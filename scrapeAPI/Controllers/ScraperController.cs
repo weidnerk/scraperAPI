@@ -15,46 +15,6 @@ using scrapeAPI.Models;
 namespace scrapeAPI.Controllers
 {
 
-    public class IntModel
-    {
-        public string ID
-        {
-            get; set;
-        }
-    }
-
-    public class TestModel
-    {
-        public string FirstName
-        {
-            get; set;
-        }
-
-        public string MiddleName
-        {
-            get; set;
-        }
-
-        public DateTime BirthDate
-        {
-            get; set;
-        }
-
-        public string LastName
-        {
-            get; set;
-        }
-
-        public string Alias
-        {
-            get; set;
-        }
-
-        public string ID
-        {
-            get; set;
-        }
-    }
     public class ScraperController : ApiController
     {
 
@@ -238,9 +198,6 @@ namespace scrapeAPI.Controllers
             try
             {
 
-                string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
-                WriteFile(log, header);
-
                 //works better with the smaller seller
                 string url = string.Format("https://www.ebay.com/csc/{0}/m.html?_ipg=48&_since=15&_sop=13&LH_Complete=1&LH_Sold=1&rt=nc&_trksid=p2046732.m1684", seller);
 
@@ -276,6 +233,11 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> GetSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders)
         {
+            string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
+            string log = baseDir + _logfile;
+            string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
+            WriteFile(log, header);
+
             return await GetSellerAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders);
         }
 
@@ -323,7 +285,7 @@ namespace scrapeAPI.Controllers
                                 model.TotalOrders += listing.Orders.Count();
 
                                 db.OrderHistorySave(listing.Orders, rptNumber, false);
-                                WriteFile(log, DateTime.Now.ToString() + " " + listing.Title);
+                                
                                 if (showNoOrders == "0") ++model.TotalItems;
                             }
                             else
@@ -333,11 +295,13 @@ namespace scrapeAPI.Controllers
                                 l.Orders = new List<OrderHistory>();
                                 l.Orders.Add(new Models.OrderHistory { Title = " No orders found in range - " + listing.Title, Url = listing.Url });
                                 db.OrderHistorySave(l.Orders, rptNumber, true);
-                                WriteFile(log, DateTime.Now.ToString() + " No orders found");
                             }
                             if (showNoOrders == "1") ++model.TotalItems;
                             ++model.PercentTotalItemsProcesssed;
                             ++i;
+
+                            Random r = new Random();
+                            waitSeconds = r.Next(1, 5);
                             System.Threading.Thread.Sleep(waitSeconds * 1000);
                         }
                         catch (Exception exc)
@@ -474,7 +438,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                Console.WriteLine("ERROR: " + title + " " + exc.Message);
+                Console.WriteLine("GenerateQtySold: " + title + " " + exc.Message);
                 return null;
             }
         }

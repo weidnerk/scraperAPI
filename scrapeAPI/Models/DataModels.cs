@@ -54,5 +54,45 @@ namespace scrapeAPI.Models
         public string Url { get; set; }
 
     }
+    public class IntModel
+    {
+        public string ID
+        {
+            get; set;
+        }
+    }
+
+    public class TestModel
+    {
+        public string FirstName
+        {
+            get; set;
+        }
+
+        public string MiddleName
+        {
+            get; set;
+        }
+
+        public DateTime BirthDate
+        {
+            get; set;
+        }
+
+        public string LastName
+        {
+            get; set;
+        }
+
+        public string Alias
+        {
+            get; set;
+        }
+
+        public string ID
+        {
+            get; set;
+        }
+    }
 
 }
