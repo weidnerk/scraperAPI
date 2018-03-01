@@ -136,13 +136,13 @@ namespace scrapeAPI.Controllers
 
             // count orders processed so far
             var orders = from c in results join o in db.OrderHistory on c.Title equals o.Title
-                         where o.RptNumber == rptNumber
-                         select c;
+                         where o.RptNumber == rptNumber && !o.ListingEnded
+                         select o;
 
             // count listings processed so far
-            var listings = from c in db.OrderHistory
-                        where c.RptNumber == rptNumber
-                        group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
+            var listings = from c in results join o in db.OrderHistory on c.Title equals o.Title
+                           where o.RptNumber == rptNumber && !o.ListingEnded
+                           group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl, c.Price } into grp
                         select grp;
 
             var mv = new ModelViewTimesSold();

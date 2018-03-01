@@ -39,3 +39,23 @@
 3/1/2018 5:15:41 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
 3/1/2018 5:16:11 PM 3/1/2018 5:16:11 PM Completed.
 3/1/2018 5:16:11 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 5:36:21 PM Seller: **justforyou** daysBack: 15 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:37:56 PM Seller: **justforyou** daysBack: 15 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:47:00 PM Seller: **justforyou** daysBack: 15 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:48:22 PM Seller: **justforyou** daysBack: 15 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:49:34 PM Seller: **justforyou** daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:49:42 PM Seller: **justforyou** daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:50:06 PM Seller: **justforyou** daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:50:10 PM SKIP Object reference not set to an instance of an object.
+3/1/2018 5:51:47 PM Seller: **justforyou** daysBack: 4 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:51:57 PM 3/1/2018 5:51:57 PM Completed.
+3/1/2018 5:51:57 PM Complete scan -> TotalItems: 3 TotalOrders: 3 Seconds: 0
+3/1/2018 5:52:06 PM Seller: **justforyou** daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:54:05 PM 3/1/2018 5:54:05 PM Completed.
+3/1/2018 5:54:05 PM Complete scan -> TotalItems: 29 TotalOrders: 3 Seconds: 0
+3/1/2018 5:55:55 PM Seller: **justforyou** daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:57:02 PM Seller: **justforyou** daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:58:07 PM 3/1/2018 5:58:07 PM Completed.
+3/1/2018 5:58:07 PM Complete scan -> TotalItems: 32 TotalOrders: 6 Seconds: 0
+3/1/2018 5:59:04 PM 3/1/2018 5:59:04 PM Completed.
+3/1/2018 5:59:04 PM Complete scan -> TotalItems: 32 TotalOrders: 6 Seconds: 0
