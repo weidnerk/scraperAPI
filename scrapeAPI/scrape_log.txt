@@ -59,3 +59,29 @@
 3/1/2018 5:58:07 PM Complete scan -> TotalItems: 32 TotalOrders: 6 Seconds: 0
 3/1/2018 5:59:04 PM 3/1/2018 5:59:04 PM Completed.
 3/1/2018 5:59:04 PM Complete scan -> TotalItems: 32 TotalOrders: 6 Seconds: 0
+3/1/2018 6:18:34 PM Seller: **justforyou** daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:20:16 PM Seller: demi2601 daysBack: 12 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:21:07 PM 3/1/2018 6:21:07 PM Completed.
+3/1/2018 6:21:07 PM Complete scan -> TotalItems: 13 TotalOrders: 0 Seconds: 0
+3/1/2018 6:21:16 PM Seller: **justforyou** daysBack: 3 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:21:27 PM 3/1/2018 6:21:27 PM Completed.
+3/1/2018 6:21:27 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/1/2018 6:22:16 PM Seller: **justforyou** daysBack: 3 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:22:28 PM 3/1/2018 6:22:28 PM Completed.
+3/1/2018 6:22:28 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/1/2018 6:22:42 PM Seller: **justforyou** daysBack: 3 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:22:55 PM 3/1/2018 6:22:55 PM Completed.
+3/1/2018 6:22:55 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/1/2018 6:23:33 PM Seller: shopwithusnow daysBack: 1 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:24:11 PM 3/1/2018 6:24:11 PM Completed.
+3/1/2018 6:24:11 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/1/2018 6:24:42 PM Seller: shopwithusnow daysBack: 1 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:25:18 PM 3/1/2018 6:25:18 PM Completed.
+3/1/2018 6:25:18 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/1/2018 6:28:02 PM Seller: **justforyou** daysBack: 4 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:28:11 PM 3/1/2018 6:28:11 PM Completed.
+3/1/2018 6:28:11 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/1/2018 6:30:42 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:34:08 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 6:34:40 PM 3/1/2018 6:34:40 PM Completed.
+3/1/2018 6:34:40 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0

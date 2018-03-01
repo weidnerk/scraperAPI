@@ -128,27 +128,38 @@ namespace scrapeAPI.Controllers
         public ModelViewTimesSold GetTimesSold(int rptNumber, int minSold, string showNoOrders)
         {
             bool endedListings = (showNoOrders == "0") ? false : true;
+
+            // return actual results for display
             var results = from c in db.OrderHistory
                           where c.RptNumber == rptNumber && (!c.ListingEnded || c.ListingEnded == endedListings)
                           group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
                           where grp.Count() >= minSold
                           select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Min(x => x.DateOfPurchase) };
 
-            // count orders processed so far
-            var orders = from c in results join o in db.OrderHistory on c.Title equals o.Title
+            // count listings processed so far
+            var listings = from o in db.OrderHistory
+                           where o.RptNumber == rptNumber
+                           group o by new { o.Title, o.Price } into grp
+                           select grp;
+
+            // count listings processed so far - matches
+            var matchedlistings = from c in results
+                                  join o in db.OrderHistory on c.Title equals o.Title
+                                  where o.RptNumber == rptNumber && !o.ListingEnded
+                                  group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl, c.Price } into grp
+                                  select grp;
+
+            // count orders processed so far - matches
+            var orders = from c in results
+                         join o in db.OrderHistory on c.Title equals o.Title
                          where o.RptNumber == rptNumber && !o.ListingEnded
                          select o;
-
-            // count listings processed so far
-            var listings = from c in results join o in db.OrderHistory on c.Title equals o.Title
-                           where o.RptNumber == rptNumber && !o.ListingEnded
-                           group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl, c.Price } into grp
-                        select grp;
 
             var mv = new ModelViewTimesSold();
             mv.TimesSoldRpt = results.ToList();
             mv.ListingsProcessed = listings.Count();
             mv.TotalOrders = orders.Count();
+            mv.MatchedListings = matchedlistings.Count();
 
             return mv;
         }

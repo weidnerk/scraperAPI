@@ -11,6 +11,7 @@ namespace scrapeAPI.Models
         public List<TimesSold> TimesSoldRpt { get; set; }
         public int ListingsProcessed { get; set; }
         public int TotalOrders { get; set; }
+        public int MatchedListings { get; set; }
     }
 
     public class TimesSold
