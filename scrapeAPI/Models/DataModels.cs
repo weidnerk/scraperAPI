@@ -9,7 +9,8 @@ namespace scrapeAPI.Models
     public class ModelViewTimesSold
     {
         public List<TimesSold> TimesSoldRpt { get; set; }
-        public int NumItems { get; set; }
+        public int ListingsProcessed { get; set; }
+        public int TotalOrders { get; set; }
     }
 
     public class TimesSold
@@ -41,7 +42,7 @@ namespace scrapeAPI.Models
     public class ModelView
     {
         public List<Listing> Listing { get; set; }
-        public int TotalItems { get; set; }
+        public int MatchedListings { get; set; }
         public int TotalOrders { get; set; }
         public double ElapsedSeconds { get; set; }
         public int PercentTotalItemsProcesssed { get; set; }

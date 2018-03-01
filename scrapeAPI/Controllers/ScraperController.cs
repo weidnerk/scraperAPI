@@ -134,15 +134,22 @@ namespace scrapeAPI.Controllers
                           where grp.Count() >= minSold
                           select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Min(x => x.DateOfPurchase) };
 
+            // count orders processed so far
+            var orders = from c in results join o in db.OrderHistory on c.Title equals o.Title
+                         where o.RptNumber == rptNumber
+                         select c;
 
-            var items = from c in db.OrderHistory
-                    where c.RptNumber == rptNumber
-                    group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
-                    select grp;
+            // count listings processed so far
+            var listings = from c in db.OrderHistory
+                        where c.RptNumber == rptNumber
+                        group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
+                        select grp;
 
             var mv = new ModelViewTimesSold();
             mv.TimesSoldRpt = results.ToList();
-            mv.NumItems = items.Count();
+            mv.ListingsProcessed = listings.Count();
+            mv.TotalOrders = orders.Count();
+
             return mv;
         }
 
@@ -286,7 +293,7 @@ namespace scrapeAPI.Controllers
 
                                 db.OrderHistorySave(listing.Orders, rptNumber, false);
                                 
-                                if (showNoOrders == "0") ++model.TotalItems;
+                                if (showNoOrders == "0") ++model.MatchedListings;
                             }
                             else
                             {
@@ -296,7 +303,7 @@ namespace scrapeAPI.Controllers
                                 l.Orders.Add(new Models.OrderHistory { Title = " No orders found in range - " + listing.Title, Url = listing.Url });
                                 db.OrderHistorySave(l.Orders, rptNumber, true);
                             }
-                            if (showNoOrders == "1") ++model.TotalItems;
+                            if (showNoOrders == "1") ++model.MatchedListings;
                             ++model.PercentTotalItemsProcesssed;
                             ++i;
 
@@ -337,7 +344,7 @@ namespace scrapeAPI.Controllers
                 */
                 #endregion
 
-                string footer = string.Format("Complete scan -> TotalItems: {0} TotalOrders: {1} Seconds: {2}", model.TotalItems, model.TotalOrders, model.ElapsedSeconds);
+                string footer = string.Format("Complete scan -> TotalItems: {0} TotalOrders: {1} Seconds: {2}", model.MatchedListings, model.TotalOrders, model.ElapsedSeconds);
                 WriteFile(log, footer);
 
                 model.ElapsedSeconds = (DateTime.Now - startTime).TotalSeconds;

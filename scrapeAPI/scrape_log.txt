@@ -1,2 +1,41 @@
 3/1/2018 3:02:58 PM 3/1/2018 3:02:58 PM theadkays
 3/1/2018 3:02:58 PM Seller: theadkays daysBack: 2 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:01:27 PM Seller: shedsforlessdirect daysBack: 10 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:02:08 PM 3/1/2018 4:02:08 PM Completed.
+3/1/2018 4:02:08 PM Complete scan -> TotalItems: 11 TotalOrders: 20 Seconds: 0
+3/1/2018 4:03:13 PM Seller: shedsforlessdirect daysBack: 20 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:04:24 PM 3/1/2018 4:04:24 PM Completed.
+3/1/2018 4:04:24 PM Complete scan -> TotalItems: 18 TotalOrders: 34 Seconds: 0
+3/1/2018 4:07:46 PM Seller: shedsforlessdirect daysBack: 20 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:09:05 PM 3/1/2018 4:09:05 PM Completed.
+3/1/2018 4:09:05 PM Complete scan -> TotalItems: 18 TotalOrders: 34 Seconds: 0
+3/1/2018 4:15:25 PM Seller: shedsforlessdirect daysBack: 20 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:16:41 PM 3/1/2018 4:16:41 PM Completed.
+3/1/2018 4:16:41 PM Complete scan -> TotalItems: 18 TotalOrders: 34 Seconds: 0
+3/1/2018 4:16:47 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:17:14 PM 3/1/2018 4:17:14 PM Completed.
+3/1/2018 4:17:14 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 4:18:30 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:18:57 PM 3/1/2018 4:18:57 PM Completed.
+3/1/2018 4:18:57 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 4:24:45 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 4:25:09 PM 3/1/2018 4:25:09 PM Completed.
+3/1/2018 4:25:09 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 5:04:42 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:05:05 PM 3/1/2018 5:05:05 PM Completed.
+3/1/2018 5:05:05 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 5:06:23 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:06:54 PM 3/1/2018 5:06:54 PM Completed.
+3/1/2018 5:06:54 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 5:12:11 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:12:39 PM 3/1/2018 5:12:39 PM Completed.
+3/1/2018 5:12:39 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 5:13:00 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:13:24 PM 3/1/2018 5:13:24 PM Completed.
+3/1/2018 5:13:24 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 5:15:07 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:15:32 PM 3/1/2018 5:15:32 PM Completed.
+3/1/2018 5:15:32 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
+3/1/2018 5:15:41 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
+3/1/2018 5:16:11 PM 3/1/2018 5:16:11 PM Completed.
+3/1/2018 5:16:11 PM Complete scan -> TotalItems: 7 TotalOrders: 12 Seconds: 0
