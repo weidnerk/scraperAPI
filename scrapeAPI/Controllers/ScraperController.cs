@@ -167,7 +167,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                return Content(HttpStatusCode.ExpectationFailed, "GetTimesSold " + exc.Message);
+                return Content(HttpStatusCode.ExpectationFailed, DateTime.Now.ToString() + " GetTimesSold " + exc.Message);
             }
         }
 
@@ -212,7 +212,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                return Content(HttpStatusCode.ExpectationFailed, "GetNumItems " + exc.Message);
+                return Content(HttpStatusCode.ExpectationFailed, DateTime.Now.ToString() + " GetNumItems " + exc.Message);
             }
         }
 
@@ -372,7 +372,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 WriteFile(log, "GetSellerAsync " + exc.Message);
-                return Content(HttpStatusCode.ExpectationFailed, "GetSellerAsync " + exc.Message);
+                return Content(HttpStatusCode.ExpectationFailed, DateTime.Now.ToString() + " GetSellerAsync " + exc.Message);
             }
         }
 
