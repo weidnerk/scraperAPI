@@ -22,8 +22,8 @@ namespace scrapeAPI.Controllers
         const string _filename = "order.csv";
         const string _logfile = "scrape_log.txt";
 
-    #region ** testing **
-    [HttpGet]
+        #region ** testing **
+        [HttpGet]
         [Route("multipart")]
         public HttpResponseMessage GetMultipartData()
         {
@@ -72,7 +72,7 @@ namespace scrapeAPI.Controllers
         public HttpResponseMessage StreamData()
         {
             List<IntModel> numbers = GenerateNumbers();
-       
+
             List<IntModel> numbersHold = new List<IntModel>();
 
             var response = Request.CreateResponse(HttpStatusCode.OK);
@@ -111,7 +111,7 @@ namespace scrapeAPI.Controllers
         {
             List<IntModel> ln = new List<IntModel>();
 
-            for(int i = 0; i<2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 var item = new IntModel();
                 item.ID = i.ToString();
@@ -125,43 +125,50 @@ namespace scrapeAPI.Controllers
 
         [Route("timessold/{rptNumber}/{minSold}/{showNoOrders}")]
         [HttpGet]
-        public ModelViewTimesSold GetTimesSold(int rptNumber, int minSold, string showNoOrders)
+        public IHttpActionResult GetTimesSold(int rptNumber, int minSold, string showNoOrders)
         {
             bool endedListings = (showNoOrders == "0") ? false : true;
 
-            // return actual results for display
-            var results = from c in db.OrderHistory
-                          where c.RptNumber == rptNumber && (!c.ListingEnded || c.ListingEnded == endedListings)
-                          group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
-                          where grp.Count() >= minSold
-                          select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Min(x => x.DateOfPurchase) };
+            try
+            {
+                // return actual results for display
+                var results = from c in db.OrderHistory
+                              where c.RptNumber == rptNumber && (!c.ListingEnded || c.ListingEnded == endedListings)
+                              group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
+                              where grp.Count() >= minSold
+                              select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Min(x => x.DateOfPurchase) };
 
-            // count listings processed so far
-            var listings = from o in db.OrderHistory
-                           where o.RptNumber == rptNumber
-                           group o by new { o.Title, o.Price } into grp
-                           select grp;
+                // count listings processed so far
+                var listings = from o in db.OrderHistory
+                               where o.RptNumber == rptNumber
+                               group o by new { o.Title, o.Price } into grp
+                               select grp;
 
-            // count listings processed so far - matches
-            var matchedlistings = from c in results
-                                  join o in db.OrderHistory on c.Title equals o.Title
-                                  where o.RptNumber == rptNumber && !o.ListingEnded
-                                  group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl, c.Price } into grp
-                                  select grp;
+                // count listings processed so far - matches
+                var matchedlistings = from c in results
+                                      join o in db.OrderHistory on c.Title equals o.Title
+                                      where o.RptNumber == rptNumber && !o.ListingEnded
+                                      group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl, c.Price } into grp
+                                      select grp;
 
-            // count orders processed so far - matches
-            var orders = from c in results
-                         join o in db.OrderHistory on c.Title equals o.Title
-                         where o.RptNumber == rptNumber && !o.ListingEnded
-                         select o;
+                // count orders processed so far - matches
+                var orders = from c in results
+                             join o in db.OrderHistory on c.Title equals o.Title
+                             where o.RptNumber == rptNumber && !o.ListingEnded
+                             select o;
 
-            var mv = new ModelViewTimesSold();
-            mv.TimesSoldRpt = results.ToList();
-            mv.ListingsProcessed = listings.Count();
-            mv.TotalOrders = orders.Count();
-            mv.MatchedListings = matchedlistings.Count();
+                var mv = new ModelViewTimesSold();
+                mv.TimesSoldRpt = results.ToList();
+                mv.ListingsProcessed = listings.Count();
+                mv.TotalOrders = orders.Count();
+                mv.MatchedListings = matchedlistings.Count();
 
-            return mv;
+                return Ok(mv);
+            }
+            catch (Exception exc)
+            {
+                return Content(HttpStatusCode.ExpectationFailed, "GetTimesSold " + exc.Message);
+            }
         }
 
         [Route("orders/{rptNumber}")]
@@ -259,7 +266,7 @@ namespace scrapeAPI.Controllers
             return await GetSellerAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders);
         }
 
-                //public async Task<List<OrderHistory>> GetSellerAsync(string seller, int daysBack)
+        //public async Task<List<OrderHistory>> GetSellerAsync(string seller, int daysBack)
         protected async Task<IHttpActionResult> GetSellerAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders)
         {
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
@@ -303,7 +310,7 @@ namespace scrapeAPI.Controllers
                                 model.TotalOrders += listing.Orders.Count();
 
                                 db.OrderHistorySave(listing.Orders, rptNumber, false);
-                                
+
                                 if (showNoOrders == "0") ++model.MatchedListings;
                             }
                             else
