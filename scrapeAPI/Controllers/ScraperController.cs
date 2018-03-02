@@ -186,29 +186,11 @@ namespace scrapeAPI.Controllers
             {
                 string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
 
-                //works better with the smaller seller
-                string url = string.Format("https://www.ebay.com/csc/{0}/m.html?_ipg=48&_since=15&_sop=13&LH_Complete=1&LH_Sold=1&rt=nc&_trksid=p2046732.m1684", seller);
+                var listings = await GetProductListings(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders);
 
-                //works better with the bigger sellers
-                url = string.Format("https://www.ebay.com/csc/m.html?_since={0}&_sop=13&LH_Complete=1&LH_Sold=1&_ssn={1}&_ipg={2}&rt=nc", daysBack, seller, resultsPerPg);
-
-                var httpClient = new HttpClient();
-                var html = await httpClient.GetStringAsync(url);
-
-                var htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(html);
-
-                // Get html corresponding to 'ul' that contains the listings
-                var ProductsHtml = htmlDocument.DocumentNode.Descendants("ul")
-                    .Where(node => node.GetAttributeValue("id", "")
-                    .Equals("ListViewInner")).ToList();
-
-                // put 'li's into actual list
-                var ProductListItems = ProductsHtml[0].Descendants("li")
-                    .Where(node => node.GetAttributeValue("id", "")
-                    .Contains("item")).ToList();
-
-                return Ok(ProductListItems.Count());
+                if (listings != null)
+                    return Ok(listings.Count());
+                else return Ok(0);
             }
             catch (Exception exc)
             {
@@ -240,12 +222,15 @@ namespace scrapeAPI.Controllers
                     .Where(node => node.GetAttributeValue("id", "")
                     .Equals("ListViewInner")).ToList();
 
-                // put 'li's into actual list
-                var ProductListItems = ProductsHtml[0].Descendants("li")
-                    .Where(node => node.GetAttributeValue("id", "")
-                    .Contains("item")).ToList();
-
-                return ProductListItems;
+                if (ProductsHtml.Count() > 0)
+                {
+                    // put 'li's into actual list
+                    var ProductListItems = ProductsHtml[0].Descendants("li")
+                        .Where(node => node.GetAttributeValue("id", "")
+                        .Contains("item")).ToList();
+                    return ProductListItems;
+                }
+                else return null;
             }
             catch (Exception exc)
             {
@@ -294,48 +279,51 @@ namespace scrapeAPI.Controllers
 
                 int i = 0;
                 var ProductListItems = await GetProductListings(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders);
-                if (ProductListItems.Count() > 0)
+                if (ProductListItems != null)
                 {
-                    itemCount = ProductListItems.Count();
-                    foreach (var ProductListItem in ProductListItems)
+                    if (ProductListItems.Count() > 0)
                     {
-                        try
+                        itemCount = ProductListItems.Count();
+                        foreach (var ProductListItem in ProductListItems)
                         {
-                            var listing = await ProcessListing(ProductListItem, daysBack);
-                            if (listing.Orders.Count() > 0)
+                            try
                             {
-                                if (model.Listing == null)
-                                    model.Listing = new List<Listing>();
-                                model.Listing.Add(listing);
-                                model.TotalOrders += listing.Orders.Count();
+                                var listing = await ProcessListing(ProductListItem, daysBack);
+                                if (listing.Orders.Count() > 0)
+                                {
+                                    if (model.Listing == null)
+                                        model.Listing = new List<Listing>();
+                                    model.Listing.Add(listing);
+                                    model.TotalOrders += listing.Orders.Count();
 
-                                db.OrderHistorySave(listing.Orders, rptNumber, false);
+                                    db.OrderHistorySave(listing.Orders, rptNumber, false);
 
-                                if (showNoOrders == "0") ++model.MatchedListings;
+                                    if (showNoOrders == "0") ++model.MatchedListings;
+                                }
+                                else
+                                {
+                                    // listing ended
+                                    var l = new Listing();
+                                    l.Orders = new List<OrderHistory>();
+                                    l.Orders.Add(new Models.OrderHistory { Title = " No orders found in range - " + listing.Title, Url = listing.Url });
+                                    db.OrderHistorySave(l.Orders, rptNumber, true);
+                                }
+                                if (showNoOrders == "1") ++model.MatchedListings;
+                                ++model.PercentTotalItemsProcesssed;
+                                ++i;
+
+                                Random r = new Random();
+                                waitSeconds = r.Next(1, 5);
+                                System.Threading.Thread.Sleep(waitSeconds * 1000);
                             }
-                            else
+                            catch (Exception exc)
                             {
-                                // listing ended
-                                var l = new Listing();
-                                l.Orders = new List<OrderHistory>();
-                                l.Orders.Add(new Models.OrderHistory { Title = " No orders found in range - " + listing.Title, Url = listing.Url });
-                                db.OrderHistorySave(l.Orders, rptNumber, true);
+                                WriteFile(log, "SKIP " + exc.Message);
+                                --itemCount;
                             }
-                            if (showNoOrders == "1") ++model.MatchedListings;
-                            ++model.PercentTotalItemsProcesssed;
-                            ++i;
-
-                            Random r = new Random();
-                            waitSeconds = r.Next(1, 5);
-                            System.Threading.Thread.Sleep(waitSeconds * 1000);
                         }
-                        catch (Exception exc)
-                        {
-                            WriteFile(log, "SKIP " + exc.Message);
-                            --itemCount;
-                        }
+                        WriteFile(log, DateTime.Now.ToString() + " Completed.");
                     }
-                    WriteFile(log, DateTime.Now.ToString() + " Completed.");
                 }
 
                 #region WriteToFile

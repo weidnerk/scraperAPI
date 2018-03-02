@@ -85,3 +85,31 @@
 3/1/2018 6:34:08 PM Seller: shedsforlessdirect daysBack: 5 waitSeconds: 1 resultsPerPg: 200
 3/1/2018 6:34:40 PM 3/1/2018 6:34:40 PM Completed.
 3/1/2018 6:34:40 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/2/2018 2:08:21 PM Seller: shedsforlessdirect daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:08:28 PM 3/2/2018 2:08:28 PM Completed.
+3/2/2018 2:08:28 PM Complete scan -> TotalItems: 1 TotalOrders: 1 Seconds: 0
+3/2/2018 2:08:33 PM Seller: shedsforlessdirect daysBack: 3 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:08:44 PM 3/2/2018 2:08:44 PM Completed.
+3/2/2018 2:08:44 PM Complete scan -> TotalItems: 2 TotalOrders: 4 Seconds: 0
+3/2/2018 2:08:48 PM Seller: shedsforlessdirect daysBack: 4 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:09:09 PM 3/2/2018 2:09:09 PM Completed.
+3/2/2018 2:09:09 PM Complete scan -> TotalItems: 5 TotalOrders: 10 Seconds: 0
+3/2/2018 2:36:45 PM Seller: jojo_stuff daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:43:10 PM Seller: jojo_stuff daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:43:18 PM GetSellerAsync Value cannot be null.
+Parameter name: source
+3/2/2018 2:43:29 PM Seller: shedsforlessdirect daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:43:36 PM 3/2/2018 2:43:36 PM Completed.
+3/2/2018 2:43:36 PM Complete scan -> TotalItems: 1 TotalOrders: 1 Seconds: 0
+3/2/2018 2:43:43 PM Seller: shedsforlessdirect daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:44:27 PM 3/2/2018 2:44:27 PM Completed.
+3/2/2018 2:44:27 PM Complete scan -> TotalItems: 10 TotalOrders: 18 Seconds: 0
+3/2/2018 2:45:38 PM Seller: **justforyou** daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:48:57 PM 3/2/2018 2:48:57 PM Completed.
+3/2/2018 2:48:57 PM Complete scan -> TotalItems: 13 TotalOrders: 14 Seconds: 0
+3/2/2018 2:50:33 PM Seller: jojo_stuff daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:51:46 PM Seller: jojo_stuff daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:53:38 PM Seller: jojo_stuff daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:53:42 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/2/2018 2:53:55 PM Seller: jojo_stuff daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/2/2018 2:53:56 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
