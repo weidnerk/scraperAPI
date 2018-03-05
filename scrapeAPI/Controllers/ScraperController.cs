@@ -171,22 +171,22 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [Route("orders/{rptNumber}")]
-        [HttpGet]
-        public List<OrderHistory> GetOrderHistory(int rptNumber)
-        {
-            return db.OrderHistory.Where(x => x.RptNumber == rptNumber).ToList();
-        }
+        //[Route("orders/{rptNumber}")]
+        //[HttpGet]
+        //public List<OrderHistory> GetOrderHistory(int rptNumber)
+        //{
+        //    return db.OrderHistory.Where(x => x.RptNumber == rptNumber).ToList();
+        //}
 
         [Route("numitems")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetNumItems(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders)
+        public async Task<IHttpActionResult> GetNumItems(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
         {
             try
             {
                 string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
 
-                var listings = await GetProductListings(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders);
+                var listings = await GetProductListings(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders, useProxy);
 
                 if (listings != null)
                     return Ok(listings.Count());
@@ -198,7 +198,7 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        public async Task<List<HtmlNode>> GetProductListings(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders)
+        protected async Task<List<HtmlNode>> GetProductListings(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
         {
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
             string log = baseDir + _logfile;
@@ -211,7 +211,7 @@ namespace scrapeAPI.Controllers
                 //works better with the bigger sellers
                 url = string.Format("https://www.ebay.com/csc/m.html?_since={0}&_sop=13&LH_Complete=1&LH_Sold=1&_ssn={1}&_ipg={2}&rt=nc", daysBack, seller, resultsPerPg);
 
-                var httpClient = CreateHttpClient();
+                var httpClient = CreateHttpClient(useProxy);
                 //var httpClient = new HttpClient();
                 var html = await httpClient.GetStringAsync(url);
 
@@ -242,18 +242,18 @@ namespace scrapeAPI.Controllers
 
         [Route("scraper")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders)
+        public async Task<IHttpActionResult> GetSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
         {
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
             string log = baseDir + _logfile;
             string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
             WriteFile(log, header);
 
-            return await GetSellerAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders);
+            return await GetSellerAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders, useProxy);
         }
 
         //public async Task<List<OrderHistory>> GetSellerAsync(string seller, int daysBack)
-        protected async Task<IHttpActionResult> GetSellerAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders)
+        protected async Task<IHttpActionResult> GetSellerAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
         {
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
             string log = baseDir + _logfile;
@@ -279,7 +279,7 @@ namespace scrapeAPI.Controllers
                 //seller = "demi2601";
 
                 int i = 0;
-                var ProductListItems = await GetProductListings(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders);
+                var ProductListItems = await GetProductListings(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders, useProxy);
                 if (ProductListItems != null)
                 {
                     if (ProductListItems.Count() > 0)
@@ -289,7 +289,7 @@ namespace scrapeAPI.Controllers
                         {
                             try
                             {
-                                var listing = await ProcessListing(ProductListItem, daysBack);
+                                var listing = await ProcessListing(ProductListItem, daysBack, useProxy);
                                 if (listing.Orders.Count() > 0)
                                 {
                                     if (model.Listing == null)
@@ -366,7 +366,7 @@ namespace scrapeAPI.Controllers
         }
 
         // 'listing' is an li html node element
-        protected async Task<Listing> ProcessListing(HtmlNode htmllisting, int daysBack)
+        protected async Task<Listing> ProcessListing(HtmlNode htmllisting, int daysBack, string useProxy)
         {
             string prodName = null;
             //var mv = new ModelView();
@@ -386,7 +386,7 @@ namespace scrapeAPI.Controllers
             // A sold item might be returned but i can't reach order history since the listing has ended,
             // the error trap will catch it and we continue
             var listing = new Listing();
-            listing = await GenerateQtySold(prodName, detailUrl, daysBack);
+            listing = await GenerateQtySold(prodName, detailUrl, daysBack, useProxy);
             listing.Title = prodName;
             listing.Url = detailUrl;
             return listing;
@@ -394,11 +394,11 @@ namespace scrapeAPI.Controllers
 
         // browse to the listing and qty sold link
         // will error if listing has ended
-        private async Task<Listing> GenerateQtySold(string title, string url, int daysBack)
+        private async Task<Listing> GenerateQtySold(string title, string url, int daysBack, string useProxy)
         {
             try
             {
-                var httpClient = CreateHttpClient();
+                var httpClient = CreateHttpClient(useProxy);
                 //var httpClient = new HttpClient();
                 var html = await httpClient.GetStringAsync(url);
 
@@ -448,7 +448,7 @@ namespace scrapeAPI.Controllers
                 string imgSrc = imgHtml[0].GetAttributeValue("src", "").Trim('\r', '\n', '\t');
 
                 var listing = new Listing();
-                listing = await OrderHistory(title, lnk, daysBack, url, imgSrc);
+                listing = await OrderHistory(title, lnk, daysBack, url, imgSrc, useProxy);
                 return listing;
             }
             catch (Exception exc)
@@ -459,15 +459,14 @@ namespace scrapeAPI.Controllers
         }
 
         // capture order history
-        private async Task<Listing> OrderHistory(string title, string url, int daysBack, string detailUrl, string imgUrl)
+        private async Task<Listing> OrderHistory(string title, string url, int daysBack, string detailUrl, string imgUrl, string useProxy)
         {
-
             var history = new List<OrderHistory>();
 
             string browse = System.Web.HttpUtility.HtmlDecode(url);
 
             //var httpClient = new HttpClient();
-            var httpClient = CreateHttpClient();
+            var httpClient = CreateHttpClient(useProxy);
             var html = await httpClient.GetStringAsync(browse);
 
             var htmlDocument = new HtmlDocument();
@@ -516,45 +515,54 @@ namespace scrapeAPI.Controllers
             return listing;
         }
 
-        protected HttpClient CreateHttpClient()
+        protected HttpClient CreateHttpClient(string useProxy)
         {
-            string proxyUri = string.Format("{0}:{1}", "us-wa.proxymesh.com", "31280");
-
-            NetworkCredential proxyCreds = new NetworkCredential(
-                "ventures2018",
-                "k3918834"
-            );
-
-            WebProxy proxy = new WebProxy(proxyUri, false)
+            if (useProxy == "1")
             {
-                UseDefaultCredentials = false,
-                Credentials = proxyCreds,
-            };
 
-            // Now create a client handler which uses that proxy
+                string proxyUri = string.Format("{0}:{1}", "us-wa.proxymesh.com", "31280");
 
-            HttpClient client = null;
-            HttpClientHandler httpClientHandler = new HttpClientHandler()
+                NetworkCredential proxyCreds = new NetworkCredential(
+                    "ventures2018",
+                    "k3918834"
+                );
+
+                WebProxy proxy = new WebProxy(proxyUri, false)
+                {
+                    UseDefaultCredentials = false,
+                    Credentials = proxyCreds,
+                };
+
+                // Now create a client handler which uses that proxy
+
+                HttpClient client = null;
+                HttpClientHandler httpClientHandler = new HttpClientHandler()
+                {
+                    Proxy = proxy,
+                    PreAuthenticate = true,
+                    UseDefaultCredentials = false,
+                };
+
+                // You only need this part if the server wants a username and password:
+
+                //string
+                //    httpUserName = "?????",
+                //    httpPassword = "secret";
+
+                //httpClientHandler.Credentials = new NetworkCredential(httpUserName, httpPassword);
+
+                client = new HttpClient(httpClientHandler);
+
+                return client;
+            }
+            else
             {
-                Proxy = proxy,
-                PreAuthenticate = true,
-                UseDefaultCredentials = false,
-            };
-
-            // You only need this part if the server wants a username and password:
-
-            //string
-            //    httpUserName = "?????",
-            //    httpPassword = "secret";
-
-            //httpClientHandler.Credentials = new NetworkCredential(httpUserName, httpPassword);
-
-            client = new HttpClient(httpClientHandler);
-
-            return client;
+                var client = new HttpClient();
+                return client;
+            }
         }
 
-        public void WriteFile(string filename, string msg)
+        protected void WriteFile(string filename, string msg)
         {
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(filename, true))
             {

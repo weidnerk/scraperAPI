@@ -113,3 +113,13 @@ Parameter name: source
 3/2/2018 2:53:42 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
 3/2/2018 2:53:55 PM Seller: jojo_stuff daysBack: 2 waitSeconds: 0 resultsPerPg: 200
 3/2/2018 2:53:56 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/5/2018 5:31:02 PM Seller: **justforyou** daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/5/2018 5:31:02 PM GetProductListings An error occurred while sending the request.
+3/5/2018 5:31:02 PM GetProductListings An error occurred while sending the request.
+3/5/2018 5:31:02 PM Complete scan -> TotalItems: 0 TotalOrders: 0 Seconds: 0
+3/5/2018 5:33:23 PM Seller: **justforyou** daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/5/2018 5:33:45 PM 3/5/2018 5:33:45 PM Completed.
+3/5/2018 5:33:45 PM Complete scan -> TotalItems: 3 TotalOrders: 3 Seconds: 0
+3/5/2018 5:33:57 PM Seller: **justforyou** daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/5/2018 5:34:29 PM 3/5/2018 5:34:29 PM Completed.
+3/5/2018 5:34:29 PM Complete scan -> TotalItems: 6 TotalOrders: 3 Seconds: 0
