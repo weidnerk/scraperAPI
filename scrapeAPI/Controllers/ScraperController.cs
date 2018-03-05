@@ -211,7 +211,8 @@ namespace scrapeAPI.Controllers
                 //works better with the bigger sellers
                 url = string.Format("https://www.ebay.com/csc/m.html?_since={0}&_sop=13&LH_Complete=1&LH_Sold=1&_ssn={1}&_ipg={2}&rt=nc", daysBack, seller, resultsPerPg);
 
-                var httpClient = new HttpClient();
+                var httpClient = CreateHttpClient();
+                //var httpClient = new HttpClient();
                 var html = await httpClient.GetStringAsync(url);
 
                 var htmlDocument = new HtmlDocument();
@@ -397,7 +398,8 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var httpClient = new HttpClient();
+                var httpClient = CreateHttpClient();
+                //var httpClient = new HttpClient();
                 var html = await httpClient.GetStringAsync(url);
 
                 var htmlDocument = new HtmlDocument();
@@ -464,7 +466,8 @@ namespace scrapeAPI.Controllers
 
             string browse = System.Web.HttpUtility.HtmlDecode(url);
 
-            var httpClient = new HttpClient();
+            //var httpClient = new HttpClient();
+            var httpClient = CreateHttpClient();
             var html = await httpClient.GetStringAsync(browse);
 
             var htmlDocument = new HtmlDocument();
@@ -511,6 +514,44 @@ namespace scrapeAPI.Controllers
             var listing = new Listing();
             listing.Orders = history;
             return listing;
+        }
+
+        protected HttpClient CreateHttpClient()
+        {
+            string proxyUri = string.Format("{0}:{1}", "us-wa.proxymesh.com", "31280");
+
+            NetworkCredential proxyCreds = new NetworkCredential(
+                "ventures2018",
+                "k3918834"
+            );
+
+            WebProxy proxy = new WebProxy(proxyUri, false)
+            {
+                UseDefaultCredentials = false,
+                Credentials = proxyCreds,
+            };
+
+            // Now create a client handler which uses that proxy
+
+            HttpClient client = null;
+            HttpClientHandler httpClientHandler = new HttpClientHandler()
+            {
+                Proxy = proxy,
+                PreAuthenticate = true,
+                UseDefaultCredentials = false,
+            };
+
+            // You only need this part if the server wants a username and password:
+
+            //string
+            //    httpUserName = "?????",
+            //    httpPassword = "secret";
+
+            //httpClientHandler.Credentials = new NetworkCredential(httpUserName, httpPassword);
+
+            client = new HttpClient(httpClientHandler);
+
+            return client;
         }
 
         public void WriteFile(string filename, string msg)
