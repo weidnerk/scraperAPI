@@ -32,7 +32,7 @@ namespace scrapeAPI.Models
         public string Title { get; set; }
         public string Price { get; set; }
         public string Qty { get; set; }
-        public string DateOfPurchaseStr { get; set; }
+        //public string DateOfPurchaseStr { get; set; }
         public DateTime? DateOfPurchase { get; set; }
         public int RptNumber { get; set; }
         public string Url { get; set; }
@@ -42,7 +42,7 @@ namespace scrapeAPI.Models
     }
     public class ModelView
     {
-        public List<Listing> Listing { get; set; }
+        public List<Listing> Listings { get; set; }
         public int MatchedListings { get; set; }
         public int TotalOrders { get; set; }
         public double ElapsedSeconds { get; set; }
