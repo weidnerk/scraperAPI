@@ -120,8 +120,8 @@ namespace scrapeAPI.Controllers
                               where c.RptNumber == rptNumber && (!c.ListingEnded || c.ListingEnded == endedListings)
                               group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
                               where grp.Count() >= minSold
-                              orderby grp.Min(x => x.DateOfPurchase) descending
-                              select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Min(x => x.DateOfPurchase) };
+                              orderby grp.Max(x => x.DateOfPurchase) descending
+                              select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Max(x => x.DateOfPurchase) };
 
                 // count listings processed so far
                 var listings = from o in db.OrderHistory
