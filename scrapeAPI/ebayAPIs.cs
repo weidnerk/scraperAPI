@@ -5,6 +5,7 @@ using scrapeAPI.com.ebay.developer;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -52,12 +53,12 @@ namespace scrapeAPI
             ApiContext oContext = new ApiContext();
 
             // set the dev,app,cert information
-            oContext.ApiCredential.ApiAccount.Developer = "a6cb408d-cbde-4f5b-800d-a2d50f8b1d4f";
-            oContext.ApiCredential.ApiAccount.Application = "KevinWei-Test-PRD-25d7a0307-a9330e4a";
-            oContext.ApiCredential.ApiAccount.Certificate = "PRD-5d7a03078d48-38e0-46ca-a4b5-78e3";
+            oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["devID"];
+            oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["appID"];
+            oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["certID"];
 
             // set the AuthToken
-            oContext.ApiCredential.eBayToken = "AgAAAA**AQAAAA**aAAAAA**/cGeWg**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AEkYqgC5GHpgmdj6x9nY+seQ**MSQEAA**AAMAAA**qAz8OEOpAQOkmQGW/tc6iFwCLieoSTMywErUh9QaGIJk8/vVtMGGSWEo4mz916raEycwkqvVF5Exn6yM7K+PkQKvVS9w0w5bI1N+KyG6OuBxrqizywiWtCYRNgydx4mnLPpVw4Isc8v4REUgnbDh1i4I35MN+xSG3cV0v4tsgNyPJMkL+sNFKAhtFWYPyYOy28K0gn7UYhPZFuwdp7ghFiFCNQwXfeMLWkgXkCruzNHcAw3Ot2EmkUMGcA3LXrKI0L+BYhPVPpGegwixP3tqaIlg4dCIzM7GwAzQcH7ZF5qbpKsY+l8Boen48ZPbVk7JyvnLv4wwPbuNc6WXn2jx7GOdwpgqsrp6QuMkqKc9JrafuhGN+xjojARI8MB5rZ+l1wp4IiHTHeND26YIlP+w/5b4c7du4CWGVwpWiQYZwHcQlds2UPC9kd068AU+43wUwtVKCnrtVDKpt0vvw1+Vh5TlzRmY2C5OjyFxpQFYLdd0rfe1VLQJFeFrJF5/F04JyzQLjkL+tavWTD7bH2NTWcUnbt2Le7fxHWc0004gvKTizKDGZkqAy6MJkzbycKTRCGI+MPN9T4RqIqEPtH2BKXK9DDF2+cqQa1F/pO2TS+L8lHW8A0woEIfwatfADPBwXxLEHUTqLMNVeMvr72lO7581UwuMniBXtHheDlEmQ9x7yC73OD24qMEElGBotpNXLCXWfG7OCrkv3+lOMta6vzufHJ6wL7ILdIHdjTnSjTxpuG3ANcwtRsZ28RTHdDtJ";
+            oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["ebayToken"];
 
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
 
@@ -189,12 +190,12 @@ namespace scrapeAPI
             ApiContext oContext = new ApiContext();
 
             //set the dev,app,cert information
-            oContext.ApiCredential.ApiAccount.Developer = "a6cb408d-cbde-4f5b-800d-a2d50f8b1d4f";
-            oContext.ApiCredential.ApiAccount.Application = "KevinWei-Test-PRD-25d7a0307-a9330e4a";
-            oContext.ApiCredential.ApiAccount.Certificate = "PRD-5d7a03078d48-38e0-46ca-a4b5-78e3";
+            oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["devID"];
+            oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["appID"];
+            oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["certID"];
 
             //set the AuthToken
-            oContext.ApiCredential.eBayToken = "AgAAAA**AQAAAA**aAAAAA**/cGeWg**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AEkYqgC5GHpgmdj6x9nY+seQ**MSQEAA**AAMAAA**qAz8OEOpAQOkmQGW/tc6iFwCLieoSTMywErUh9QaGIJk8/vVtMGGSWEo4mz916raEycwkqvVF5Exn6yM7K+PkQKvVS9w0w5bI1N+KyG6OuBxrqizywiWtCYRNgydx4mnLPpVw4Isc8v4REUgnbDh1i4I35MN+xSG3cV0v4tsgNyPJMkL+sNFKAhtFWYPyYOy28K0gn7UYhPZFuwdp7ghFiFCNQwXfeMLWkgXkCruzNHcAw3Ot2EmkUMGcA3LXrKI0L+BYhPVPpGegwixP3tqaIlg4dCIzM7GwAzQcH7ZF5qbpKsY+l8Boen48ZPbVk7JyvnLv4wwPbuNc6WXn2jx7GOdwpgqsrp6QuMkqKc9JrafuhGN+xjojARI8MB5rZ+l1wp4IiHTHeND26YIlP+w/5b4c7du4CWGVwpWiQYZwHcQlds2UPC9kd068AU+43wUwtVKCnrtVDKpt0vvw1+Vh5TlzRmY2C5OjyFxpQFYLdd0rfe1VLQJFeFrJF5/F04JyzQLjkL+tavWTD7bH2NTWcUnbt2Le7fxHWc0004gvKTizKDGZkqAy6MJkzbycKTRCGI+MPN9T4RqIqEPtH2BKXK9DDF2+cqQa1F/pO2TS+L8lHW8A0woEIfwatfADPBwXxLEHUTqLMNVeMvr72lO7581UwuMniBXtHheDlEmQ9x7yC73OD24qMEElGBotpNXLCXWfG7OCrkv3+lOMta6vzufHJ6wL7ILdIHdjTnSjTxpuG3ANcwtRsZ28RTHdDtJ";
+            oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["ebayToken"];
 
             //set the endpoint (sandbox) use https://api.ebay.com/wsapi for production
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
@@ -251,12 +252,12 @@ namespace scrapeAPI
             ApiContext oContext = new ApiContext();
 
             //set the dev,app,cert information
-            oContext.ApiCredential.ApiAccount.Developer = "a6cb408d-cbde-4f5b-800d-a2d50f8b1d4f";
-            oContext.ApiCredential.ApiAccount.Application = "KevinWei-Test-PRD-25d7a0307-a9330e4a";
-            oContext.ApiCredential.ApiAccount.Certificate = "PRD-5d7a03078d48-38e0-46ca-a4b5-78e3";
+            oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["devID"];
+            oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["appID"];
+            oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["certID"];
 
             //set the AuthToken
-            oContext.ApiCredential.eBayToken = "AgAAAA**AQAAAA**aAAAAA**/cGeWg**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AEkYqgC5GHpgmdj6x9nY+seQ**MSQEAA**AAMAAA**qAz8OEOpAQOkmQGW/tc6iFwCLieoSTMywErUh9QaGIJk8/vVtMGGSWEo4mz916raEycwkqvVF5Exn6yM7K+PkQKvVS9w0w5bI1N+KyG6OuBxrqizywiWtCYRNgydx4mnLPpVw4Isc8v4REUgnbDh1i4I35MN+xSG3cV0v4tsgNyPJMkL+sNFKAhtFWYPyYOy28K0gn7UYhPZFuwdp7ghFiFCNQwXfeMLWkgXkCruzNHcAw3Ot2EmkUMGcA3LXrKI0L+BYhPVPpGegwixP3tqaIlg4dCIzM7GwAzQcH7ZF5qbpKsY+l8Boen48ZPbVk7JyvnLv4wwPbuNc6WXn2jx7GOdwpgqsrp6QuMkqKc9JrafuhGN+xjojARI8MB5rZ+l1wp4IiHTHeND26YIlP+w/5b4c7du4CWGVwpWiQYZwHcQlds2UPC9kd068AU+43wUwtVKCnrtVDKpt0vvw1+Vh5TlzRmY2C5OjyFxpQFYLdd0rfe1VLQJFeFrJF5/F04JyzQLjkL+tavWTD7bH2NTWcUnbt2Le7fxHWc0004gvKTizKDGZkqAy6MJkzbycKTRCGI+MPN9T4RqIqEPtH2BKXK9DDF2+cqQa1F/pO2TS+L8lHW8A0woEIfwatfADPBwXxLEHUTqLMNVeMvr72lO7581UwuMniBXtHheDlEmQ9x7yC73OD24qMEElGBotpNXLCXWfG7OCrkv3+lOMta6vzufHJ6wL7ILdIHdjTnSjTxpuG3ANcwtRsZ28RTHdDtJ";
+            oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["ebayToken"];
 
             //set the endpoint (sandbox) use https://api.ebay.com/wsapi for production
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";

@@ -1,4 +1,14 @@
-﻿using System;
+﻿/*
+ * 
+ * say user forgets their password
+ * email them a new password (reset their password), then they have option to change the password
+ * 
+ * 
+ * 
+ * 
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
@@ -19,6 +29,15 @@ using scrapeAPI.Results;
 
 namespace scrapeAPI.Controllers
 {
+    public class ResetPasswordViewModel
+    {
+        public string Email { get; set; }
+
+        public string Code { get; set; }
+
+        public string Password { get; set; }
+    }
+
     [Authorize]
     [RoutePrefix("api/Account")]
     public class AccountController : ApiController
@@ -132,6 +151,30 @@ namespace scrapeAPI.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("resetpassword")]
+        public async Task<IHttpActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            //if (!ModelState.IsValid)
+            //{
+            //    return View(model);
+            //}
+            var user = await UserManager.FindByNameAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+            }
+            string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+            model.Code = code;
+            var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
 
         // POST api/Account/SetPassword
