@@ -21,7 +21,7 @@ namespace scrapeAPI.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base("OPWContext", throwIfV1Schema: false)
         {
         }
         
