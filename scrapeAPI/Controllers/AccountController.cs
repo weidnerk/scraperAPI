@@ -136,7 +136,8 @@ namespace scrapeAPI.Controllers
         }
 
         // POST api/Account/ChangePassword
-        [Route("ChangePassword")]
+        [HttpPost]
+        [Route("changepassword")]
         public async Task<IHttpActionResult> ChangePassword(ChangePasswordBindingModel model)
         {
             if (!ModelState.IsValid)
@@ -179,42 +180,63 @@ namespace scrapeAPI.Controllers
             return BadRequest();
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
-        [Route("sendmsg")]
-        public async Task<IHttpActionResult> SendMsg()
+        [Route("setrandompassword")]
+        public async Task<IHttpActionResult> SetRandomPassword(ForgotPasswordViewModel vm)
         {
-            await SendMail();
-            return Ok();
+            var user = await UserManager.FindByNameAsync(vm.EmailAddress);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return BadRequest();
+            }
+        
+            string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+            string pwd = DateTime.Now.ToFileTimeUtc().ToString();
+            var result = await UserManager.ResetPasswordAsync(user.Id, code, pwd);
+            if (result.Succeeded)
+            {
+                await SendMail(pwd, vm.EmailAddress);
+                return Ok();
+            }
+            return BadRequest();
         }
 
-        protected async Task Send()
+        // this version works from my laptop but not at work
+        protected async Task Send(string emailTo, string body, string subject, string host)
         {
-            MailMessage mailMessage = new MailMessage();
-            MailAddress fromAddress = new MailAddress("weidnerk@gmail.com");
-            mailMessage.From = fromAddress;
-            mailMessage.To.Add("ventures2018@gmail.com");
-            mailMessage.Body = "This is Testing Email Without Configured SMTP Server";
-            mailMessage.IsBodyHtml = true;
-            mailMessage.Subject = " Testing Email";
-            SmtpClient smtpClient = new SmtpClient();
-            smtpClient.Host = "localhost";
-            await smtpClient.SendMailAsync(mailMessage);
+            try
+            {
+                MailMessage mailMessage = new MailMessage();
+                MailAddress fromAddress = new MailAddress("weidnerk@gmail.com");
+                mailMessage.From = fromAddress;
+                mailMessage.To.Add(emailTo);
+                mailMessage.Body = body;
+                mailMessage.IsBodyHtml = true;
+                mailMessage.Subject = subject;
+                SmtpClient smtpClient = new SmtpClient();
+                smtpClient.Host = host;
+                await smtpClient.SendMailAsync(mailMessage);
+            }
+            catch (Exception exc)
+            {
+                string msg = exc.Message;
+            }
         }
 
-        protected async Task SendMail()
+        protected async Task SendMail(string pwd, string toAddress)
         {
             try
             {
                 // Gmail Address from where you send the mail
                 var fromAddress = "weidnerk@gmail.com";
                 // any address where the email will be sending
-                var toAddress = "ventures2018@gmail.com";
                 //Password of your gmail address
                 const string fromPassword = "kw2607666";
                 // Passing the values and make a email formate to display
-                string subject = "test subject";
-                string body = "test body";
+                string subject = "OPW Account Reset";
+                string body = "your new password is " + pwd;
                 // smtp settings
                 var smtp = new System.Net.Mail.SmtpClient();
                 {
@@ -241,7 +263,7 @@ namespace scrapeAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await UserManager.FindByNameAsync(model.Email);
+                var user = await UserManager.FindByNameAsync(model.EmailAddress);
 
                 if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
                 {

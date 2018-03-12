@@ -43,6 +43,6 @@ namespace scrapeAPI.Models
 
     public class ForgotPasswordViewModel
     {
-        public string Email { get; set; }
+        public string EmailAddress { get; set; }
     }
 }
