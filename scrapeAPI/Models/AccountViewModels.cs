@@ -40,4 +40,9 @@ namespace scrapeAPI.Models
 
         public string ProviderKey { get; set; }
     }
+
+    public class ForgotPasswordViewModel
+    {
+        public string Email { get; set; }
+    }
 }

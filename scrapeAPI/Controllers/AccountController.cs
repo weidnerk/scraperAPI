@@ -10,7 +10,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -170,6 +172,111 @@ namespace scrapeAPI.Controllers
             string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
             model.Code = code;
             var result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("sendmsg")]
+        public async Task<IHttpActionResult> SendMsg()
+        {
+            await SendMail();
+            return Ok();
+        }
+
+        protected async Task Send()
+        {
+            MailMessage mailMessage = new MailMessage();
+            MailAddress fromAddress = new MailAddress("weidnerk@gmail.com");
+            mailMessage.From = fromAddress;
+            mailMessage.To.Add("ventures2018@gmail.com");
+            mailMessage.Body = "This is Testing Email Without Configured SMTP Server";
+            mailMessage.IsBodyHtml = true;
+            mailMessage.Subject = " Testing Email";
+            SmtpClient smtpClient = new SmtpClient();
+            smtpClient.Host = "localhost";
+            await smtpClient.SendMailAsync(mailMessage);
+        }
+
+        protected async Task SendMail()
+        {
+            try
+            {
+                // Gmail Address from where you send the mail
+                var fromAddress = "weidnerk@gmail.com";
+                // any address where the email will be sending
+                var toAddress = "ventures2018@gmail.com";
+                //Password of your gmail address
+                const string fromPassword = "kw2607666";
+                // Passing the values and make a email formate to display
+                string subject = "test subject";
+                string body = "test body";
+                // smtp settings
+                var smtp = new System.Net.Mail.SmtpClient();
+                {
+                    smtp.Host = "smtp.gmail.com";
+                    smtp.Port = 587;
+                    smtp.EnableSsl = true;
+                    smtp.DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network;
+                    smtp.Credentials = new NetworkCredential(fromAddress, fromPassword);
+                    smtp.Timeout = 20000;
+                }
+                // Passing values to smtp object
+                await smtp.SendMailAsync(fromAddress, toAddress, subject, body);
+            }
+            catch (Exception exc)
+            {
+                string msg = exc.Message;
+            }
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("ForgotPassword")]
+        public async Task<IHttpActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await UserManager.FindByNameAsync(model.Email);
+
+                if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
+                {
+                    return Ok();
+                }
+
+                try
+                {
+                    var code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                    var callbackUrl = new Uri(@"http://onepluswonder/scraper/ConfirmEmail?userid=" + user.Id + "&code=" + code);
+
+                    string subject = "Reset Password";
+                    string body = "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>";
+                    await UserManager.SendEmailAsync(user.Email, subject, body);
+                }
+
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.ToString());
+                }
+
+                return Ok();
+            }
+
+            // If we got this far, something failed, redisplay form
+            return BadRequest(ModelState);
+        }
+
+        public async Task<IHttpActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                return BadRequest();
+            }
+            var result = await UserManager.ConfirmEmailAsync(userId, code);
             if (result.Succeeded)
             {
                 return Ok();
