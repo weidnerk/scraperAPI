@@ -6,6 +6,24 @@ using System.Web;
 
 namespace scrapeAPI.Models
 {
+    [Table("UserProfile")]
+    public class UserProfile
+    {
+        public string Id { get; set; }
+        public string AppID { get; set; }
+        public string DevID { get; set; }
+        public string CertID { get; set; }
+        public string UserToken { get; set; }
+    }
+    public class UserProfileVM
+    {
+        public string userName { get; set; }
+        public string AppID { get; set; }
+        public string DevID { get; set; }
+        public string CertID { get; set; }
+        public string UserToken { get; set; }
+    }
+
     public class ModelViewTimesSold
     {
         public List<TimesSold> TimesSoldRpt { get; set; }

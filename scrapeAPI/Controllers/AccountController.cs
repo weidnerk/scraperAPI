@@ -44,6 +44,7 @@ namespace scrapeAPI.Controllers
     [RoutePrefix("api/Account")]
     public class AccountController : ApiController
     {
+        private DataModelsDB db = new DataModelsDB();
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
 
@@ -137,6 +138,14 @@ namespace scrapeAPI.Controllers
             };
         }
 
+        [HttpPost]
+        [Route("userprofilesave")]
+        public async Task<IHttpActionResult> UserProfileSave(UserProfileVM profile)
+        {
+            await db.UserProfileSave(profile);
+            return Ok();
+        }
+
         // POST api/Account/ChangePassword
         [HttpPost]
         [Route("changepassword")]
@@ -206,7 +215,7 @@ namespace scrapeAPI.Controllers
             return BadRequest();
         }
 
-        // this version works from my laptop but not at work
+        // Use this version of send when deploying
         protected async Task Send(string emailTo, string body, string subject, string host)
         {
             try
@@ -230,6 +239,8 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        // Use this version of send when working in development
+        // Can try using just Send(), see if it works.
         protected async Task SendMail(string pwd, string toAddress)
         {
             try
@@ -588,6 +599,8 @@ namespace scrapeAPI.Controllers
 
             base.Dispose(disposing);
         }
+
+
 
         #region Helpers
 
