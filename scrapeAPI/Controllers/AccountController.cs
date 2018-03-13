@@ -47,6 +47,8 @@ namespace scrapeAPI.Controllers
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
 
+        string log = System.AppDomain.CurrentDomain.BaseDirectory + "log.txt";
+
         public AccountController()
         {
         }
@@ -197,7 +199,8 @@ namespace scrapeAPI.Controllers
             var result = await UserManager.ResetPasswordAsync(user.Id, code, pwd);
             if (result.Succeeded)
             {
-                await SendMail(pwd, vm.EmailAddress);
+                //await SendMail(pwd, vm.EmailAddress);
+                await Send(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
                 return Ok();
             }
             return BadRequest();
@@ -218,10 +221,12 @@ namespace scrapeAPI.Controllers
                 SmtpClient smtpClient = new SmtpClient();
                 smtpClient.Host = host;
                 await smtpClient.SendMailAsync(mailMessage);
+                HomeController.WriteFile(log, "email sent to " + emailTo);
             }
             catch (Exception exc)
             {
                 string msg = exc.Message;
+                HomeController.WriteFile(log, "send error " + exc.Message);
             }
         }
 
