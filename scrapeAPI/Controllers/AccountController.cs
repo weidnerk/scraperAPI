@@ -146,6 +146,17 @@ namespace scrapeAPI.Controllers
             return Ok();
         }
 
+        [HttpGet]
+        [Route("userprofileget")]
+        public async Task<IHttpActionResult> UserProfileGet(string userName)
+        {
+            var p = await db.UserProfileGet(userName);
+            if (p == null)
+                return BadRequest();
+            else
+                return Ok(p);
+        }
+
         // POST api/Account/ChangePassword
         [HttpPost]
         [Route("changepassword")]
@@ -208,15 +219,15 @@ namespace scrapeAPI.Controllers
             var result = await UserManager.ResetPasswordAsync(user.Id, code, pwd);
             if (result.Succeeded)
             {
-                //await SendMail(pwd, vm.EmailAddress);
-                await Send(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
+                await SendMailDev(pwd, vm.EmailAddress);
+                //await SendMailProd(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
                 return Ok();
             }
             return BadRequest();
         }
 
         // Use this version of send when deploying
-        protected async Task Send(string emailTo, string body, string subject, string host)
+        protected async Task SendMailProd(string emailTo, string body, string subject, string host)
         {
             try
             {
@@ -241,7 +252,7 @@ namespace scrapeAPI.Controllers
 
         // Use this version of send when working in development
         // Can try using just Send(), see if it works.
-        protected async Task SendMail(string pwd, string toAddress)
+        protected async Task SendMailDev(string pwd, string toAddress)
         {
             try
             {

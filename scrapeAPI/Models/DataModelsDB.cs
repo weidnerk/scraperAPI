@@ -72,6 +72,13 @@ namespace scrapeAPI.Models
             return ret;
         }
 
+        public async Task<UserProfile> UserProfileGet(string userName)
+        {
+            var user = await UserManager.FindByNameAsync(userName);
+            var profile = this.UserProfiles.Find(user.Id);
+            return profile;
+        }
+
         // return error string
         public async Task<string> UserProfileSave(UserProfileVM p)
         {
