@@ -94,6 +94,10 @@ namespace scrapeAPI.Models
                 var profile = this.UserProfiles.Find(user.Id);
                 if (profile != null)
                 {
+                    profile.AppID = p.AppID;
+                    profile.CertID = p.CertID;
+                    profile.DevID = p.DevID;
+                    profile.UserToken = p.UserToken;
                     this.Entry(profile).State = EntityState.Modified;
                 }
                 else
