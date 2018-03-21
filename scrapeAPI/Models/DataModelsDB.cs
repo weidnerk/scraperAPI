@@ -1,12 +1,7 @@
-﻿//using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using scrapeAPI.Controllers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.Identity.Owin;
@@ -52,7 +47,6 @@ namespace scrapeAPI.Models
                     OrderHistory.Add(item);
                 }
                 this.SaveChanges();
-                //ret = oh.ID.ToString();
             }
             catch (DbEntityValidationException e)
             {
@@ -72,10 +66,9 @@ namespace scrapeAPI.Models
             return ret;
         }
 
-        public async Task<UserProfile> UserProfileGet(string userName)
+        public async Task<UserProfile> UserProfileGet(ApplicationUser usr)
         {
-            var user = await UserManager.FindByNameAsync(userName);
-            var profile = this.UserProfiles.Find(user.Id);
+            var profile = this.UserProfiles.Find(usr.Id);
             return profile;
         }
 

@@ -198,3 +198,9 @@ Parameter name: source
 3/9/2018 1:19:28 PM Seller: deal-buys daysBack: 2 waitSeconds: 0 resultsPerPg: 200
 3/12/2018 9:07:49 PM Seller: shedsforlessdirect daysBack: 10 waitSeconds: 0 resultsPerPg: 200
 3/13/2018 1:59:21 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/18/2018 1:29:27 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/20/2018 5:53:56 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/20/2018 6:10:18 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/20/2018 6:31:05 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/20/2018 6:36:20 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/20/2018 6:38:27 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200

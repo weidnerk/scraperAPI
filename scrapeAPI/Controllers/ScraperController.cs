@@ -8,6 +8,9 @@ using System.Web.Http;
 using scrapeAPI.Models;
 using scrapeAPI.com.ebay.developer;
 using eBay.Service.Core.Soap;
+using System.Web;
+using Microsoft.AspNet.Identity.Owin;
+using System.Threading.Tasks;
 
 namespace scrapeAPI.Controllers
 {
@@ -18,6 +21,15 @@ namespace scrapeAPI.Controllers
         DataModelsDB db = new DataModelsDB();
         const string _filename = "order.csv";
         const string _logfile = "scrape_log.txt";
+        private ApplicationUserManager _userManager;
+        public ApplicationUserManager UserManager
+        {
+            get => _userManager ?? HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            private set
+            {
+                _userManager = value;
+            }
+        }
 
         [Route("numitemssold")]
         [HttpGet]
@@ -40,18 +52,19 @@ namespace scrapeAPI.Controllers
 
         [Route("getsellersold")]
         [HttpGet]
-        public IHttpActionResult FetchSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
+        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
         {
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
             string log = baseDir + _logfile;
             string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
             HomeController.WriteFile(log, header);
 
-            var mv = GetSellerSoldAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders, useProxy);
+            var user = await UserManager.FindByNameAsync(userName);
+            var mv = GetSellerSoldAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders, user);
             return Ok(mv);
         }
 
-        protected ModelView GetSellerSoldAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
+        protected ModelView GetSellerSoldAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
         {
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
 
@@ -74,7 +87,7 @@ namespace scrapeAPI.Controllers
                     // loop through each order
                     DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
                     DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
-                    var transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo);
+                    var transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
                     var orderHistory = new List<OrderHistory>();
                     foreach (TransactionType item in transactions)
                     {

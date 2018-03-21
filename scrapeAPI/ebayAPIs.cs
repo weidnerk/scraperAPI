@@ -3,19 +3,20 @@ using eBay.Service.Core.Sdk;
 using eBay.Service.Core.Soap;
 using scrapeAPI.com.ebay.developer;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using scrapeAPI.Models;
 
 namespace scrapeAPI
 {
     public class ebayAPIs
     {
+        
+
         // findCompletedItems
         // this is a member of the Finding API.  My understanding is that the .NET SDK only supports the Trading API
         public static async Task FindItemsAsync()
@@ -45,7 +46,7 @@ namespace scrapeAPI
         // a variety of this is to use findCompletedItems
         //
         // I don't know how to filter this by completed items
-        protected static void GetSellerList(string seller)
+        protected static void GetSellerList_notused(string seller)
         {
             // TODO: Add code to start application here
             //
@@ -185,17 +186,21 @@ namespace scrapeAPI
         // 192369073559
         //
         // also look at GetOrderTransactions()
-        public static TransactionTypeCollection GetItemTransactions(string itemId, DateTime ModTimeFrom, DateTime ModTimeTo)
+        public static TransactionTypeCollection GetItemTransactions(string itemId, DateTime ModTimeFrom, DateTime ModTimeTo, ApplicationUser user)
         {
+            DataModelsDB db = new DataModelsDB();
+            var profile = db.UserProfiles.Find(user.Id);
             ApiContext oContext = new ApiContext();
 
             //set the dev,app,cert information
-            oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["devID"];
-            oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["appID"];
-            oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["certID"];
-
-            //set the AuthToken
-            oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["ebayToken"];
+            oContext.ApiCredential.ApiAccount.Developer = profile.DevID;
+            oContext.ApiCredential.ApiAccount.Application = profile.AppID;
+            oContext.ApiCredential.ApiAccount.Certificate = profile.CertID;
+            oContext.ApiCredential.eBayToken = profile.UserToken;
+            //oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["devID"];
+            //oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["appID"];
+            //oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["certID"];
+            //oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["ebayToken"];
 
             //set the endpoint (sandbox) use https://api.ebay.com/wsapi for production
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
