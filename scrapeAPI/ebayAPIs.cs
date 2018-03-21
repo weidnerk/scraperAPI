@@ -252,7 +252,7 @@ namespace scrapeAPI
         // https://ebaydts.com/eBayKBDetails?KBid=1987
         //
         // 192369073559
-        protected static void GetItem(string itemId)
+        protected static void GetItem_notused(string itemId)
         {
             ApiContext oContext = new ApiContext();
 

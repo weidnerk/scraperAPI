@@ -68,7 +68,7 @@ namespace scrapeAPI.Models
 
         public async Task<UserProfile> UserProfileGet(ApplicationUser usr)
         {
-            var profile = this.UserProfiles.Find(usr.Id);
+            var profile = await this.UserProfiles.FindAsync(usr.Id);
             return profile;
         }
 

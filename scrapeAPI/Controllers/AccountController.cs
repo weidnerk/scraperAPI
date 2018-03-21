@@ -233,7 +233,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 MailMessage mailMessage = new MailMessage();
-                MailAddress fromAddress = new MailAddress("weidnerk@gmail.com");
+                MailAddress fromAddress = new MailAddress("onepluswonder@gmail.com");
                 mailMessage.From = fromAddress;
                 mailMessage.To.Add(emailTo);
                 mailMessage.Body = body;
