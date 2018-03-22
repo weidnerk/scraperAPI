@@ -165,7 +165,7 @@ namespace scrapeAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest("The was a problem changing your password.  Please try again.");
             }
 
             IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword,
@@ -611,7 +611,6 @@ namespace scrapeAPI.Controllers
 
             base.Dispose(disposing);
         }
-
 
 
         #region Helpers

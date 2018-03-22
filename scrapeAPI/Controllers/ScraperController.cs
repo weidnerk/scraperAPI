@@ -169,6 +169,16 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("emailtaken")]
+        public async Task<IHttpActionResult> GetEmailTaken(string email)
+        {
+            var user = await UserManager.FindByNameAsync(email);
+            if (user == null)
+                return Ok(false);
+            else
+                return Ok(true);
+        }
 
     }
 }

@@ -83,7 +83,7 @@ namespace scrapeAPI.Controllers
 
         [Route("scraper")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
+        public async Task<IHttpActionResult> GetSeller_notused(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
         {
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
             string log = baseDir + _logfile;

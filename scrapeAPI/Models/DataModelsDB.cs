@@ -120,5 +120,22 @@ namespace scrapeAPI.Models
             return ret;
         }
 
+        public async Task<bool> GetEmailTaken(string email)
+        {
+            bool taken = true;
+            try
+            {
+                // if user is null, then emailTaken = false
+                var user = await UserManager.FindByNameAsync(email);
+                taken = (user == null) ? false : true;
+            }
+            catch (Exception ex)
+            {
+                string s = ex.Message;
+            }
+            return taken;
+        }
+
+
     }
 }
