@@ -33,12 +33,14 @@ namespace scrapeAPI.Controllers
 
         [Route("numitemssold")]
         [HttpGet]
-        public IHttpActionResult GetNumItemsSold(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string useProxy)
+        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
         {
             try
             {
                 string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
-                var r = ebayAPIs.FindCompletedItems(seller, daysBack);
+                var user = await UserManager.FindByNameAsync(userName);
+                var profile = db.UserProfiles.Find(user.Id);
+                var r = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID);
 
                 if (r != null)
                     return Ok(r.Count());
@@ -67,8 +69,8 @@ namespace scrapeAPI.Controllers
         protected ModelView GetSellerSoldAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
         {
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
-
-            var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack);
+            var profile = db.UserProfiles.Find(user.Id);
+            var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID);
             var listings = new List<Listing>();
             if (completedItems != null)
             {

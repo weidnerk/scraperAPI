@@ -183,8 +183,6 @@ namespace scrapeAPI
 
         // https://ebaydts.com/eBayKBDetails?KBid=1937
         //
-        // 192369073559
-        //
         // also look at GetOrderTransactions()
         public static TransactionTypeCollection GetItemTransactions(string itemId, DateTime ModTimeFrom, DateTime ModTimeTo, ApplicationUser user)
         {
@@ -213,7 +211,7 @@ namespace scrapeAPI
 
             //very important, let's setup the logging
             ApiLogManager oLogManager = new ApiLogManager();
-            oLogManager.ApiLoggerList.Add(new eBay.Service.Util.FileLogger("GetItemTransactions.log", true, true, true));
+            oLogManager.ApiLoggerList.Add(new eBay.Service.Util.FileLogger("GetItemTransactions.log", false, false, true));
             oLogManager.EnableLogging = true;
             oContext.ApiLogManager = oLogManager;
 
@@ -299,12 +297,13 @@ namespace scrapeAPI
             var pic = r.PictureDetails.PictureURL;
         }
 
-        public static SearchItem[] FindCompletedItems(string seller, int daysBack)
+        public static SearchItem[] FindCompletedItems(string seller, int daysBack, string appID)
         {
             try
             {
                 CustomFindSold service = new CustomFindSold();
                 service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
+                service.appID = appID;
                 FindCompletedItemsRequest request = new FindCompletedItemsRequest();
 
                 ItemFilter filterSeller = new ItemFilter();
