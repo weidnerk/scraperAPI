@@ -135,7 +135,5 @@ namespace scrapeAPI.Models
             }
             return taken;
         }
-
-
     }
 }

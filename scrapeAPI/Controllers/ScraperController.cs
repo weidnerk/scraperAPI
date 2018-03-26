@@ -17,7 +17,6 @@ namespace scrapeAPI.Controllers
 
     public class ScraperController : ApiController
     {
-
         DataModelsDB db = new DataModelsDB();
         const string _filename = "order.csv";
         const string _logfile = "scrape_log.txt";
@@ -56,12 +55,17 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
         {
+
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
             string log = baseDir + _logfile;
             string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
             HomeController.WriteFile(log, header);
 
             var user = await UserManager.FindByNameAsync(userName);
+
+            // test
+            ebayAPIs.GetAPIStatus(user);
+
             var mv = GetSellerSoldAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders, user);
             return Ok(mv);
         }
@@ -182,5 +186,18 @@ namespace scrapeAPI.Controllers
                 return Ok(true);
         }
 
+        [HttpGet]
+        [Route("tradingapiusage")]
+        public async Task<IHttpActionResult> GetTradingAPIUsage(string userName)
+        {
+            var user = await UserManager.FindByNameAsync(userName);
+            if (user == null)
+                return Ok(false);
+            else
+            {
+                var i = ebayAPIs.GetTradingAPIUsage(user);
+                return Ok(i);
+            }
+        }
     }
 }
