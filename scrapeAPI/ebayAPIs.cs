@@ -13,6 +13,13 @@ using scrapeAPI.Models;
 
 namespace scrapeAPI
 {
+    // TokenStatusType is an eBay type that has a property called Status which is an enum
+    // Here, another property has been added to show the name of the enum
+    public class TokenStatusTypeCustom : TokenStatusType
+    {
+        public string StatusStr { get; set; }
+    }
+
     public class ebayAPIs
     {
 
@@ -331,7 +338,7 @@ namespace scrapeAPI
             }
         }
 
-        public static TokenStatusType GetTokenStatus(ApplicationUser user)
+        public static TokenStatusTypeCustom GetTokenStatus(ApplicationUser user)
         {
             try
             {
@@ -364,7 +371,11 @@ namespace scrapeAPI
                 oGetTokenStatusCall.EnableCompression = true;
 
                 var r = oGetTokenStatusCall.GetTokenStatus();
-                return r;
+                TokenStatusTypeCustom final = new TokenStatusTypeCustom();
+                final.StatusStr = r.Status.ToString();
+                final.ExpirationTime = r.ExpirationTime;
+
+                return final;
             }
             catch (Exception ex)
             {
@@ -372,6 +383,7 @@ namespace scrapeAPI
                 return null;
             }
         }
+
         // https://ebaydts.com/eBayKBDetails?KBid=1987
         //
         // 192369073559
