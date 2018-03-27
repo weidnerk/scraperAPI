@@ -199,5 +199,19 @@ namespace scrapeAPI.Controllers
                 return Ok(i);
             }
         }
+
+        [HttpGet]
+        [Route("tokenstatustype")]
+        public async Task<IHttpActionResult> GetTokenStatus(string userName)
+        {
+            var user = await UserManager.FindByNameAsync(userName);
+            if (user == null)
+                return Ok(false);
+            else
+            {
+                var i = ebayAPIs.GetTokenStatus(user);
+                return Ok(i);
+            }
+        }
     }
 }

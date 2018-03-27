@@ -287,6 +287,7 @@ namespace scrapeAPI
             }
         }
 
+        // note below that GetApiAccessRules returns a collection but first item is CallName, ApplicationAggregate, which returns all
         public static long GetTradingAPIUsage(ApplicationUser user)
         {
             try
@@ -318,6 +319,7 @@ namespace scrapeAPI
 
                 //' enable the compression feature
                 oGetApiAccessRulesCall.EnableCompression = true;
+
                 var r = oGetApiAccessRulesCall.GetApiAccessRules();
                 var i = r[0].DailyUsage;
                 return i;
@@ -329,6 +331,47 @@ namespace scrapeAPI
             }
         }
 
+        public static TokenStatusType GetTokenStatus(ApplicationUser user)
+        {
+            try
+            {
+                DataModelsDB db = new DataModelsDB();
+                var profile = db.UserProfiles.Find(user.Id);
+                ApiContext oContext = new ApiContext();
+
+                //set the dev,app,cert information
+                oContext.ApiCredential.ApiAccount.Developer = profile.DevID;
+                oContext.ApiCredential.ApiAccount.Application = profile.AppID;
+                oContext.ApiCredential.ApiAccount.Certificate = profile.CertID;
+                oContext.ApiCredential.eBayToken = profile.UserToken;
+
+                oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
+
+                //set the Site of the Context
+                oContext.Site = eBay.Service.Core.Soap.SiteCodeType.US;
+
+                //the WSDL Version used for this SDK build
+                oContext.Version = "817";
+                GetTokenStatusCall oGetTokenStatusCall = new GetTokenStatusCall(oContext);
+
+                //' set the Version used in the call
+                oGetTokenStatusCall.Version = oContext.Version;
+
+                //' set the Site of the call
+                oGetTokenStatusCall.Site = oContext.Site;
+
+                //' enable the compression feature
+                oGetTokenStatusCall.EnableCompression = true;
+
+                var r = oGetTokenStatusCall.GetTokenStatus();
+                return r;
+            }
+            catch (Exception ex)
+            {
+                string s = ex.Message;
+                return null;
+            }
+        }
         // https://ebaydts.com/eBayKBDetails?KBid=1987
         //
         // 192369073559
@@ -581,6 +624,5 @@ namespace scrapeAPI
                 Console.WriteLine("Error: " + ex.Message);
             }
         }
-
     }
 }
