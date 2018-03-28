@@ -72,6 +72,8 @@ namespace scrapeAPI.Controllers
 
         protected ModelView GetSellerSoldAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
         {
+            int notSold = 0;
+
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
             var profile = db.UserProfiles.Find(user.Id);
             var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID);
@@ -114,6 +116,7 @@ namespace scrapeAPI.Controllers
 
                             orderHistory.Add(order);
                         }
+                        else ++notSold;
                     }
                     db.OrderHistorySave(orderHistory, rptNumber, false);
                     listing.Orders = orderHistory;
@@ -122,30 +125,93 @@ namespace scrapeAPI.Controllers
             }
             var mv = new ModelView();
             mv.Listings = listings;
-            
+
+            int b = notSold;
             return mv;
         }
 
-        [Route("timessold/{rptNumber}/{minSold}/{showNoOrders}")]
+        [Route("timessold/{rptNumber}/{minSold}/{showNoOrders}/{daysBack}")]
         [HttpGet]
-        public IHttpActionResult GetTimesSold(int rptNumber, int minSold, string showNoOrders)
+        public IHttpActionResult GetTimesSold(int rptNumber, int minSold, string showNoOrders, int daysBack)
         {
             bool endedListings = (showNoOrders == "0") ? false : true;
+            DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
+            DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
 
             try
             {
-                // return actual results for display
-                var results = from c in db.OrderHistory
-                              where c.RptNumber == rptNumber && (!c.ListingEnded || c.ListingEnded == endedListings)
-                              group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
-                              where grp.Count() >= minSold
-                              orderby grp.Max(x => x.DateOfPurchase) descending
-                              select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Max(x => x.DateOfPurchase) };
+                // materialize the date from SQL Server first since SQL Server doesn't understand Convert.ToInt32 on Qty
+                var results = (from c in db.OrderHistory
+                               where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
+                               group c by new { c.Title, c.Url, c.Price, c.ImageUrl, c.Qty, c.DateOfPurchase } into grp
+                               select new
+                               {
+                                   grp.Key.Title,
+                                   grp.Key.Url,
+                                   grp.Key.Price,
+                                   grp.Key.ImageUrl,
+                                   grp.Key.Qty,
+                                   grp.Key.DateOfPurchase
+                               }).ToList();
+
+                var x = from a in results
+                        group a by new { a.Title, a.Url, a.Price, a.ImageUrl } into grp
+                        select new
+                              {
+                                grp.Key.Title,
+                                grp.Key.Url,
+                                grp.Key.Price,
+                                grp.Key.ImageUrl,
+                                Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
+                                MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase))
+                              } into g
+                              where g.Qty >= minSold
+                              orderby g.MaxDate descending
+                        select new TimesSold
+                              {
+                                  Title = g.Title,
+                                  Url = g.Url,
+                                  ImageUrl = g.ImageUrl,
+                                  Price = g.Price,
+                                  SoldQty = g.Qty,
+                                  EarliestSold = g.MaxDate
+                              };
+
+                // 1. where rptNumber=x and DateOfPurchase>daysBack
+                // 2. group by title,url,price,sum(Qty),max(DateofPurchase)
+                // 3. having Qty>=minSold
+                //var results = from c in db.OrderHistory
+                //        where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
+                //        group c by new { c.Title, c.Url, c.Price, c.ImageUrl } into grp
+                //        select new { grp.Key.Title,
+                //                        grp.Key.Url,
+                //                        grp.Key.Price,
+                //                        grp.Key.ImageUrl,
+                //                        Qty = grp.Sum(c => Convert.ToInt32(c.Qty)),
+                //                        MaxDate = grp.Max(c => Convert.ToDateTime(c.DateOfPurchase))
+                //                    } into g
+                //        where g.Qty >= minSold
+                //        select new TimesSold {
+                //            Title = g.Title,
+                //            Url = g.Url,
+                //            ImageUrl = g.ImageUrl,
+                //            Price = g.Price,
+                //            SoldQty = g.Qty,
+                //            EarliestSold = g.MaxDate
+                //        };
+
+                //var results = from c in db.OrderHistory
+                //              where c.RptNumber == rptNumber && (!c.ListingEnded || c.ListingEnded == endedListings) && c.DateOfPurchase >= ModTimeFrom
+                //              group c by new { c.Title, c.Url, c.RptNumber, c.ImageUrl, c.Price } into grp
+                //              where grp.Count() >= minSold
+                //              orderby grp.Max(x => x.DateOfPurchase) descending
+                //              select new TimesSold { Title = grp.Key.Title, Url = grp.Key.Url, ImageUrl = grp.Key.ImageUrl, Price = grp.Key.Price, SoldQty = grp.Count(), EarliestSold = grp.Max(x => x.DateOfPurchase) };
+
 
                 // count listings processed so far
                 var listings = from o in db.OrderHistory
                                where o.RptNumber == rptNumber
-                               group o by new { o.Title, o.Price } into grp
+                               group o by new { o.Title } into grp
                                select grp;
 
                 // count listings processed so far - matches
@@ -162,7 +228,7 @@ namespace scrapeAPI.Controllers
                              select o;
 
                 var mv = new ModelViewTimesSold();
-                mv.TimesSoldRpt = results.ToList();
+                mv.TimesSoldRpt = x.ToList();
                 mv.ListingsProcessed = listings.Count();
                 mv.TotalOrders = orders.Count();
                 mv.MatchedListings = matchedlistings.Count();
