@@ -97,6 +97,9 @@ namespace scrapeAPI.Models
                 {
                     var newprofile = new UserProfile();
                     newprofile.AppID = p.AppID;
+                    newprofile.CertID = p.CertID;
+                    newprofile.DevID = p.DevID;
+                    newprofile.UserToken = p.UserToken;
                     newprofile.Id = user.Id;
                     UserProfiles.Add(newprofile);
                 }

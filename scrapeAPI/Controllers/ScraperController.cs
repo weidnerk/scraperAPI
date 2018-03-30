@@ -32,11 +32,14 @@ namespace scrapeAPI.Controllers
 
         [Route("numitemssold")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
+        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string showNoOrders, string userName)
         {
             try
             {
-                string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
+                // stub to delete a user
+                //AccountController.DeleteUsr("ventures2021@gmail.com");
+
+                string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
                 var user = await UserManager.FindByNameAsync(userName);
                 var profile = db.UserProfiles.Find(user.Id);
                 var r = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID);
@@ -53,12 +56,12 @@ namespace scrapeAPI.Controllers
 
         [Route("getsellersold")]
         [HttpGet]
-        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
+        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
         {
 
             string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
             string log = baseDir + _logfile;
-            string header = string.Format("Seller: {0} daysBack: {1} waitSeconds: {2} resultsPerPg: {3}", seller, daysBack, waitSeconds, resultsPerPg);
+            string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
             HomeController.WriteFile(log, header);
 
             var user = await UserManager.FindByNameAsync(userName);
@@ -66,11 +69,11 @@ namespace scrapeAPI.Controllers
             // test
             ebayAPIs.GetAPIStatus(user);
 
-            var mv = GetSellerSoldAsync(seller, daysBack, waitSeconds, resultsPerPg, rptNumber, minSold, showNoOrders, user);
+            var mv = GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
             return Ok(mv);
         }
 
-        protected ModelView GetSellerSoldAsync(string seller, int daysBack, int waitSeconds, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
+        protected ModelView GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
         {
             int notSold = 0;
 

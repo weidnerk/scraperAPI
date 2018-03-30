@@ -318,3 +318,33 @@ Parameter name: source
 3/28/2018 4:23:53 PM Seller: deal-buys daysBack: 2 waitSeconds: 0 resultsPerPg: 200
 3/28/2018 4:24:54 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
 3/28/2018 4:25:43 PM Seller: pricedrightsales daysBack: 1 waitSeconds: 0 resultsPerPg: 200
+3/28/2018 4:39:36 PM Seller: **justforyou** daysBack: 4 waitSeconds: 0 resultsPerPg: 200
+3/28/2018 4:40:20 PM Seller: **justforyou** daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/28/2018 4:40:50 PM Seller: **justforyou** daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/28/2018 4:41:20 PM Seller: **justforyou** daysBack: 10 waitSeconds: 0 resultsPerPg: 200
+3/29/2018 2:56:04 PM Seller: **justforyou** daysBack: 20 waitSeconds: 0 resultsPerPg: 200
+3/29/2018 3:05:01 PM Seller: **justforyou** daysBack: 5 waitSeconds: 0 resultsPerPg: 200
+3/29/2018 3:07:31 PM Seller: **justforyou** daysBack: 5 waitSeconds: 0 resultsPerPg: 200
+3/29/2018 3:08:30 PM Seller: **justforyou** daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/29/2018 3:17:12 PM Seller: fabulousfinds101  daysBack: 30 waitSeconds: 0 resultsPerPg: 200
+3/30/2018 7:40:18 AM Seller: theadkays daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/30/2018 7:51:36 AM Seller: **justforyou** daysBack: 2 waitSeconds: 0 resultsPerPg: 200
+3/30/2018 8:05:25 AM Seller: **justforyou** daysBack: 3 waitSeconds: 0 resultsPerPg: 200
+3/30/2018 8:24:20 AM Seller: theadkays daysBack: 1 waitSeconds: 0 resultsPerPg: 200
+3/30/2018 8:28:53 AM Seller: theadkays daysBack: 1 waitSeconds: 0 resultsPerPg: 200
+3/30/2018 11:53:29 AM Seller: **justforyou** daysBack: 2 resultsPerPg: 200
+3/30/2018 1:51:55 PM Seller: theadkays daysBack: 1 resultsPerPg: 200
+3/30/2018 1:54:10 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+3/30/2018 1:54:44 PM Seller: theadkays daysBack: 1 resultsPerPg: 200
+3/30/2018 2:36:09 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 2:37:41 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 2:39:04 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 2:39:44 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 2:40:30 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 2:52:03 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 2:52:39 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 3:11:11 PM Seller: **justforyou** daysBack: 1 resultsPerPg: 200
+3/30/2018 3:27:02 PM Seller: pricedrightsales daysBack: 1 resultsPerPg: 200
+3/30/2018 3:28:08 PM Seller: pricedrightsales daysBack: 1 resultsPerPg: 200
+3/30/2018 3:40:37 PM Seller: theadkays daysBack: 5 resultsPerPg: 200
+3/30/2018 3:43:19 PM Seller: fabulousfinds101  daysBack: 3 resultsPerPg: 200

@@ -6,6 +6,16 @@ using System.Web;
 
 namespace scrapeAPI.Models
 {
+    public class SearchHistory
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; }
+        public string Seller { get; set; }
+        public int DaysBack { get; set; }
+        public int MinSoldFilter { get; set; }
+
+    }
+
     [Table("UserProfile")]
     public class UserProfile
     {

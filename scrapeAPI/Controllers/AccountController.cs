@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Mail;
@@ -65,7 +66,7 @@ namespace scrapeAPI.Controllers
         {
             get
             {
-                return _userManager ?? Request.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                return _userManager ?? HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
             }
             private set
             {
@@ -599,6 +600,13 @@ namespace scrapeAPI.Controllers
                 return GetErrorResult(result); 
             }
             return Ok();
+        }
+
+        public static void DeleteUsr(string email)
+        {
+            ApplicationUserManager manager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            ApplicationUser user = manager.FindByEmail(email);
+            manager.Delete(user);
         }
 
         protected override void Dispose(bool disposing)
