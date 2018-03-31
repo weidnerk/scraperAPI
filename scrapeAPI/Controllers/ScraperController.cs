@@ -39,8 +39,17 @@ namespace scrapeAPI.Controllers
                 // stub to delete a user
                 //AccountController.DeleteUsr("ventures2021@gmail.com");
 
+
                 string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
                 var user = await UserManager.FindByNameAsync(userName);
+
+                var sh = new SearchHistory();
+                sh.UserId = user.Id;
+                sh.Seller = seller;
+                sh.DaysBack = daysBack;
+                sh.MinSoldFilter = minSold;
+                await db.SearchHistorySave(sh);
+
                 var profile = db.UserProfiles.Find(user.Id);
                 var r = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID);
 

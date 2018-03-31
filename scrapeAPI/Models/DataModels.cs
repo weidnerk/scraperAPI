@@ -6,6 +6,7 @@ using System.Web;
 
 namespace scrapeAPI.Models
 {
+    [Table("SearchHistory")]
     public class SearchHistory
     {
         public int Id { get; set; }

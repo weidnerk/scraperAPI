@@ -24,6 +24,7 @@ namespace scrapeAPI.Models
 
         public DbSet<OrderHistory> OrderHistory { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<SearchHistory> SearchHistory { get; set; }
 
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
@@ -64,6 +65,18 @@ namespace scrapeAPI.Models
                 ret = exc.Message;
             }
             return ret;
+        }
+
+        public async Task SearchHistorySave(SearchHistory sh)
+        {
+            try
+            {
+                SearchHistory.Add(sh);
+                this.SaveChanges();
+            }
+            catch (Exception exc)
+            {
+            }
         }
 
         public async Task<UserProfile> UserProfileGet(ApplicationUser usr)
