@@ -19,7 +19,8 @@ namespace scrapeAPI.Controllers
     {
         DataModelsDB db = new DataModelsDB();
         const string _filename = "order.csv";
-        const string _logfile = "scrape_log.txt";
+        readonly string _logfile = "scrape_log.txt";
+
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
         {
@@ -38,7 +39,7 @@ namespace scrapeAPI.Controllers
             {
                 // stub to delete a user
                 //AccountController.DeleteUsr("ventures2021@gmail.com");
-
+                string s = System.AppDomain.CurrentDomain.BaseDirectory;
 
                 string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
                 var user = await UserManager.FindByNameAsync(userName);
@@ -60,7 +61,9 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                return Content(HttpStatusCode.ExpectationFailed, DateTime.Now.ToString() + " GetNumItemsSold " + exc.Message);
+                string msg = " GetNumItemsSold " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
             }
         }
 
@@ -68,19 +71,25 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
         {
+            try
+            {
+                string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
+                HomeController.WriteFile(_logfile, header);
 
-            string baseDir = System.AppDomain.CurrentDomain.BaseDirectory;
-            string log = baseDir + _logfile;
-            string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
-            HomeController.WriteFile(log, header);
+                var user = await UserManager.FindByNameAsync(userName);
 
-            var user = await UserManager.FindByNameAsync(userName);
+                // test
+                ebayAPIs.GetAPIStatus(user);
 
-            // test
-            ebayAPIs.GetAPIStatus(user);
-
-            var mv = GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
-            return Ok(mv);
+                var mv = GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
+                return Ok(mv);
+            }
+            catch (Exception exc)
+            {
+                string msg = " FetchSeller " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
         }
 
         protected ModelView GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
@@ -108,32 +117,41 @@ namespace scrapeAPI.Controllers
                     // loop through each order
                     DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
                     DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
-                    var transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
-                    var orderHistory = new List<OrderHistory>();
-                    foreach (TransactionType item in transactions)
+                    TransactionTypeCollection transactions = null;
+                    try
                     {
-                        if (item.MonetaryDetails != null)
+                        transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
+                        var orderHistory = new List<OrderHistory>();
+                        foreach (TransactionType item in transactions)
                         {
-                            // why is Payment an array?
-                            var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
-                            var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
-                            var order = new OrderHistory();
-                            order.Title = searchItem.title;
-                            order.Qty = item.QuantityPurchased.ToString();
+                            if (item.MonetaryDetails != null)
+                            {
+                                // why is Payment an array?
+                                var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
+                                var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
+                                var order = new OrderHistory();
+                                order.Title = searchItem.title;
+                                order.Qty = item.QuantityPurchased.ToString();
 
-                            order.Price = item.TransactionPrice.Value.ToString();
+                                order.Price = item.TransactionPrice.Value.ToString();
 
-                            order.DateOfPurchase = item.CreatedDate;
-                            order.Url = searchItem.viewItemURL;
-                            order.ImageUrl = searchItem.galleryURL;
+                                order.DateOfPurchase = item.CreatedDate;
+                                order.Url = searchItem.viewItemURL;
+                                order.ImageUrl = searchItem.galleryURL;
 
-                            orderHistory.Add(order);
+                                orderHistory.Add(order);
+                            }
+                            else ++notSold;
                         }
-                        else ++notSold;
+                        db.OrderHistorySave(orderHistory, rptNumber, false);
+                        listing.Orders = orderHistory;
+                        listings.Add(listing);
                     }
-                    db.OrderHistorySave(orderHistory, rptNumber, false);
-                    listing.Orders = orderHistory;
-                    listings.Add(listing);
+                    catch (Exception exc)
+                    {
+                        string msg = " GetItemTransactions " + exc.Message;
+                        HomeController.WriteFile(_logfile, msg);
+                    }
                 }
             }
             var mv = new ModelView();
@@ -193,6 +211,8 @@ namespace scrapeAPI.Controllers
 
                 // group by title, url and price
                 // (eventually provide this report)
+                // may also just group by title for differing prices
+
                 //var x = from a in results
                 //        group a by new { a.Title, a.Url, a.Price, a.ImageUrl } into grp
                 //        select new
@@ -245,7 +265,9 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                return Content(HttpStatusCode.ExpectationFailed, DateTime.Now.ToString() + " GetTimesSold " + exc.Message);
+                string msg = " GetTimesSold " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
             }
         }
 
@@ -253,38 +275,66 @@ namespace scrapeAPI.Controllers
         [Route("emailtaken")]
         public async Task<IHttpActionResult> GetEmailTaken(string email)
         {
-            var user = await UserManager.FindByNameAsync(email);
-            if (user == null)
-                return Ok(false);
-            else
-                return Ok(true);
+            try
+            {
+                var user = await UserManager.FindByNameAsync(email);
+                if (user == null)
+                    return Ok(false);
+                else
+                    return Ok(true);
+            }
+            catch (Exception exc)
+            {
+                string msg = "GetEmailTaken: " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
         }
 
         [HttpGet]
         [Route("tradingapiusage")]
         public async Task<IHttpActionResult> GetTradingAPIUsage(string userName)
         {
-            var user = await UserManager.FindByNameAsync(userName);
-            if (user == null)
-                return Ok(false);
-            else
+            try
             {
-                var i = ebayAPIs.GetTradingAPIUsage(user);
-                return Ok(i);
+                var user = await UserManager.FindByNameAsync(userName);
+                if (user == null)
+                    return Ok(false);
+                else
+                {
+                    var i = ebayAPIs.GetTradingAPIUsage(user);
+                    return Ok(i);
+                }
             }
+            catch (Exception exc)
+            {
+                string msg = "GetTradingAPIUsage: " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+
         }
 
         [HttpGet]
         [Route("tokenstatustype")]
         public async Task<IHttpActionResult> GetTokenStatus(string userName)
         {
-            var user = await UserManager.FindByNameAsync(userName);
-            if (user == null)
-                return Ok(false);
-            else
+            try
             {
-                var i = ebayAPIs.GetTokenStatus(user);
-                return Ok(i);
+                var user = await UserManager.FindByNameAsync(userName);
+                if (user == null)
+                    return Ok(false);
+                else
+                {
+                    var i = ebayAPIs.GetTokenStatus(user);
+                    return Ok(i);
+                }
+            }
+            catch (Exception exc)
+            {
+                string msg = "GetTokenStatus: " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
             }
         }
     }

@@ -48,6 +48,7 @@ namespace scrapeAPI.Controllers
         private DataModelsDB db = new DataModelsDB();
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
+        const string _logfile = "scrape_log.txt";
 
         string log = System.AppDomain.CurrentDomain.BaseDirectory + "log.txt";
 
@@ -143,8 +144,17 @@ namespace scrapeAPI.Controllers
         [Route("userprofilesave")]
         public async Task<IHttpActionResult> UserProfileSave(UserProfileVM profile)
         {
-            await db.UserProfileSave(profile);
-            return Ok();
+            try
+            {
+                await db.UserProfileSave(profile);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = " UserProfileSave " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
         }
 
         [HttpGet]

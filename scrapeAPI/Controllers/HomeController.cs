@@ -17,7 +17,7 @@ namespace scrapeAPI.Controllers
 
         public static void WriteFile(string filename, string msg)
         {
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(filename, true))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(System.AppDomain.CurrentDomain.BaseDirectory + filename, true))
             {
                 string dtStr = DateTime.Now.ToString();
                 file.WriteLine(dtStr + " " + msg);
