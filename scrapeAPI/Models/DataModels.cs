@@ -11,6 +11,7 @@ namespace scrapeAPI.Models
     {
         public int Id { get; set; }
         public string UserId { get; set; }
+        public int ReportNumber { get; set; }
         public string Seller { get; set; }
         public int DaysBack { get; set; }
         public int MinSoldFilter { get; set; }

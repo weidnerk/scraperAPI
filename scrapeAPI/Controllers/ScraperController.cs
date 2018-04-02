@@ -32,7 +32,7 @@ namespace scrapeAPI.Controllers
 
         [Route("numitemssold")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string showNoOrders, string userName)
+        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string showNoOrders, string userName, int rptNumber)
         {
             try
             {
@@ -45,6 +45,7 @@ namespace scrapeAPI.Controllers
 
                 var sh = new SearchHistory();
                 sh.UserId = user.Id;
+                sh.ReportNumber = rptNumber;
                 sh.Seller = seller;
                 sh.DaysBack = daysBack;
                 sh.MinSoldFilter = minSold;
