@@ -126,7 +126,6 @@ namespace scrapeAPI.Controllers
                         {
                             if (item.MonetaryDetails != null)
                             {
-                                // why is Payment an array?
                                 var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
                                 var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
                                 var order = new OrderHistory();

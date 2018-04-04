@@ -164,7 +164,7 @@ namespace scrapeAPI.Controllers
             var user = await UserManager.FindByNameAsync(userName);
             var p = await db.UserProfileGet(user);
             if (p == null)
-                return BadRequest();
+                return NotFound();
             else
                 return Ok(p);
         }
@@ -231,8 +231,8 @@ namespace scrapeAPI.Controllers
             var result = await UserManager.ResetPasswordAsync(user.Id, code, pwd);
             if (result.Succeeded)
             {
-                //await SendMailDev(pwd, vm.EmailAddress);
-                await SendMailProd(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
+                await SendMailDev(pwd, vm.EmailAddress);
+                //await SendMailProd(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
                 return Ok();
             }
             return BadRequest();

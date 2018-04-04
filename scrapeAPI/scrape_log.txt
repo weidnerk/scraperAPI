@@ -440,3 +440,17 @@ Parameter name: source
 4/2/2018 3:16:22 PM  GetItemTransactions This item cannot be accessed because the listing has been deleted, is a Half.com listing, or you are not the seller.
 4/2/2018 3:18:06 PM Seller: quicksquad daysBack: 30 resultsPerPg: 200
 4/2/2018 3:26:23 PM  GetItemTransactions This item cannot be accessed because the listing has been deleted, is a Half.com listing, or you are not the seller.
+4/3/2018 9:06:54 AM Seller: esportsonline daysBack: 30 resultsPerPg: 200
+4/3/2018 9:17:02 AM Seller: esportsonline daysBack: 30 resultsPerPg: 200
+4/3/2018 2:07:41 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 2:10:16 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 2:21:23 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 2:23:30 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 2:23:56 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 2:25:22 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 3:33:09 PM Seller: ddddd daysBack: 30 resultsPerPg: 200
+4/3/2018 3:36:44 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 3:37:27 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/3/2018 3:39:52 PM Seller: pricedrightsales daysBack: 1 resultsPerPg: 200
+4/3/2018 4:07:52 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/4/2018 9:05:07 AM Seller: **justforyou** daysBack: 4 resultsPerPg: 200
