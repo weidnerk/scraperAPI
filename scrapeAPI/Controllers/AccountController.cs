@@ -219,23 +219,32 @@ namespace scrapeAPI.Controllers
         [Route("setrandompassword")]
         public async Task<IHttpActionResult> SetRandomPassword(ForgotPasswordViewModel vm)
         {
-            var user = await UserManager.FindByNameAsync(vm.EmailAddress);
-            if (user == null)
+            try
             {
-                // Don't reveal that the user does not exist
+                var user = await UserManager.FindByNameAsync(vm.EmailAddress);
+                if (user == null)
+                {
+                    // Don't reveal that the user does not exist
+                    return BadRequest();
+                }
+
+                string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                string pwd = DateTime.Now.ToFileTimeUtc().ToString();
+                var result = await UserManager.ResetPasswordAsync(user.Id, code, pwd);
+                if (result.Succeeded)
+                {
+                    await SendMailDev(pwd, vm.EmailAddress);
+                    //await SendMailProd(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
+                    return Ok();
+                }
                 return BadRequest();
             }
-        
-            string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-            string pwd = DateTime.Now.ToFileTimeUtc().ToString();
-            var result = await UserManager.ResetPasswordAsync(user.Id, code, pwd);
-            if (result.Succeeded)
+            catch (Exception exc)
             {
-                await SendMailDev(pwd, vm.EmailAddress);
-                //await SendMailProd(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
-                return Ok();
+                string msg = exc.Message;
+                HomeController.WriteFile(log, "SetRandomPassword " + exc.Message);
+                return InternalServerError(exc);
             }
-            return BadRequest();
         }
 
         // Use this version of send when deploying
@@ -258,7 +267,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = exc.Message;
-                HomeController.WriteFile(log, "send error " + exc.Message);
+                HomeController.WriteFile(log, "SendMailProd " + exc.Message);
             }
         }
 
