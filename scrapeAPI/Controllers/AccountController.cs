@@ -50,8 +50,6 @@ namespace scrapeAPI.Controllers
         private ApplicationUserManager _userManager;
         const string _logfile = "scrape_log.txt";
 
-        string log = System.AppDomain.CurrentDomain.BaseDirectory + "log.txt";
-
         public AccountController()
         {
         }
@@ -241,8 +239,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = exc.Message;
-                HomeController.WriteFile(log, "SetRandomPassword " + exc.Message);
+                HomeController.WriteFile(_logfile, "SetRandomPassword " + exc.Message);
                 return InternalServerError(exc);
             }
         }
@@ -262,12 +259,12 @@ namespace scrapeAPI.Controllers
                 SmtpClient smtpClient = new SmtpClient();
                 smtpClient.Host = host;
                 await smtpClient.SendMailAsync(mailMessage);
-                HomeController.WriteFile(log, "email sent to " + emailTo);
+                HomeController.WriteFile(_logfile, "email sent to " + emailTo);      //problem is here
             }
             catch (Exception exc)
             {
                 string msg = exc.Message;
-                HomeController.WriteFile(log, "SendMailProd " + exc.Message);
+                HomeController.WriteFile(_logfile, "SendMailProd " + exc.Message);
             }
         }
 
