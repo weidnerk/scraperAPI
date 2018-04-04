@@ -144,7 +144,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                await db.UserProfileSave(profile);
+                await db.UserProfileSaveAsync(profile);
                 return Ok();
             }
             catch (Exception exc)
@@ -545,7 +545,7 @@ namespace scrapeAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            var user = new ApplicationUser() { UserName = model.Username, Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
@@ -553,6 +553,13 @@ namespace scrapeAPI.Controllers
             {
                 return GetErrorResult(result);
             }
+
+            var p = new UserProfileVM();
+            p.Id = user.Id;
+            p.Firstname = model.Firstname;
+            p.Lastname = model.Lastname;
+            p.userName = model.Username;
+            await db.UserProfileSaveAsync(p);
 
             return Ok();
         }

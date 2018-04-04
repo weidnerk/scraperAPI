@@ -26,14 +26,19 @@ namespace scrapeAPI.Models
         public string DevID { get; set; }
         public string CertID { get; set; }
         public string UserToken { get; set; }
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
     }
     public class UserProfileVM
     {
+        public string Id { get; set; }
         public string userName { get; set; }
         public string AppID { get; set; }
         public string DevID { get; set; }
         public string CertID { get; set; }
         public string UserToken { get; set; }
+        public string Firstname { get; set; }
+        public string Lastname { get; set; }
     }
 
     public class ModelViewTimesSold

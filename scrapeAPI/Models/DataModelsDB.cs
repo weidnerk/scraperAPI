@@ -72,7 +72,7 @@ namespace scrapeAPI.Models
             try
             {
                 SearchHistory.Add(sh);
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (Exception exc)
             {
@@ -86,7 +86,7 @@ namespace scrapeAPI.Models
         }
 
         // return error string
-        public async Task<string> UserProfileSave(UserProfileVM p)
+        public async Task<string> UserProfileSaveAsync(UserProfileVM p)
         {
             string ret = string.Empty;
             try
@@ -104,6 +104,8 @@ namespace scrapeAPI.Models
                     profile.CertID = p.CertID;
                     profile.DevID = p.DevID;
                     profile.UserToken = p.UserToken;
+                    profile.Firstname = p.Firstname;
+                    profile.Lastname = p.Lastname;
                     this.Entry(profile).State = EntityState.Modified;
                 }
                 else
@@ -114,9 +116,11 @@ namespace scrapeAPI.Models
                     newprofile.DevID = p.DevID;
                     newprofile.UserToken = p.UserToken;
                     newprofile.Id = user.Id;
+                    newprofile.Firstname = p.Firstname;
+                    newprofile.Lastname = p.Lastname;
                     UserProfiles.Add(newprofile);
                 }
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbEntityValidationException e)
             {

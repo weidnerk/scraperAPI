@@ -39,7 +39,7 @@ namespace scrapeAPI.Controllers
             {
                 // stub to delete a user
                 //AccountController.DeleteUsr("ventures2021@gmail.com");
-                string s = System.AppDomain.CurrentDomain.BaseDirectory;
+                AccountController.DeleteUsr("ventures2019@gmail.com");
 
                 string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
                 var user = await UserManager.FindByNameAsync(userName);
