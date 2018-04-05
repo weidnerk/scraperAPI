@@ -231,8 +231,8 @@ namespace scrapeAPI.Controllers
                 var result = await UserManager.ResetPasswordAsync(user.Id, code, pwd);
                 if (result.Succeeded)
                 {
-                    await SendMailDev(pwd, vm.EmailAddress);
-                    //await SendMailProd(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
+                    //await SendMailDev(pwd, vm.EmailAddress);
+                    await SendMailProd(vm.EmailAddress, "temp password is " + pwd, "OPW credentiuals", "localhost");
                     return Ok();
                 }
                 return BadRequest();

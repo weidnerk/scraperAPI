@@ -104,8 +104,8 @@ namespace scrapeAPI.Models
                     profile.CertID = p.CertID;
                     profile.DevID = p.DevID;
                     profile.UserToken = p.UserToken;
-                    profile.Firstname = p.Firstname;
-                    profile.Lastname = p.Lastname;
+                    Entry(profile).Property(x => x.Firstname).IsModified = false;
+                    Entry(profile).Property(x => x.Lastname).IsModified = false;
                     this.Entry(profile).State = EntityState.Modified;
                 }
                 else
