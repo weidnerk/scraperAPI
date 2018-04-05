@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using scrapeAPI.Models;
+using System.Collections.Generic;
 
 namespace scrapeAPI
 {
@@ -434,7 +435,7 @@ namespace scrapeAPI
             var pic = r.PictureDetails.PictureURL;
         }
 
-        public static SearchItem[] FindCompletedItems(string seller, int daysBack, string appID)
+        public static List<SearchItem> FindCompletedItems(string seller, int daysBack, string appID, int pageNumber)
         {
             try
             {
@@ -481,7 +482,7 @@ namespace scrapeAPI
                 pagination.entriesPerPageSpecified = true;
                 pagination.entriesPerPage = 200;
                 pagination.pageNumberSpecified = true;
-                pagination.pageNumber = 1;
+                pagination.pageNumber = pageNumber;
                 request.paginationInput = pagination;
 
                 // Sorting the result
@@ -490,9 +491,9 @@ namespace scrapeAPI
 
                 FindCompletedItemsResponse response = service.findCompletedItems(request);
 
-                //Console.WriteLine("Total Pages: " + response.paginationOutput.totalPages);
+                int totalPages = response.paginationOutput.totalPages;
                 //Console.WriteLine("Count: " + response.searchResult.count);
-                return response.searchResult.item;
+                return response.searchResult.item.ToList();
             }
             catch (Exception ex)
             {

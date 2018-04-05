@@ -53,7 +53,7 @@ namespace scrapeAPI.Controllers
                 await db.SearchHistorySave(sh);
 
                 var profile = db.UserProfiles.Find(user.Id);
-                var r = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID);
+                var r = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 1);
 
                 if (r != null)
                     return Ok(r.Count());
@@ -92,13 +92,17 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        // Recall FindCompletedItems will only give us up to 100 listings
+        // interesting case is 'fabulousfinds101' - 
         protected ModelView GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
         {
             int notSold = 0;
 
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
             var profile = db.UserProfiles.Find(user.Id);
-            var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID);
+            var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 1);
+            var listToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 2);
+            completedItems.AddRange(listToAdd);
             var listings = new List<Listing>();
             if (completedItems != null)
             {
@@ -140,11 +144,15 @@ namespace scrapeAPI.Controllers
 
                                 orderHistory.Add(order);
                             }
-                            else ++notSold;
                         }
-                        db.OrderHistorySave(orderHistory, rptNumber, false);
-                        listing.Orders = orderHistory;
-                        listings.Add(listing);
+                        if (transactions.Count == 0)
+                            ++notSold;
+                        else
+                        {
+                            db.OrderHistorySave(orderHistory, rptNumber, false);
+                            listing.Orders = orderHistory;
+                            listings.Add(listing);
+                        }
                     }
                     catch (Exception exc)
                     {
