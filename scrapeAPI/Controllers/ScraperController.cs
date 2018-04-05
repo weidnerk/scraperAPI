@@ -276,6 +276,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
+                // does FindByNameAsync() work with either username or email?
                 var user = await UserManager.FindByNameAsync(email);
                 if (user == null)
                     return Ok(false);
@@ -285,6 +286,27 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetEmailTaken: " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+
+        [HttpGet]
+        [Route("usernametaken")]
+        public async Task<IHttpActionResult> GetUsernameTaken(string username)
+        {
+            try
+            {
+                // does FindByNameAsync() work with either username or email?
+                var user = await UserManager.FindByNameAsync(username);
+                if (user == null)
+                    return Ok(false);
+                else
+                    return Ok(true);
+            }
+            catch (Exception exc)
+            {
+                string msg = "GetUsernameTaken: " + exc.Message;
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
