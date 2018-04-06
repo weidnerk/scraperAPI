@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web;
 using scrapeAPI.Models;
 using System.Collections.Generic;
+using scrapeAPI.Controllers;
 
 namespace scrapeAPI
 {
@@ -493,6 +494,7 @@ namespace scrapeAPI
 
                 int totalPages = response.paginationOutput.totalPages;
                 //Console.WriteLine("Count: " + response.searchResult.count);
+
                 return response.searchResult.item.ToList();
             }
             catch (Exception ex)

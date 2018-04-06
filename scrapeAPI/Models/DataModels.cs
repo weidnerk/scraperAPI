@@ -1,4 +1,5 @@
-﻿using System;
+﻿using scrapeAPI.com.ebay.developer;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -74,6 +75,7 @@ namespace scrapeAPI.Models
 
         public string ImageUrl { get; set; }
         public bool ListingEnded { get; set; }
+        public int PageNumber { get; set; }
     }
     public class ModelView
     {
@@ -131,5 +133,9 @@ namespace scrapeAPI.Models
             get; set;
         }
     }
-
+    public class SearchItemCustom
+    {
+        public SearchItem searchItem { get; set; }
+        public int PageNumber { get; set; }
+    }
 }

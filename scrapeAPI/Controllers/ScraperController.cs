@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace scrapeAPI.Controllers
 {
-
     public class ScraperController : ApiController
     {
         DataModelsDB db = new DataModelsDB();
@@ -100,13 +99,30 @@ namespace scrapeAPI.Controllers
 
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
             var profile = db.UserProfiles.Find(user.Id);
+
+            
             var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 1);
+            List<SearchItemCustom> completedItemsList = completedItems.ConvertAll(x => new SearchItemCustom
+            {
+                PageNumber = 1,
+                searchItem = x
+            });
+            //completedItems.Select(c => { c.PageNumber = 1; return c; }).ToList();
+
             var listToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 2);
-            completedItems.AddRange(listToAdd);
+            List<SearchItemCustom> listToAddList = completedItems.ConvertAll(x => new SearchItemCustom
+            {
+                PageNumber = 2,
+                searchItem = x
+            });
+            //listToAdd.Select(c => { c.PageNumber = 2; return c; }).ToList();
+
+            completedItemsList.AddRange(listToAddList);
+
             var listings = new List<Listing>();
             if (completedItems != null)
             {
-                foreach (SearchItem searchItem in completedItems)
+                foreach (SearchItemCustom searchItem in completedItemsList)
                 {
                     //var a = searchItem.itemId;
                     //var b = searchItem.title;
@@ -116,7 +132,7 @@ namespace scrapeAPI.Controllers
                     //var f = searchItem.galleryURL;
 
                     var listing = new Listing();
-                    listing.Title = searchItem.title;
+                    listing.Title = searchItem.searchItem.title;
 
                     // loop through each order
                     DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
@@ -124,7 +140,7 @@ namespace scrapeAPI.Controllers
                     TransactionTypeCollection transactions = null;
                     try
                     {
-                        transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
+                        transactions = ebayAPIs.GetItemTransactions(searchItem.searchItem.itemId, ModTimeFrom, ModTimeTo, user);
                         var orderHistory = new List<OrderHistory>();
                         foreach (TransactionType item in transactions)
                         {
@@ -133,14 +149,15 @@ namespace scrapeAPI.Controllers
                                 var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
                                 var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
                                 var order = new OrderHistory();
-                                order.Title = searchItem.title;
+                                order.Title = searchItem.searchItem.title;
                                 order.Qty = item.QuantityPurchased.ToString();
 
                                 order.Price = item.TransactionPrice.Value.ToString();
 
                                 order.DateOfPurchase = item.CreatedDate;
-                                order.Url = searchItem.viewItemURL;
-                                order.ImageUrl = searchItem.galleryURL;
+                                order.Url = searchItem.searchItem.viewItemURL;
+                                order.ImageUrl = searchItem.searchItem.galleryURL;
+                                order.PageNumber = searchItem.PageNumber;
 
                                 orderHistory.Add(order);
                             }
