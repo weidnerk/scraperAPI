@@ -107,17 +107,22 @@ namespace scrapeAPI.Controllers
                 PageNumber = 1,
                 searchItem = x
             });
-            //completedItems.Select(c => { c.PageNumber = 1; return c; }).ToList();
 
-            var listToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 2);
-            List<SearchItemCustom> listToAddList = completedItems.ConvertAll(x => new SearchItemCustom
-            {
-                PageNumber = 2,
-                searchItem = x
-            });
-            //listToAdd.Select(c => { c.PageNumber = 2; return c; }).ToList();
+            #region PAGE_2
+            // Ran across seller 'fabulousfinds101' which seems to be halting and not giving back all results.
+            // but in that case, many of the items where ended listings so just appeared that way.
+            // Then i found out about asking for another 'page' and it appeared I got more sold listings.
+            // However, I ran page 2 for justforyou and looks like just got a duplicate of page 1.
+            // For now, don't worry about it and just stick with page 1 until more understood.
 
-            completedItemsList.AddRange(listToAddList);
+            //var listToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 2);
+            //List<SearchItemCustom> listToAddList = completedItems.ConvertAll(x => new SearchItemCustom
+            //{
+            //    PageNumber = 2,
+            //    searchItem = x
+            //});
+            //completedItemsList.AddRange(listToAddList);
+            #endregion
 
             var listings = new List<Listing>();
             if (completedItems != null)
@@ -270,7 +275,7 @@ namespace scrapeAPI.Controllers
                 var matchedlistings = from c in results
                                       join o in db.OrderHistory on c.Title equals o.Title
                                       where o.RptNumber == rptNumber && !o.ListingEnded
-                                      group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl, c.Price } into grp
+                                      group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl } into grp
                                       select grp;
 
                 // count orders processed so far - matches
