@@ -495,12 +495,13 @@ namespace scrapeAPI
                 int totalPages = response.paginationOutput.totalPages;
                 //Console.WriteLine("Count: " + response.searchResult.count);
 
-                return response.searchResult.item.ToList();
+                if (response.searchResult.item != null)
+                    return response.searchResult.item.ToList();
+                else return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("FindCompletedItems: " + ex.Message);
-                return null;
+                throw (ex);
             }
         }
 
