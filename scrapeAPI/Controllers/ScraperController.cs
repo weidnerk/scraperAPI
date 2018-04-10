@@ -190,9 +190,9 @@ namespace scrapeAPI.Controllers
             return mv;
         }
 
-        [Route("timessold/{rptNumber}/{minSold}/{showNoOrders}/{daysBack}")]
+        [Route("timessold/{rptNumber}/{minSold}/{showNoOrders}/{daysBack}/{minPrice}/{maxPrice}")]
         [HttpGet]
-        public IHttpActionResult GetTimesSold(int rptNumber, int minSold, string showNoOrders, int daysBack)
+        public IHttpActionResult GetTimesSold(int rptNumber, int minSold, string showNoOrders, int daysBack, int? minPrice, int? maxPrice)
         {
             bool endedListings = (showNoOrders == "0") ? false : true;
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
@@ -220,7 +220,7 @@ namespace scrapeAPI.Controllers
                         select new
                               {
                                 grp.Key.Title,
-                                grp.Key.Price,
+                                Price = Convert.ToDecimal(grp.Key.Price),
                                 Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
                                 MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase)),
                                 Url = grp.Max(s => s.Url),
@@ -237,6 +237,12 @@ namespace scrapeAPI.Controllers
                                   SoldQty = g.Qty,
                                   EarliestSold = g.MaxDate
                               };
+
+                if (minPrice.HasValue)
+                    x = x.Where(u => u.Price >= minPrice);
+
+                if (maxPrice.HasValue)
+                    x = x.Where(u => u.Price <= maxPrice);
 
                 // group by title, url and price
                 // (eventually provide this report)

@@ -57,7 +57,7 @@ namespace scrapeAPI.Models
         public string Url { get; set; }
         public int RptNumber { get; set; }
         public string ImageUrl { get; set; }
-        public string Price { get; set; }
+        public decimal Price { get; set; }
         public DateTime? EarliestSold { get; set; }
     }
 

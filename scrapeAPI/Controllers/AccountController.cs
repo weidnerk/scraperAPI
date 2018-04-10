@@ -219,7 +219,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var user = await UserManager.FindByNameAsync(vm.EmailAddress);
+                var user = await UserManager.FindByEmailAsync(vm.EmailAddress);
                 if (user == null)
                 {
                     // Don't reveal that the user does not exist
