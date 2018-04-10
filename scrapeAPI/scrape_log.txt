@@ -738,3 +738,12 @@ Parameter name: source
 4/9/2018 9:24:13 PM  GetTimesSold The underlying provider failed on Open.
 4/9/2018 9:26:06 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
 4/9/2018 9:29:33 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/10/2018 9:50:39 AM Seller: theadkays daysBack: 2 resultsPerPg: 200
+4/10/2018 9:52:50 AM Seller: theadkays daysBack: 30 resultsPerPg: 200
+4/10/2018 9:56:13 AM Seller: theadkays daysBack: 15 resultsPerPg: 200
+4/10/2018 10:04:40 AM Seller: **justforyou** daysBack: 15 resultsPerPg: 200
+4/10/2018 1:12:06 PM Seller: big*sell daysBack: 30 resultsPerPg: 200
+4/10/2018 1:21:35 PM Seller: big*sell daysBack: 30 resultsPerPg: 200
+4/10/2018 1:32:15 PM Seller: big*sell daysBack: 30 resultsPerPg: 200
+4/10/2018 1:48:18 PM Seller: thehoneyroastedpeanut daysBack: 30 resultsPerPg: 200
+4/10/2018 2:28:04 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200

@@ -436,7 +436,7 @@ namespace scrapeAPI
             var pic = r.PictureDetails.PictureURL;
         }
 
-        public static List<SearchItem> FindCompletedItems(string seller, int daysBack, string appID, int pageNumber)
+        public static SearchResult FindCompletedItems(string seller, int daysBack, string appID, int pageNumber)
         {
             try
             {
@@ -496,7 +496,7 @@ namespace scrapeAPI
                 //Console.WriteLine("Count: " + response.searchResult.count);
 
                 if (response.searchResult.item != null)
-                    return response.searchResult.item.ToList();
+                    return response.searchResult;
                 else return null;
             }
             catch (Exception ex)

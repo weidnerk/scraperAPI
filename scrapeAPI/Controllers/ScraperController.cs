@@ -55,7 +55,7 @@ namespace scrapeAPI.Controllers
                 var r = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 1);
 
                 if (r != null)
-                    return Ok(r.Count());
+                    return Ok(r.item.Count());
                 else return Ok(0);
             }
             catch (Exception exc)
@@ -102,7 +102,7 @@ namespace scrapeAPI.Controllers
 
             
             var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 1);
-            List<SearchItemCustom> completedItemsList = completedItems.ConvertAll(x => new SearchItemCustom
+            List<SearchItemCustom> completedItemsList = completedItems.item.ToList().ConvertAll(x => new SearchItemCustom
             {
                 PageNumber = 1,
                 searchItem = x
@@ -115,13 +115,38 @@ namespace scrapeAPI.Controllers
             // However, I ran page 2 for justforyou and looks like just got a duplicate of page 1.
             // For now, don't worry about it and just stick with page 1 until more understood.
 
-            //var listToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 2);
-            //List<SearchItemCustom> listToAddList = completedItems.ConvertAll(x => new SearchItemCustom
+            //if (completedItems.item.Count() >= 100)
             //{
-            //    PageNumber = 2,
-            //    searchItem = x
-            //});
-            //completedItemsList.AddRange(listToAddList);
+            //    var listToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 2);
+            //    List<SearchItemCustom> listToAddList = completedItems.item.ToList().ConvertAll(x => new SearchItemCustom
+            //    {
+            //        PageNumber = 2,
+            //        searchItem = x
+            //    });
+            //    completedItemsList.AddRange(listToAddList);
+
+            //    if (listToAdd.item.ToList().Count() >= 100)
+            //    {
+            //        var anotherlistToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 3);
+            //        List<SearchItemCustom> anotherlistToAddList = completedItems.item.ToList().ConvertAll(x => new SearchItemCustom
+            //        {
+            //            PageNumber = 3,
+            //            searchItem = x
+            //        });
+            //        completedItemsList.AddRange(anotherlistToAddList);
+
+            //        if (anotherlistToAdd.item.ToList().Count() >= 100)
+            //        {
+            //            var list2 = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 3);
+            //            List<SearchItemCustom> list2List = completedItems.item.ToList().ConvertAll(x => new SearchItemCustom
+            //            {
+            //                PageNumber = 4,
+            //                searchItem = x
+            //            });
+            //            completedItemsList.AddRange(list2List);
+            //        }
+            //    }
+            //}
             #endregion
 
             var listings = new List<Listing>();
