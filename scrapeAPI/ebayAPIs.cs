@@ -124,7 +124,7 @@ namespace scrapeAPI
 
             // get the first page, 200 items per page
             PaginationType oPagination = new PaginationType();
-            oPagination.EntriesPerPage = 200;
+            oPagination.EntriesPerPage = 100;
             oPagination.EntriesPerPageSpecified = true;
             oPagination.PageNumber = 1;
             oPagination.PageNumberSpecified = true;
@@ -436,7 +436,7 @@ namespace scrapeAPI
             var pic = r.PictureDetails.PictureURL;
         }
 
-        public static SearchResult FindCompletedItems(string seller, int daysBack, string appID, int pageNumber)
+        public static FindCompletedItemsResponse FindCompletedItems(string seller, int daysBack, string appID, int pageNumber)
         {
             try
             {
@@ -468,6 +468,10 @@ namespace scrapeAPI
                 //filterEndTimeTo.paramValue = "filterEndTimeTo";
                 filterEndTimeTo.value = new string[] { ModTimeToStr };
 
+                ItemFilter filterSoldOnly = new ItemFilter();
+                filterSoldOnly.name = ItemFilterType.SoldItemsOnly;
+                filterSoldOnly.value = new string[] { "true" };
+
                 //Create the filter array
                 ItemFilter[] itemFilters = new ItemFilter[3];
 
@@ -481,7 +485,7 @@ namespace scrapeAPI
                 // Setting the pagination 
                 PaginationInput pagination = new PaginationInput();
                 pagination.entriesPerPageSpecified = true;
-                pagination.entriesPerPage = 200;
+                pagination.entriesPerPage = 100;
                 pagination.pageNumberSpecified = true;
                 pagination.pageNumber = pageNumber;
                 request.paginationInput = pagination;
@@ -496,7 +500,7 @@ namespace scrapeAPI
                 //Console.WriteLine("Count: " + response.searchResult.count);
 
                 if (response.searchResult.item != null)
-                    return response.searchResult;
+                    return response;
                 else return null;
             }
             catch (Exception ex)
