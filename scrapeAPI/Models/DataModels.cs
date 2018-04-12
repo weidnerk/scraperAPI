@@ -76,6 +76,7 @@ namespace scrapeAPI.Models
         public string ImageUrl { get; set; }
         public bool ListingEnded { get; set; }
         public int PageNumber { get; set; }
+        public string ItemId { get; set; }
     }
     public class ModelView
     {

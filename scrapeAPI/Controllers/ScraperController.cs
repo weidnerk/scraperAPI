@@ -40,23 +40,10 @@ namespace scrapeAPI.Controllers
                 //AccountController.DeleteUsr("ventures2021@gmail.com");
                 //AccountController.DeleteUsr("aaronmweidner@gmail.com");
 
-                string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
                 var user = await UserManager.FindByNameAsync(userName);
 
-                var sh = new SearchHistory();
-                sh.UserId = user.Id;
-                sh.ReportNumber = rptNumber;
-                sh.Seller = seller;
-                sh.DaysBack = daysBack;
-                sh.MinSoldFilter = minSold;
-                await db.SearchHistorySave(sh);
-
-                var profile = db.UserProfiles.Find(user.Id);
-                var r = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 1);
-
-                if (r != null)
-                    return Ok(r.searchResult.count);
-                else return Ok(0);
+                int itemCount = ebayAPIs.ItemCount(seller, daysBack, user, rptNumber);
+                return Ok(itemCount);
             }
             catch (Exception exc)
             {
@@ -77,7 +64,6 @@ namespace scrapeAPI.Controllers
 
                 var user = await UserManager.FindByNameAsync(userName);
 
-                // test
                 ebayAPIs.GetAPIStatus(user);
 
                 var mv = GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
@@ -95,130 +81,14 @@ namespace scrapeAPI.Controllers
         // interesting case is 'fabulousfinds101' - 
         protected ModelView GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
         {
-            int notSold = 0;
-
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
             var profile = db.UserProfiles.Find(user.Id);
-            
-            var completedItems = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 1);
-            int i = completedItems.paginationOutput.totalPages;
-            
-            List<SearchItemCustom> completedItemsList = completedItems.searchResult.item.ToList().ConvertAll(x => new SearchItemCustom
-            {
-                PageNumber = 1,
-                searchItem = x
-            });
-
-            #region PAGE_2
-            // Ran across seller 'fabulousfinds101' which seems to be halting and not giving back all results.
-            // but in that case, many of the items where ended listings so just appeared that way.
-            // Then i found out about asking for another 'page' and it appeared I got more sold listings.
-            // However, I ran page 2 for justforyou and looks like just got a duplicate of page 1.
-            // For now, don't worry about it and just stick with page 1 until more understood.
-
-            if (completedItems.searchResult.count >= 100)
-            {
-                var listToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 2);
-                List<SearchItemCustom> listToAddList = completedItems.searchResult.item.ToList().ConvertAll(x => new SearchItemCustom
-                {
-                    PageNumber = 2,
-                    searchItem = x
-                });
-                completedItemsList.AddRange(listToAddList);
-
-                if (listToAdd.searchResult.count >= 100)
-                {
-                    var anotherlistToAdd = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 3);
-                    List<SearchItemCustom> anotherlistToAddList = completedItems.searchResult.item.ToList().ConvertAll(x => new SearchItemCustom
-                    {
-                        PageNumber = 3,
-                        searchItem = x
-                    });
-                    completedItemsList.AddRange(anotherlistToAddList);
-
-                    if (anotherlistToAdd.searchResult.count >= 100)
-                    {
-                        var list2 = ebayAPIs.FindCompletedItems(seller, daysBack, profile.AppID, 3);
-                        List<SearchItemCustom> list2List = completedItems.searchResult.item.ToList().ConvertAll(x => new SearchItemCustom
-                        {
-                            PageNumber = 4,
-                            searchItem = x
-                        });
-                        completedItemsList.AddRange(list2List);
-                    }
-                }
-            }
-            #endregion
-
-            var listings = new List<Listing>();
-            if (completedItems != null)
-            {
-                foreach (SearchItemCustom searchItem in completedItemsList)
-                {
-                    //var a = searchItem.itemId;
-                    //var b = searchItem.title;
-                    //var c = searchItem.listingInfo.listingType;
-                    //var d = searchItem.viewItemURL;
-                    //var e = searchItem.sellingStatus.currentPrice.Value;
-                    //var f = searchItem.galleryURL;
-
-                    var listing = new Listing();
-                    listing.Title = searchItem.searchItem.title;
-
-                    // loop through each order
-                    DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
-                    DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
-                    TransactionTypeCollection transactions = null;
-                    try
-                    {
-                        transactions = ebayAPIs.GetItemTransactions(searchItem.searchItem.itemId, ModTimeFrom, ModTimeTo, user);
-                        var orderHistory = new List<OrderHistory>();
-                        foreach (TransactionType item in transactions)
-                        {
-                            if (item.MonetaryDetails != null)
-                            {
-                                var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
-                                var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
-                                var order = new OrderHistory();
-                                order.Title = searchItem.searchItem.title;
-                                order.Qty = item.QuantityPurchased.ToString();
-
-                                order.Price = item.TransactionPrice.Value.ToString();
-
-                                order.DateOfPurchase = item.CreatedDate;
-                                order.Url = searchItem.searchItem.viewItemURL;
-                                order.ImageUrl = searchItem.searchItem.galleryURL;
-                                order.PageNumber = searchItem.PageNumber;
-
-                                orderHistory.Add(order);
-                            }
-                        }
-                        if (transactions.Count == 0)
-                            ++notSold;
-                        else
-                        {
-                            db.OrderHistorySave(orderHistory, rptNumber, false);
-                            listing.Orders = orderHistory;
-                            listings.Add(listing);
-                        }
-                    }
-                    catch (Exception exc)
-                    {
-                        string msg = " GetItemTransactions " + exc.Message;
-                        HomeController.WriteFile(_logfile, msg);
-                    }
-                }
-            }
-            var mv = new ModelView();
-            mv.Listings = listings;
-
-            int b = notSold;
-            return mv;
+            return ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
         }
 
-        [Route("timessold/{rptNumber}/{minSold}/{showNoOrders}/{daysBack}/{minPrice}/{maxPrice}")]
+        [Route("getreport/{rptNumber}/{minSold}/{showNoOrders}/{daysBack}/{minPrice}/{maxPrice}")]
         [HttpGet]
-        public IHttpActionResult GetTimesSold(int rptNumber, int minSold, string showNoOrders, int daysBack, int? minPrice, int? maxPrice)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, string showNoOrders, int daysBack, int? minPrice, int? maxPrice)
         {
             bool endedListings = (showNoOrders == "0") ? false : true;
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
@@ -240,7 +110,7 @@ namespace scrapeAPI.Controllers
                                    grp.Key.DateOfPurchase
                                }).ToList();
 
-                // group by title and price
+                // group by title and price and filter by minSold
                 var x = from a in results
                         group a by new { a.Title, a.Price } into grp
                         select new
@@ -264,38 +134,12 @@ namespace scrapeAPI.Controllers
                                   EarliestSold = g.MaxDate
                               };
 
+                // filter by min and max price
                 if (minPrice.HasValue)
                     x = x.Where(u => u.Price >= minPrice);
 
                 if (maxPrice.HasValue)
                     x = x.Where(u => u.Price <= maxPrice);
-
-                // group by title, url and price
-                // (eventually provide this report)
-                // may also just group by title for differing prices
-
-                //var x = from a in results
-                //        group a by new { a.Title, a.Url, a.Price, a.ImageUrl } into grp
-                //        select new
-                //        {
-                //            grp.Key.Title,
-                //            grp.Key.Url,
-                //            grp.Key.Price,
-                //            grp.Key.ImageUrl,
-                //            Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
-                //            MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase))
-                //        } into g
-                //        where g.Qty >= minSold
-                //        orderby g.MaxDate descending
-                //        select new TimesSold
-                //        {
-                //            Title = g.Title,
-                //            Url = g.Url,
-                //            ImageUrl = g.ImageUrl,
-                //            Price = g.Price,
-                //            SoldQty = g.Qty,
-                //            EarliestSold = g.MaxDate
-                //        };
 
                 // count listings processed so far
                 var listings = from o in db.OrderHistory
@@ -395,7 +239,6 @@ namespace scrapeAPI.Controllers
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
-
         }
 
         [HttpGet]

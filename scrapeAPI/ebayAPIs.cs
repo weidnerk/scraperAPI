@@ -644,5 +644,228 @@ namespace scrapeAPI
                 Console.WriteLine("Error: " + ex.Message);
             }
         }
+
+        public static int ItemCount(string seller, int daysBack, ApplicationUser user, int rptNumber)
+        {
+            DataModelsDB db = new DataModelsDB();
+            string _logfile = "scrape_log.txt";
+            int notSold = 0;
+            var listings = new List<Listing>();
+            int totalCount = 0;
+
+            CustomFindSold service = new CustomFindSold();
+            service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
+            var profile = db.UserProfiles.Find(user.Id);
+            service.appID = profile.AppID;
+            int currentPageNumber = 1;
+
+            var request = BuildReqest(seller, daysBack);
+            var response = ebayAPIs.GetResults(service, request, currentPageNumber);
+            if (response.ack == AckValue.Success)
+            {
+                var result = response.searchResult;
+                totalCount = result.count;
+                if (result != null && result.count > 0)
+                {
+
+                    for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
+                    {
+                        currentPageNumber += 1;
+
+                        response = GetResults(service, request, currentPageNumber);
+                        result = response.searchResult;
+                        totalCount += result.count;
+                    }
+                }
+            }
+            return totalCount;
+        }
+
+        public static ModelView ToStart(string seller, int daysBack, ApplicationUser user, int rptNumber)
+        {
+            DataModelsDB db = new DataModelsDB();
+            string _logfile = "scrape_log.txt";
+            int notSold = 0;
+            var listings = new List<Listing>();
+
+            CustomFindSold service = new CustomFindSold();
+            service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
+            var profile = db.UserProfiles.Find(user.Id);
+            service.appID = profile.AppID;
+            int currentPageNumber = 1;
+
+            var request = BuildReqest(seller, daysBack);
+            var response = ebayAPIs.GetResults(service, request, currentPageNumber);
+            if (response.ack == AckValue.Success)
+            {
+                var result = response.searchResult;
+                if (result != null && result.count > 0)
+                {
+                    StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
+
+                    for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
+                    {
+                        currentPageNumber += 1;
+
+                        response = GetResults(service, request, currentPageNumber);
+                        result = response.searchResult;
+                        StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
+                    }
+                }
+                var mv = new ModelView();
+                mv.Listings = listings;
+
+                int b = notSold;
+                return mv;
+            }
+            return null;
+        }
+
+        // Store transactions for a page of results
+        protected static void StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
+        {
+            DataModelsDB db = new DataModelsDB();
+            string _logfile = "scrape_log.txt";
+            int notSold = 0;
+
+            foreach (SearchItem searchItem in result.item)
+            {
+                //var a = searchItem.itemId;
+                //var b = searchItem.title;
+                //var c = searchItem.listingInfo.listingType;
+                //var d = searchItem.viewItemURL;
+                //var e = searchItem.sellingStatus.currentPrice.Value;
+                //var f = searchItem.galleryURL;
+
+                var listing = new Listing();
+                listing.Title = searchItem.title;
+
+                // loop through each order
+                DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
+                DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
+                TransactionTypeCollection transactions = null;
+                try
+                {
+                    // We have queried for only sold times, but sometimes this returns nothing, possibly due to date range.
+                    // Or may happen because of this:
+                    // 'This listing was ended by the seller because the item is no longer available.'
+                    transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
+                    var orderHistory = new List<OrderHistory>();
+
+                    // iterate transactions for an item
+                    foreach (TransactionType item in transactions)
+                    {
+                        // did it sell?
+                        if (item.MonetaryDetails != null)
+                        {
+                            var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
+                            var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
+                            var order = new OrderHistory();
+                            order.Title = searchItem.title;
+                            order.Qty = item.QuantityPurchased.ToString();
+
+                            order.Price = item.TransactionPrice.Value.ToString();
+
+                            order.DateOfPurchase = item.CreatedDate;
+                            order.Url = searchItem.viewItemURL;
+                            order.ImageUrl = searchItem.galleryURL;
+                            order.PageNumber = pg;
+                            order.ItemId = searchItem.itemId;
+
+                            orderHistory.Add(order);
+                        }
+                        else
+                        {
+                            // i don't see this ever being executed which makes sense if querying only sold items
+                            HomeController.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null");
+                        }
+                    }
+                    if (transactions.Count == 0)
+                    {
+                        // Despite filtering for only sold items, we may still meet this condition (which doesn't make a whole lot of sense)
+                        // in testing, I would see an item like 
+                        // 'Test listing - DO NOT BID OR BUY362254235623'
+                        //
+                        ++notSold;
+
+                        //var order = new OrderHistory();
+                        //order.Title = searchItem.searchItem.title;
+                        //order.Price = "-1";
+                        //order.Url = searchItem.searchItem.viewItemURL;
+                        //order.ItemId = searchItem.searchItem.itemId;
+                        //orderHistory.Add(order);
+                    }
+
+                    db.OrderHistorySave(orderHistory, rptNumber, false);
+                    listing.Orders = orderHistory;
+                    listings.Add(listing);
+                }
+                catch (Exception exc)
+                {
+                    string msg = " StoreTransactions " + exc.Message;
+                    HomeController.WriteFile(_logfile, msg);
+                }
+            }
+        }
+
+        protected static FindCompletedItemsRequest BuildReqest(string seller, int daysBack)
+        {
+            FindCompletedItemsRequest request = new FindCompletedItemsRequest();
+
+            ItemFilter filterSeller = new ItemFilter();
+            filterSeller.name = ItemFilterType.Seller;
+            filterSeller.paramName = "name";
+            filterSeller.paramValue = "Seller";
+            filterSeller.value = new string[] { seller };
+
+            DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
+            DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
+            string ModTimeToStr = ModTimeTo.Year + "-" + ModTimeTo.Month.ToString("00") + "-" + ModTimeTo.Day.ToString("00") + "T00:00:00.000Z";
+            string ModTimeFromStr = ModTimeFrom.Year + "-" + ModTimeFrom.Month.ToString("00") + "-" + ModTimeFrom.Day.ToString("00") + "T00:00:00.000Z";
+
+            ItemFilter filterEndTimeFrom = new ItemFilter();
+            filterEndTimeFrom.name = ItemFilterType.EndTimeFrom;
+            //filterEndTimeFrom.paramName = "name";
+            //filterEndTimeFrom.paramValue = "EndTimeFrom";
+            filterEndTimeFrom.value = new string[] { ModTimeFromStr };
+
+            ItemFilter filterEndTimeTo = new ItemFilter();
+            filterEndTimeTo.name = ItemFilterType.EndTimeTo;
+            //filterEndTimeTo.paramName = "name";
+            //filterEndTimeTo.paramValue = "filterEndTimeTo";
+            filterEndTimeTo.value = new string[] { ModTimeToStr };
+
+            ItemFilter filterSoldOnly = new ItemFilter();
+            filterSoldOnly.name = ItemFilterType.SoldItemsOnly;
+            filterSoldOnly.value = new string[] { "true" };
+
+            //Create the filter array
+            ItemFilter[] itemFilters = new ItemFilter[3];
+
+            //Add Filters to the array
+            itemFilters[0] = filterSeller;
+            itemFilters[1] = filterEndTimeFrom;
+            itemFilters[2] = filterEndTimeTo;
+
+            request.itemFilter = itemFilters;
+            return request;
+        }
+
+        public static FindCompletedItemsResponse GetResults(CustomFindSold service, FindCompletedItemsRequest request, int currentPageNumber)
+        {
+            request.paginationInput = GetNextPage(currentPageNumber);
+            return service.findCompletedItems(request);
+        }
+
+        private static PaginationInput GetNextPage(int pageNumber)
+        {
+            return new PaginationInput
+            {
+                entriesPerPageSpecified = true,
+                entriesPerPage = 100,
+                pageNumberSpecified = true,
+                pageNumber = pageNumber
+            };
+        }
     }
 }
