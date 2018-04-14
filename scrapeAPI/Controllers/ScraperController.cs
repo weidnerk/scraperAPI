@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace scrapeAPI.Controllers
 {
+    [Authorize]
     public class ScraperController : ApiController
     {
         DataModelsDB db = new DataModelsDB();
