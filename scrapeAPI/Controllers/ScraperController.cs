@@ -1,13 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿/*
+ * Note there are 2 Web references: com.ebay.developer and com.ebay.developer1 - they are not duplicate references
+ * 
+ * com.ebay.developer is a reference to the Trading API
+ * com.ebay.developer1 is a reference to the Shopping API
+ * 
+ * This is notated further in the 'eBay API Website' doc
+ * 
+ */
+
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using scrapeAPI.Models;
-using scrapeAPI.com.ebay.developer;
-using eBay.Service.Core.Soap;
 using System.Web;
 using Microsoft.AspNet.Identity.Owin;
 using System.Threading.Tasks;
@@ -28,6 +34,26 @@ namespace scrapeAPI.Controllers
             private set
             {
                 _userManager = value;
+            }
+        }
+
+        // Unused after developing GetSingleItem()
+        [Route("prodbyid")]
+        [HttpGet]
+        public async Task<IHttpActionResult> GetProdById(string userName)
+        {
+            try
+            {
+                var user = await UserManager.FindByNameAsync(userName);
+
+                var response = ebayAPIs.FindByKeyword(user);
+                return Ok(response);
+            }
+            catch (Exception exc)
+            {
+                string msg = " GetProdById " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
             }
         }
 
@@ -67,7 +93,7 @@ namespace scrapeAPI.Controllers
 
                 ebayAPIs.GetAPIStatus(user);
 
-                var mv = GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
+                var mv = await GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
                 return Ok(mv);
             }
             catch (Exception exc)
@@ -80,11 +106,11 @@ namespace scrapeAPI.Controllers
 
         // Recall FindCompletedItems will only give us up to 100 listings
         // interesting case is 'fabulousfinds101' - 
-        protected ModelView GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
+        protected async Task<ModelView> GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
         {
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
             var profile = db.UserProfiles.Find(user.Id);
-            return ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
+            return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
         }
 
         [Route("getreport/{rptNumber}/{minSold}/{showNoOrders}/{daysBack}/{minPrice}/{maxPrice}")]

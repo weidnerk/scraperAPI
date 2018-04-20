@@ -259,6 +259,11 @@
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Results\ChallengeResult.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Web References\com.ebay.developer1\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
     <Compile Include="Web References\com.ebay.developer\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -352,6 +357,41 @@
     <Content Include="Web References\com.ebay.developer\FindItemsIneBayStoresResponse.datasource">
       <DependentUpon>Reference.map</DependentUpon>
     </Content>
+    <Content Include="Web References\com.ebay.developer1\FindHalfProductsResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\FindProductsResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\FindReviewsAndGuidesResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\GetCategoryInfoResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\GeteBayTimeResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\GetItemStatusResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\GetMultipleItemsResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\GetShippingCostsResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\GetSingleItemResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\GetUserProfileResponseType.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </Content>
+    <Content Include="Web References\com.ebay.developer1\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </Content>
+    <None Include="Web References\com.ebay.developer1\shoppingservice.wsdl" />
     <None Include="Web References\com.ebay.developer\FindService.wsdl" />
     <Content Include="Web References\com.ebay.developer\GetHistogramsResponse.datasource">
       <DependentUpon>Reference.map</DependentUpon>
@@ -390,6 +430,17 @@
     <WebReferences Include="Web References\" />
   </ItemGroup>
   <ItemGroup>
+    <WebReferenceUrl Include="http://developer.ebay.com/webservices/983/shoppingservice.wsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\com.ebay.developer1\</RelPath>
+      <UpdateFromURL>http://developer.ebay.com/webservices/983/shoppingservice.wsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>scrapeAPI_com_ebay_developer1_Shopping</CachedSettingsPropName>
+    </WebReferenceUrl>
     <WebReferenceUrl Include="http://developer.ebay.com/webservices/Finding/latest/FindingService.wsdl">
       <UrlBehavior>Dynamic</UrlBehavior>
       <RelPath>Web References\com.ebay.developer\</RelPath>

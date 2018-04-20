@@ -2,6 +2,7 @@
 using eBay.Service.Core.Sdk;
 using eBay.Service.Core.Soap;
 using scrapeAPI.com.ebay.developer;
+using scrapeAPI.com.ebay.developer1;
 using System;
 using System.Configuration;
 using System.Linq;
@@ -12,6 +13,10 @@ using System.Web;
 using scrapeAPI.Models;
 using System.Collections.Generic;
 using scrapeAPI.Controllers;
+using Newtonsoft.Json;
+using System.Xml.Serialization;
+using System.IO;
+using System.Xml.Linq;
 
 namespace scrapeAPI
 {
@@ -436,6 +441,113 @@ namespace scrapeAPI
             var pic = r.PictureDetails.PictureURL;
         }
 
+        // Purpose of GetSingleItem is to fetch properties such as a listing's description and photos
+        // it is used when performing an auto-listing
+        public static async Task<GetSingleItemResponseType> GetSingleItem(string itemId, ApplicationUser user)
+        {
+            StringReader sr;
+            string output;
+            try
+            {
+                DataModelsDB db = new DataModelsDB();
+                var profile = db.UserProfiles.Find(user.Id);
+
+                //CustomShoppingService service = new CustomShoppingService();
+                //service.Url = "http://open.api.ebay.com/shopping";
+                //service.appID = profile.AppID;
+                //var request = new GetSingleItemRequestType();
+                //request.ItemID = itemId;
+                //var response = service.GetSingleItem(request);
+                //return response;
+
+                Shopping svc = new Shopping();
+                // set the URL and it's parameters
+                // Note: Since this is a demo appid, it is very critical to replace the appid with yours to ensure the proper servicing of your application.
+                //svc.Url = string.Format("http://open.api.ebay.com/shopping?appid={0}&version=523&siteid=0&callname=GetSingleItem&responseencoding=SOAP&requestencoding=SOAP", profile.AppID);
+                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,TextDescription&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
+                // create a new request type
+                GetSingleItemRequestType request = new GetSingleItemRequestType();
+                // put in your own item number
+                //request.ItemID = itemId;
+                // we will request Details
+                // for IncludeSelector reference see
+                // http://developer.ebay.com/DevZone/shopping/docs/CallRef/GetSingleItem.html#detailControls
+                //request.IncludeSelector = "Details";
+                //request.IncludeSelector = "Details,Description,TextDescription";
+                // create a new response type
+                GetSingleItemResponseType response = new GetSingleItemResponseType();
+
+                string uri = svc.Url;
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    // Could not get xml deserialization to work - very annoying!
+                    XmlSerializer x = new XmlSerializer(typeof(GetSingleItemResponseType));
+                    string s = await httpClient.GetStringAsync(uri);
+                    s = s.Replace("\"", "'");
+                    output = s.Replace(" xmlns='urn:ebay:apis:eBLBaseComponents'", string.Empty);
+                    //                    output = @"<?xml version='1.0' encoding='UTF-8'?>
+                    //  <GetSingleItemResponse>
+                    //   <Timestamp>2018-04-18T21:18:17.064Z</Timestamp>
+                    //</GetSingleItemResponse>
+                    //";
+                    XElement root = XElement.Parse(output);
+                    var qryRecords = from record in root.Elements("Item")
+                                     select record;
+                    var r = (from r2 in qryRecords
+                            select new
+                            {
+                                Description = r2.Element("Description")
+                            }).Single();
+                            
+
+                    string d = r.Description.Value;
+
+                    sr = new StringReader(output);
+                    return (GetSingleItemResponseType)x.Deserialize(sr);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+        }
+
+        // Was being developed when trying to get details of an item number
+        // not fully tested
+        // ended up with GetSingleItem() instead
+        public static FindItemsAdvancedResponse FindByKeyword(ApplicationUser user)
+        {
+            DataModelsDB db = new DataModelsDB();
+
+            // Setting the required proterty value
+
+            CustomFindAdvanced service = new CustomFindAdvanced();
+            service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
+            var profile = db.UserProfiles.Find(user.Id);
+            service.appID = profile.AppID;
+            FindItemsAdvancedRequest request = new FindItemsAdvancedRequest();
+            request.keywords = "302704549832";
+            //var p = new ProductId();
+            //p.type = "ReferenceID";
+            ////p.type = "UPC";
+            //p.Value = "222903428290";
+            //p.Value = "302704549832";
+            ////p.Value = "0019649215775";
+            //request.productId = p;
+
+            // Setting the pagination 
+            PaginationInput pagination = new PaginationInput();
+            pagination.entriesPerPageSpecified = true;
+            pagination.entriesPerPage = 100;
+            pagination.pageNumberSpecified = true;
+            pagination.pageNumber = 1;
+            request.paginationInput = pagination;
+
+            FindItemsAdvancedResponse response = service.findItemsAdvanced(request);
+            return response;
+        }
+
         public static FindCompletedItemsResponse FindCompletedItems(string seller, int daysBack, string appID, int pageNumber)
         {
             try
@@ -681,7 +793,7 @@ namespace scrapeAPI
             return totalCount;
         }
 
-        public static ModelView ToStart(string seller, int daysBack, ApplicationUser user, int rptNumber)
+        public static async Task<ModelView> ToStart(string seller, int daysBack, ApplicationUser user, int rptNumber)
         {
             DataModelsDB db = new DataModelsDB();
             string _logfile = "scrape_log.txt";
@@ -701,7 +813,7 @@ namespace scrapeAPI
                 var result = response.searchResult;
                 if (result != null && result.count > 0)
                 {
-                    StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
+                    await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
 
                     for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
                     {
@@ -709,7 +821,7 @@ namespace scrapeAPI
 
                         response = GetResults(service, request, currentPageNumber);
                         result = response.searchResult;
-                        StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
+                        await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
                     }
                 }
                 var mv = new ModelView();
@@ -722,7 +834,7 @@ namespace scrapeAPI
         }
 
         // Store transactions for a page of results
-        protected static void StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
+        protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
         {
             DataModelsDB db = new DataModelsDB();
             string _logfile = "scrape_log.txt";
@@ -771,6 +883,11 @@ namespace scrapeAPI
                             order.ImageUrl = searchItem.galleryURL;
                             order.PageNumber = pg;
                             order.ItemId = searchItem.itemId;
+
+                            // testing GetSingleItem
+                            // purpose of GetSingleItem is to fetch properties like listing descriptiong
+                            // it is used when performing an auto-listing
+                            // var r = await GetSingleItem(order.ItemId, user);
 
                             orderHistory.Add(order);
                         }
