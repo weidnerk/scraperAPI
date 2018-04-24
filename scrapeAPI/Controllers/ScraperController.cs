@@ -64,8 +64,15 @@ namespace scrapeAPI.Controllers
                 HomeController.WriteFile(_logfile, header);
 
                 var user = await UserManager.FindByNameAsync(userName);
-
                 ebayAPIs.GetAPIStatus(user);
+
+                var sh = new SearchHistory();
+                sh.UserId = user.Id;
+                sh.ReportNumber = rptNumber;
+                sh.Seller = seller;
+                sh.DaysBack = daysBack;
+                sh.MinSoldFilter = minSold;
+                await db.SearchHistorySave(sh);
 
                 var mv = GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
                 return Ok(mv);
