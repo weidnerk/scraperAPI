@@ -480,16 +480,19 @@ namespace scrapeAPI
                 string uri = svc.Url;
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    // Could not get xml deserialization to work - very annoying!
-                    XmlSerializer x = new XmlSerializer(typeof(GetSingleItemResponseType));
                     string s = await httpClient.GetStringAsync(uri);
                     s = s.Replace("\"", "'");
                     output = s.Replace(" xmlns='urn:ebay:apis:eBLBaseComponents'", string.Empty);
-                    //                    output = @"<?xml version='1.0' encoding='UTF-8'?>
+
+                    #region Could not get xml deserialization to work - very annoying!
+                    XmlSerializer x = new XmlSerializer(typeof(GetSingleItemResponseType));
+                                        //output = @"<?xml version='1.0' encoding='UTF-8'?>
                     //  <GetSingleItemResponse>
                     //   <Timestamp>2018-04-18T21:18:17.064Z</Timestamp>
                     //</GetSingleItemResponse>
                     //";
+                    #endregion
+
                     XElement root = XElement.Parse(output);
                     var qryRecords = from record in root.Elements("Item")
                                      select record;

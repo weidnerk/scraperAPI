@@ -833,3 +833,90 @@ Parameter name: source
 4/18/2018 6:00:31 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
 4/18/2018 6:03:19 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
 4/18/2018 6:04:39 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/23/2018 1:22:59 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/23/2018 1:23:16 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:24 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:25 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:26 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:27 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:28 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:29 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:30 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:31 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:32 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:34 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:35 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:36 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:37 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:38 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:39 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:41 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:42 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:43 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:44 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:45 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:46 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:47 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:48 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:49 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:50 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:23:51 PM  StoreTransactions Data at the root level is invalid. Line 2, position 21.
+4/23/2018 1:24:37 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/23/2018 1:25:01 PM  StoreTransactions There is an error in XML document (3, 4).
+4/23/2018 1:25:57 PM Seller: **justforyou** daysBack: 15 resultsPerPg: 200
+4/23/2018 1:27:37 PM Seller: **justforyou** daysBack: 15 resultsPerPg: 200
+4/23/2018 3:18:25 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 10:22:18 AM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 10:22:33 AM  StoreTransactions There is an error in XML document (3, 4).
+4/24/2018 10:24:14 AM  StoreTransactions There is an error in XML document (3, 4).
+4/24/2018 10:24:18 AM  StoreTransactions There is an error in XML document (3, 4).
+4/24/2018 10:25:17 AM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 10:28:53 AM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 10:30:00 AM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 10:36:47 AM Seller: **justforyou** daysBack: 10 resultsPerPg: 200
+4/24/2018 10:38:54 AM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 10:42:13 AM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 11:07:47 AM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 11:08:32 AM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 1:34:03 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 1:39:21 PM Seller: **justforyou** daysBack: 2 resultsPerPg: 200
+4/24/2018 1:39:38 PM Seller: **justforyou** daysBack: 4 resultsPerPg: 200
+4/24/2018 1:46:37 PM Seller: **justforyou** daysBack: 4 resultsPerPg: 200
+4/24/2018 1:47:30 PM Seller: **justforyou** daysBack: 4 resultsPerPg: 200
+4/24/2018 1:48:32 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 1:52:33 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 1:56:17 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 2:24:01 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 2:28:04 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:28:39 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 3:29:21 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:29:30 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:32:44 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:33:15 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:33:46 PM Seller: **justforyou** daysBack: 4 resultsPerPg: 200
+4/24/2018 3:35:52 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:37:44 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:39:50 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 3:40:07 PM Seller: **justforyou** daysBack: 4 resultsPerPg: 200
+4/24/2018 3:55:48 PM Seller: **justforyou** daysBack: 6 resultsPerPg: 200
+4/24/2018 4:03:01 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:03:25 PM Seller: **justforyou** daysBack: 4 resultsPerPg: 200
+4/24/2018 4:05:08 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:07:43 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:10:23 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:11:33 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:13:19 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:13:54 PM Seller: **justforyou** daysBack: 10 resultsPerPg: 200
+4/24/2018 4:15:58 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 4:17:57 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 4:19:20 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 4:22:30 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 4:24:05 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 4:30:56 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 4:35:25 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200
+4/24/2018 4:40:10 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 4:44:34 PM Seller: **justforyou** daysBack: 30 resultsPerPg: 200
+4/24/2018 4:46:35 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:50:21 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:52:26 PM Seller: **justforyou** daysBack: 3 resultsPerPg: 200
+4/24/2018 4:53:17 PM Seller: **justforyou** daysBack: 5 resultsPerPg: 200

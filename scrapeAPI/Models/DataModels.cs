@@ -59,6 +59,7 @@ namespace scrapeAPI.Models
         public string ImageUrl { get; set; }
         public decimal Price { get; set; }
         public DateTime? EarliestSold { get; set; }
+        public string ItemId { get; set; }
     }
 
     [Table("OrderHistory")]

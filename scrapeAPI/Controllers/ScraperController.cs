@@ -59,7 +59,7 @@ namespace scrapeAPI.Controllers
 
         [Route("numitemssold")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string showNoOrders, string userName, int rptNumber)
+        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string userName, int rptNumber)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace scrapeAPI.Controllers
 
         [Route("getsellersold")]
         [HttpGet]
-        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, string userName)
+        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string userName)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace scrapeAPI.Controllers
 
                 ebayAPIs.GetAPIStatus(user);
 
-                var mv = await GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, showNoOrders, user);
+                var mv = await GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, user);
                 return Ok(mv);
             }
             catch (Exception exc)
@@ -106,36 +106,41 @@ namespace scrapeAPI.Controllers
 
         // Recall FindCompletedItems will only give us up to 100 listings
         // interesting case is 'fabulousfinds101' - 
-        protected async Task<ModelView> GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string showNoOrders, ApplicationUser user)
+        protected async Task<ModelView> GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, ApplicationUser user)
         {
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
             var profile = db.UserProfiles.Find(user.Id);
             return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
         }
 
-        [Route("getreport/{rptNumber}/{minSold}/{showNoOrders}/{daysBack}/{minPrice}/{maxPrice}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, string showNoOrders, int daysBack, int? minPrice, int? maxPrice)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice)
         {
-            bool endedListings = (showNoOrders == "0") ? false : true;
+            //bool endedListings = (showNoOrders == "0") ? false : true;
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
 
             try
             {
                 // materialize the date from SQL Server first since SQL Server doesn't understand Convert.ToInt32 on Qty
+                //var results = (from c in db.OrderHistory
+                //               where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
+                //               group c by new { c.Title, c.Url, c.Price, c.ImageUrl, c.Qty, c.DateOfPurchase } into grp
+                //               select new
+                //               {
+                //                   grp.Key.Title,
+                //                   grp.Key.Url,
+                //                   grp.Key.Price,
+                //                   grp.Key.ImageUrl,
+                //                   grp.Key.Qty,
+                //                   grp.Key.DateOfPurchase
+                //               }).ToList();
+
                 var results = (from c in db.OrderHistory
                                where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
-                               group c by new { c.Title, c.Url, c.Price, c.ImageUrl, c.Qty, c.DateOfPurchase } into grp
-                               select new
-                               {
-                                   grp.Key.Title,
-                                   grp.Key.Url,
-                                   grp.Key.Price,
-                                   grp.Key.ImageUrl,
-                                   grp.Key.Qty,
-                                   grp.Key.DateOfPurchase
-                               }).ToList();
+                               select c
+                               ).ToList();
 
                 // group by title and price and filter by minSold
                 var x = from a in results
@@ -147,7 +152,8 @@ namespace scrapeAPI.Controllers
                                 Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
                                 MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase)),
                                 Url = grp.Max(s => s.Url),
-                                ImageUrl = grp.Max(s => s.ImageUrl)
+                                ImageUrl = grp.Max(s => s.ImageUrl),
+                                ItemId = grp.Max(s => s.ItemId)
                         } into g
                               where g.Qty >= minSold
                               orderby g.MaxDate descending
@@ -158,7 +164,8 @@ namespace scrapeAPI.Controllers
                                   ImageUrl = g.ImageUrl,
                                   Price = g.Price,
                                   SoldQty = g.Qty,
-                                  EarliestSold = g.MaxDate
+                                  EarliestSold = g.MaxDate,
+                                  ItemId = g.ItemId
                               };
 
                 // filter by min and max price
