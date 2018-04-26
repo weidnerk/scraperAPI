@@ -304,5 +304,28 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        [HttpGet]
+        [Route("getsingleitem")]
+        public async Task<IHttpActionResult> GetSingleItem(string userName, string itemId)
+        {
+            try
+            {
+                var user = await UserManager.FindByNameAsync(userName);
+                if (user == null)
+                    return Ok(false);
+                else
+                {
+                    var i = await ebayAPIs.GetSingleItem(itemId, user);
+                    return Ok(i);
+                }
+            }
+            catch (Exception exc)
+            {
+                string msg = "GetTokenStatus: " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
     }
 }
