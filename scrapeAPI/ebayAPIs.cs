@@ -464,7 +464,8 @@ namespace scrapeAPI
                 // set the URL and it's parameters
                 // Note: Since this is a demo appid, it is very critical to replace the appid with yours to ensure the proper servicing of your application.
                 //svc.Url = string.Format("http://open.api.ebay.com/shopping?appid={0}&version=523&siteid=0&callname=GetSingleItem&responseencoding=SOAP&requestencoding=SOAP", profile.AppID);
-                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,TextDescription&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
+                //svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,TextDescription&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
+                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
                 // create a new request type
                 GetSingleItemRequestType request = new GetSingleItemRequestType();
                 // put in your own item number
@@ -501,13 +502,16 @@ namespace scrapeAPI
                              {
                                  Description = r2.Element("Description"),
                                  Title = r2.Element("Title"),
-                                 Price = r2.Element("CurrentPrice"),
-                                 ListingUrl = r2.Element("ViewItemURLForNaturalSearch"),
-                                 PictureUrl = r2.Elements("PictureURL")
+                                 Price = r2.Element("ConvertedCurrentPrice"),
+                                 ListingUrl = r2.Element("ViewItemURLForNaturalSearch")
                             }).Single();
 
-                    var pics = r.PictureUrl.ToList();
+                    var list = qryRecords.Elements("PictureURL")
+                           .Select(element => element.Value)
+                           .ToArray();
+
                     var si = new SingleItem();
+                    si.PicturUrl = list;
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
                     si.Price = Convert.ToDecimal(r.Price.Value);
