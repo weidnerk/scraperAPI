@@ -502,9 +502,11 @@ namespace scrapeAPI
                                  Description = r2.Element("Description"),
                                  Title = r2.Element("Title"),
                                  Price = r2.Element("CurrentPrice"),
-                                 ListingUrl = r2.Element("ViewItemURLForNaturalSearch")
+                                 ListingUrl = r2.Element("ViewItemURLForNaturalSearch"),
+                                 PictureUrl = r2.Elements("PictureURL")
                             }).Single();
 
+                    var pics = r.PictureUrl.ToList();
                     var si = new SingleItem();
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
@@ -888,6 +890,7 @@ namespace scrapeAPI
                             order.DateOfPurchase = item.CreatedDate;
                             order.Url = searchItem.viewItemURL;
                             order.ImageUrl = searchItem.galleryURL;
+                            var pictures = searchItem.pictureURLLarge;
                             order.PageNumber = pg;
                             order.ItemId = searchItem.itemId;
 
