@@ -43,6 +43,12 @@ namespace scrapeAPI.Models
             await this.SaveChangesAsync();
         }
 
+        public async Task<Listing> ListingGet(string itemId)
+        {
+            var listing = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == itemId);
+            return listing;
+        }
+
         public string OrderHistorySave(List<OrderHistory> oh, int rptNumber, bool listingEnded)
         {
             string ret = string.Empty;

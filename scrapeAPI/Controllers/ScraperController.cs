@@ -353,5 +353,24 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        [HttpGet]
+        [Route("getlisting")]
+        public async Task<IHttpActionResult> GetListing(string itemId)
+        {
+            try
+            {
+                var listing = await db.ListingGet(itemId);
+                if (listing == null)
+                    return NotFound();
+                return Ok(listing);
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("GetListing", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
     }
 }
