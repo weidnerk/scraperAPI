@@ -443,7 +443,7 @@ namespace scrapeAPI
 
         // Purpose of GetSingleItem is to fetch properties such as a listing's description and photos
         // it is used when performing an auto-listing
-        public static async Task<SingleItem> GetSingleItem(string itemId, ApplicationUser user)
+        public static async Task<Listing> GetSingleItem(string itemId, ApplicationUser user)
         {
             StringReader sr;
             string output;
@@ -510,12 +510,12 @@ namespace scrapeAPI
                            .Select(element => element.Value)
                            .ToArray();
 
-                    var si = new SingleItem();
+                    var si = new Listing();
                     si.PicturUrl = list;
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
                     si.Price = Convert.ToDecimal(r.Price.Value);
-                    si.ListingUrl = r.ListingUrl.Value;
+                    si.Url = r.ListingUrl.Value;
                     return si;
                 }
 

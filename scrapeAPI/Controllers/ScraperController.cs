@@ -328,5 +328,22 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        [HttpPost]
+        [Route("storelisting")]
+        public async Task<IHttpActionResult> StoreListing(Listing listing)
+        {
+            try
+            {
+                await db.ListingSave(listing);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = "StoreListing: " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
     }
 }

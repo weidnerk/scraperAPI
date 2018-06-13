@@ -1,6 +1,7 @@
 ﻿using scrapeAPI.com.ebay.developer;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
@@ -88,25 +89,38 @@ namespace scrapeAPI.Models
         public int PercentTotalItemsProcesssed { get; set; }
     }
 
+    // Listing is used for the research reporting.
+    // SingleItem is used for the detail page.
+    // Case can be made to just use the Listing class.
+    [Table("Listing")]
     public class Listing
     {
+        [Key]
+        public string ItemId { get; set; }
         public string Title { get; set; }
         public List<OrderHistory> Orders { get; set; }
         public string Url { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+        public string[] PicturUrl { get;set; }
+        public decimal ListingPrice { get; set; }
     }
 
     // Listing is used for the research reporting.
     // SingleItem is used for the detail page.
     // Case can be made to just use the Listing class.
-    // Let's see.
-    public class SingleItem
-    {
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public decimal Price { get; set; }
-        public string ListingUrl { get; set; }
-        public string[] PicturUrl { get;set; }
-    }
+    //[Table("Listing")]
+    //public class SingleItem
+    //{
+    //    public string Title { get; set; }
+    //    public string Description { get; set; }
+    //    public decimal Price { get; set; }
+    //    public string Url { get; set; }
+    //    public string[] PicturUrl { get;set; }
+
+    //    [Key]
+    //    public string ItemId { get; set; }
+    //}
 
     public class IntModel
     {

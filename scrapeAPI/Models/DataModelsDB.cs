@@ -25,6 +25,7 @@ namespace scrapeAPI.Models
         public DbSet<OrderHistory> OrderHistory { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<SearchHistory> SearchHistory { get; set; }
+        public DbSet<Listing> Listings { get; set; }
 
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
@@ -34,6 +35,19 @@ namespace scrapeAPI.Models
             {
                 _userManager = value;
             }
+        }
+
+        public async Task ListingSave(Listing listing)
+        {
+            try
+            {
+                Listings.Add(listing);
+                await this.SaveChangesAsync();
+            }
+            catch (Exception exc)
+            {
+            }
+
         }
 
         public string OrderHistorySave(List<OrderHistory> oh, int rptNumber, bool listingEnded)
