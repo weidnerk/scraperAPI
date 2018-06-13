@@ -24,5 +24,18 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        public static string ErrMsg(string header, Exception exc)
+        {
+            string msg = header + " " + exc.Message;
+            if (exc.InnerException != null)
+            {
+                msg += " " + exc.InnerException.Message;
+                if (exc.InnerException.InnerException != null)
+                {
+                    msg += " " + exc.InnerException.InnerException.Message;
+                }
+            }
+            return msg;
+        }
     }
 }

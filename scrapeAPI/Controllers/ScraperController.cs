@@ -212,7 +212,15 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = " GetTimesSold " + exc.Message;
+                string msg = " GetReport " + exc.Message;
+                if (exc.InnerException != null)
+                {
+                    msg += " " + exc.InnerException.Message;
+                    if (exc.InnerException.InnerException != null)
+                    {
+                        msg += " " + exc.InnerException.InnerException.Message;
+                    }
+                }
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -340,7 +348,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = "StoreListing: " + exc.Message;
+                string msg = HomeController.ErrMsg("StoreListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }

@@ -39,15 +39,8 @@ namespace scrapeAPI.Models
 
         public async Task ListingSave(Listing listing)
         {
-            try
-            {
-                Listings.Add(listing);
-                await this.SaveChangesAsync();
-            }
-            catch (Exception exc)
-            {
-            }
-
+            Listings.Add(listing);
+            await this.SaveChangesAsync();
         }
 
         public string OrderHistorySave(List<OrderHistory> oh, int rptNumber, bool listingEnded)
