@@ -102,8 +102,11 @@ namespace scrapeAPI.Models
         public string Url { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
-        public string[] PicturUrl { get;set; }
+        public string PictureUrl { get;set; }   // store picture urls as a semi-colon delimited string
         public decimal ListingPrice { get; set; }
+        public string Source { get; set; }
+        public string PrimaryCategoryID { get; set; }
+        public string PrimaryCategoryName { get; set; }
     }
 
     // Listing is used for the research reporting.

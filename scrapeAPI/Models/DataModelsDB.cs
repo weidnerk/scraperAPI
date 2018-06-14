@@ -5,6 +5,7 @@ using System.Data.Entity.Validation;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.Identity.Owin;
+using scrapeAPI.Controllers;
 
 namespace scrapeAPI.Models
 {
@@ -39,14 +40,32 @@ namespace scrapeAPI.Models
 
         public async Task ListingSave(Listing listing)
         {
-            Listings.Add(listing);
+            var found = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == listing.ItemId);
+            if (found == null)
+                Listings.Add(listing);
+            else
+            {
+                found.ListingPrice = listing.ListingPrice;
+                found.Source = listing.Source;
+                found.PictureUrl = listing.PictureUrl;
+                this.Entry(found).State = EntityState.Modified;
+                //this.SaveChanges();
+            }
             await this.SaveChangesAsync();
         }
 
         public async Task<Listing> ListingGet(string itemId)
         {
-            var listing = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == itemId);
-            return listing;
+            try
+            {
+                var listing = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == itemId);
+                return listing;
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("", exc);
+                return null;
+            }
         }
 
         public string OrderHistorySave(List<OrderHistory> oh, int rptNumber, bool listingEnded)

@@ -503,27 +503,38 @@ namespace scrapeAPI
                                  Description = r2.Element("Description"),
                                  Title = r2.Element("Title"),
                                  Price = r2.Element("ConvertedCurrentPrice"),
-                                 ListingUrl = r2.Element("ViewItemURLForNaturalSearch")
-                            }).Single();
+                                 ListingUrl = r2.Element("ViewItemURLForNaturalSearch"),
+                                 PrimaryCategoryID = r2.Element("PrimaryCategoryID"),
+                                 PrimaryCategoryName = r2.Element("PrimaryCategoryName")
+                             }).Single();
 
                     var list = qryRecords.Elements("PictureURL")
                            .Select(element => element.Value)
                            .ToArray();
 
                     var si = new Listing();
-                    si.PicturUrl = list;
+                    si.PictureUrl = FormatPictureUrl(list);
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
                     si.Price = Convert.ToDecimal(r.Price.Value);
                     si.Url = r.ListingUrl.Value;
+                    si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
+                    si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
                     return si;
                 }
-
             }
             catch (Exception ex)
             {
                 throw (ex);
             }
+        }
+
+        private static string FormatPictureUrl(string[] pictureUrls)
+        {
+            string s = "";
+            foreach (string i in pictureUrls)
+                s += i + ";";
+            return s;
         }
 
         // Was being developed when trying to get details of an item number
