@@ -55,10 +55,10 @@ namespace scrapeAPI.Models
     {
         public string Title { get; set; }
         public int SoldQty { get; set; }
-        public string Url { get; set; }
+        public string EbayUrl { get; set; }
         public int RptNumber { get; set; }
         public string ImageUrl { get; set; }
-        public decimal Price { get; set; }
+        public decimal SupplierPrice { get; set; }
         public DateTime? EarliestSold { get; set; }
         public string ItemId { get; set; }
     }

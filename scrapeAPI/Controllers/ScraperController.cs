@@ -168,9 +168,9 @@ namespace scrapeAPI.Controllers
                         select new TimesSold
                               {
                                   Title = g.Title,
-                                  Url = g.Url,
+                                  EbayUrl = g.Url,
                                   ImageUrl = g.ImageUrl,
-                                  Price = g.Price,
+                                  SupplierPrice = g.Price,
                                   SoldQty = g.Qty,
                                   EarliestSold = g.MaxDate,
                                   ItemId = g.ItemId
@@ -178,10 +178,10 @@ namespace scrapeAPI.Controllers
 
                 // filter by min and max price
                 if (minPrice.HasValue)
-                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.Price >= minPrice)));
+                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice >= minPrice)));
 
                 if (maxPrice.HasValue)
-                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.Price <= maxPrice)));
+                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice <= maxPrice)));
 
                 // count listings processed so far
                 var listings = from o in db.OrderHistory
