@@ -152,14 +152,14 @@ namespace scrapeAPI.Controllers
 
                 // group by title and price and filter by minSold
                 var x = from a in results
-                        group a by new { a.Title, a.Price } into grp
+                        group a by new { a.Title, a.SupplierPrice } into grp
                         select new
                               {
                                 grp.Key.Title,
-                                Price = Convert.ToDecimal(grp.Key.Price),
+                                Price = Convert.ToDecimal(grp.Key.SupplierPrice),
                                 Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
                                 MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase)),
-                                Url = grp.Max(s => s.Url),
+                                Url = grp.Max(s => s.EbayUrl),
                                 ImageUrl = grp.Max(s => s.ImageUrl),
                                 ItemId = grp.Max(s => s.ItemId)
                         } into g
@@ -178,10 +178,10 @@ namespace scrapeAPI.Controllers
 
                 // filter by min and max price
                 if (minPrice.HasValue)
-                    x = x.Where(u => u.Price >= minPrice);
+                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.Price >= minPrice)));
 
                 if (maxPrice.HasValue)
-                    x = x.Where(u => u.Price <= maxPrice);
+                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.Price <= maxPrice)));
 
                 // count listings processed so far
                 var listings = from o in db.OrderHistory
@@ -193,7 +193,7 @@ namespace scrapeAPI.Controllers
                 var matchedlistings = from c in results
                                       join o in db.OrderHistory on c.Title equals o.Title
                                       where o.RptNumber == rptNumber && !o.ListingEnded
-                                      group c by new { c.Title, c.Url, o.RptNumber, c.ImageUrl } into grp
+                                      group c by new { c.Title, c.EbayUrl, o.RptNumber, c.ImageUrl } into grp
                                       select grp;
 
                 // count orders processed so far - matches

@@ -516,8 +516,8 @@ namespace scrapeAPI
                     si.PictureUrl = FormatPictureUrl(list);
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
-                    si.Price = Convert.ToDecimal(r.Price.Value);
-                    si.Url = r.ListingUrl.Value;
+                    si.SupplierPrice = Convert.ToDecimal(r.Price.Value);
+                    si.EbayUrl = r.ListingUrl.Value;
                     si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
                     si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
                     return si;
@@ -900,10 +900,10 @@ namespace scrapeAPI
                             order.Title = searchItem.title;
                             order.Qty = item.QuantityPurchased.ToString();
 
-                            order.Price = item.TransactionPrice.Value.ToString();
+                            order.SupplierPrice = item.TransactionPrice.Value.ToString();
 
                             order.DateOfPurchase = item.CreatedDate;
-                            order.Url = searchItem.viewItemURL;
+                            order.EbayUrl = searchItem.viewItemURL;
                             order.ImageUrl = searchItem.galleryURL;
                             var pictures = searchItem.pictureURLLarge;
                             order.PageNumber = pg;

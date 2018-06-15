@@ -147,7 +147,7 @@ namespace scrapeAPI.Controllers
                                     // listing ended
                                     var l = new Listing();
                                     l.Orders = new List<OrderHistory>();
-                                    l.Orders.Add(new Models.OrderHistory { Title = " No orders found in range - " + listing.Title, Url = listing.Url });
+                                    l.Orders.Add(new Models.OrderHistory { Title = " No orders found in range - " + listing.Title, EbayUrl = listing.EbayUrl });
                                     db.OrderHistorySave(l.Orders, rptNumber, true);
                                 }
                                 if (showNoOrders == "1") ++model.MatchedListings;
@@ -229,7 +229,7 @@ namespace scrapeAPI.Controllers
             var listing = new Listing();
             listing = await GenerateQtySold(prodName, detailUrl, daysBack, useProxy);
             listing.Title = prodName;
-            listing.Url = detailUrl;
+            listing.EbayUrl = detailUrl;
             return listing;
         }
 
@@ -338,9 +338,9 @@ namespace scrapeAPI.Controllers
 
                     var h = new OrderHistory();
                     h.Title = title;
-                    h.Price = price;
+                    h.SupplierPrice = price;
                     h.Qty = qty;
-                    h.Url = detailUrl;
+                    h.EbayUrl = detailUrl;
                     h.ImageUrl = imgUrl;
                     //h.DateOfPurchaseStr = dateofpurchase.Substring(0, dateofpurchase.Length - 4);
                     //var dt = Convert.ToDateTime(h.DateOfPurchaseStr);

@@ -68,12 +68,12 @@ namespace scrapeAPI.Models
     {
         public int ID { get; set; }
         public string Title { get; set; }
-        public string Price { get; set; }
+        public string SupplierPrice { get; set; }
         public string Qty { get; set; }
         //public string DateOfPurchaseStr { get; set; }
         public DateTime? DateOfPurchase { get; set; }
         public int RptNumber { get; set; }
-        public string Url { get; set; }
+        public string EbayUrl { get; set; }
 
         public string ImageUrl { get; set; }
         public bool ListingEnded { get; set; }
@@ -99,9 +99,9 @@ namespace scrapeAPI.Models
         public string ItemId { get; set; }
         public string Title { get; set; }
         public List<OrderHistory> Orders { get; set; }
-        public string Url { get; set; }
+        public string EbayUrl { get; set; }
         public string Description { get; set; }
-        public decimal Price { get; set; }
+        public decimal SupplierPrice { get; set; }
         public string PictureUrl { get;set; }   // store picture urls as a semi-colon delimited string
         public decimal ListingPrice { get; set; }
         public string Source { get; set; }
