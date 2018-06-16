@@ -38,6 +38,12 @@ namespace scrapeAPI.Models
             }
         }
 
+        public async Task<Listing> GetListing(string itemId)
+        {
+            var found = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == itemId);
+            return found;
+        }
+
         public async Task ListingSave(Listing listing)
         {
             var found = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == listing.ItemId);
@@ -49,7 +55,6 @@ namespace scrapeAPI.Models
                 found.Source = listing.Source;
                 found.PictureUrl = listing.PictureUrl;
                 this.Entry(found).State = EntityState.Modified;
-                //this.SaveChanges();
             }
             await this.SaveChangesAsync();
         }

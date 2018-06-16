@@ -513,7 +513,7 @@ namespace scrapeAPI
                            .ToArray();
 
                     var si = new Listing();
-                    si.PictureUrl = FormatPictureUrl(list);
+                    si.PictureUrl = Util.ListToDelimited(list, ';');
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
                     si.SupplierPrice = Convert.ToDecimal(r.Price.Value);
@@ -527,14 +527,6 @@ namespace scrapeAPI
             {
                 throw (ex);
             }
-        }
-
-        private static string FormatPictureUrl(string[] pictureUrls)
-        {
-            string s = "";
-            foreach (string i in pictureUrls)
-                s += i + ";";
-            return s;
         }
 
         // Was being developed when trying to get details of an item number

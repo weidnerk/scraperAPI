@@ -18,6 +18,7 @@ using scrapeAPI.Models;
 using System.Web;
 using Microsoft.AspNet.Identity.Owin;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace scrapeAPI.Controllers
 {
@@ -351,6 +352,37 @@ namespace scrapeAPI.Controllers
                 string msg = HomeController.ErrMsg("StoreListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
+            }
+        }
+
+        [HttpPost]
+        [Route("createlisting")]
+        public async Task<IHttpActionResult> CreateListing(string itemId)
+        {
+            try
+            {
+                await ListingCreateAsync(itemId);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("StoreListing", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+
+        protected async Task ListingCreateAsync(string itemId)
+        {
+            var listing = await db.GetListing(itemId);
+            if (listing != null)
+            {
+                List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
+                eBayItem.VerifyAddItemRequest(listing.Title,
+                    "Description of item",
+                    listing.PrimaryCategoryID,
+                    (double)listing.ListingPrice,
+                    pictureURLs);
             }
         }
 

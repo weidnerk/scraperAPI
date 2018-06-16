@@ -109,22 +109,6 @@ namespace scrapeAPI.Models
         public string PrimaryCategoryName { get; set; }
     }
 
-    // Listing is used for the research reporting.
-    // SingleItem is used for the detail page.
-    // Case can be made to just use the Listing class.
-    //[Table("Listing")]
-    //public class SingleItem
-    //{
-    //    public string Title { get; set; }
-    //    public string Description { get; set; }
-    //    public decimal Price { get; set; }
-    //    public string Url { get; set; }
-    //    public string[] PicturUrl { get;set; }
-
-    //    [Key]
-    //    public string ItemId { get; set; }
-    //}
-
     public class IntModel
     {
         public string ID

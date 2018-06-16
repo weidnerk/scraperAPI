@@ -37,6 +37,5 @@ namespace scrapeAPI
             service.RequesterCredentials.Credentials.AuthCert = certId;
             return service;
         }
-
     }
 }
