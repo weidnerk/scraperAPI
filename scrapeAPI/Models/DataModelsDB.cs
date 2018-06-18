@@ -54,6 +54,11 @@ namespace scrapeAPI.Models
                 found.ListingPrice = listing.ListingPrice;
                 found.Source = listing.Source;
                 found.PictureUrl = listing.PictureUrl;
+                found.Title = listing.Title;
+                found.EbayUrl = listing.EbayUrl;
+                found.PrimaryCategoryID = listing.PrimaryCategoryID;
+                found.PrimaryCategoryName = listing.PrimaryCategoryName;
+                found.Description = listing.Description;
                 this.Entry(found).State = EntityState.Modified;
             }
             await this.SaveChangesAsync();

@@ -13,6 +13,8 @@ namespace scrapeAPI
             string s = "";
             foreach (string i in array)
                 s += i + limiter;
+            if (s.Length > 0)
+                s = s.Substring(0, s.Length - 1);   // remove last semi colon
             return s;
         }
 

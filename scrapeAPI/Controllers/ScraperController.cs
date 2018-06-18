@@ -355,7 +355,7 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("createlisting")]
         public async Task<IHttpActionResult> CreateListing(string itemId)
         {

@@ -22,76 +22,92 @@ namespace scrapeAPI
         /// </summary>
         public static void VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs)
         {
-            eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("VerifyAddItem");
-
-            VerifyAddItemRequestType request = new VerifyAddItemRequestType();
-            request.Version = "949";
-            request.ErrorLanguage = "en_US";
-            request.WarningLevel = WarningLevelCodeType.High;
-
-            var item = new ItemType();
-
-            item.Title = title;
-            item.Description = description;
-            item.PrimaryCategory = new CategoryType
+            try
             {
-                CategoryID = categoryID
-            };
-            item.StartPrice = new AmountType
-            {
-                Value = price,
-                currencyID = CurrencyCodeType.USD
-            };
+                //pictureURLs = new List<string>(){
+                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/ZJcAAOSwzE9a0Qpl/$_57.JPG",
+                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/6eQAAOSwER1a0Qpn/$_57.JPG",
+                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/YPIAAOSwb~Ja0Qpq/$_57.JPG",
+                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/zhsAAOSwLjRa0Qps/$_57.JPG",
+                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/f-8AAOSwF-Ja0Qpv/$_57.JPG",
+                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/kokAAOSwbLZa0Qpy/$_57.JPG",
+                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/aZkAAOSwlila0Qp0/$_57.JPG"
+                //};
+                eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("VerifyAddItem");
 
-            // To view ConditionIDs follow the URL
-            // http://developer.ebay.com/devzone/guides/ebayfeatures/Development/Desc-ItemCondition.html#HelpingSellersChoosetheRightCondition
-            item.ConditionID = 1000;    // new
-            item.Country = CountryCodeType.US;
-            item.Currency = CurrencyCodeType.USD;
-            item.DispatchTimeMax = 3;
-            item.ListingDuration = "Days_30";
-            // Buy It Now fixed price
-            item.ListingType = ListingTypeCodeType.FixedPriceItem;
-            // Auction
-            //item.ListingType = ListingTypeCodeType.Chinese; 
-            item.PaymentMethods = new BuyerPaymentMethodCodeTypeCollection
+                VerifyAddItemRequestType request = new VerifyAddItemRequestType();
+                request.Version = "949";
+                request.ErrorLanguage = "en_US";
+                request.WarningLevel = WarningLevelCodeType.High;
+
+                var item = new ItemType();
+
+                item.Title = title;
+                item.Description = description;
+                item.PrimaryCategory = new CategoryType
+                {
+                    CategoryID = categoryID
+                };
+                item.StartPrice = new AmountType
+                {
+                    Value = price,
+                    currencyID = CurrencyCodeType.USD
+                };
+
+                // To view ConditionIDs follow the URL
+                // http://developer.ebay.com/devzone/guides/ebayfeatures/Development/Desc-ItemCondition.html#HelpingSellersChoosetheRightCondition
+                item.ConditionID = 1000;    // new
+                item.Country = CountryCodeType.US;
+                item.Currency = CurrencyCodeType.USD;
+                item.DispatchTimeMax = 3;
+                item.ListingDuration = "Days_30";
+                // Buy It Now fixed price
+                item.ListingType = ListingTypeCodeType.FixedPriceItem;
+                // Auction
+                //item.ListingType = ListingTypeCodeType.Chinese; 
+                item.PaymentMethods = new BuyerPaymentMethodCodeTypeCollection
             {
                 BuyerPaymentMethodCodeType.PayPal
             };
-            item.AutoPay = true;    // require immediate payment
-            // Default testing paypal email address
-            item.PayPalEmailAddress = "weidnerk@gmail.com";
+                item.AutoPay = true;    // require immediate payment
+                                        // Default testing paypal email address
+                item.PayPalEmailAddress = "weidnerk@gmail.com";
 
-            item.PictureDetails = new PictureDetailsType();
-            item.PictureDetails.PictureURL = new StringCollection();
-            item.PictureDetails.PictureURL.AddRange(pictureURLs.ToArray());
-            item.PostalCode = "33772";
-            item.Quantity = 1; // 1 If Auction
-            item.ReturnPolicy = new ReturnPolicyType
+                item.PictureDetails = new PictureDetailsType();
+                item.PictureDetails.PictureURL = new StringCollection();
+                item.PictureDetails.PictureURL.AddRange(pictureURLs.ToArray());
+                item.PostalCode = "33772";
+                item.Quantity = 1; // 1 If Auction
+                item.ReturnPolicy = new ReturnPolicyType
+                {
+                    ReturnsAcceptedOption = "ReturnsAccepted",
+                    ReturnsWithinOption = "Days_30",
+                    //RefundOption = "MoneyBack",
+                    Description = "Please return if unstatisfied.",
+                    ShippingCostPaidByOption = "Buyer",
+                    RestockingFeeValue = "Percent_20",
+                    RestockingFeeValueOption = "Percent_20"
+                };
+                item.ShippingDetails = GetShippingDetail();
+                item.Site = SiteCodeType.US;
+
+                request.Item = item;
+
+                VerifyAddItemResponseType response = service.VerifyAddItem(request);
+                Console.WriteLine("ItemID: {0}", response.ItemID);
+
+                // If item is verified, the item will be added.
+                if (response.ItemID == "0")
+                {
+                    Console.WriteLine("=====================================");
+                    Console.WriteLine("Add Item Verified");
+                    Console.WriteLine("=====================================");
+                    AddItemRequest(item);
+                }
+            }
+            catch (Exception exc)
             {
-                ReturnsAcceptedOption = "ReturnsAccepted",
-                ReturnsWithinOption = "Days_14",
-                //RefundOption = "MoneyBack",
-                Description = "Please return if unstatisfied.",
-                ShippingCostPaidByOption = "Buyer",
-                RestockingFeeValue = "Percent_20",
-                RestockingFeeValueOption = "Percent_20"
-            };
-            item.ShippingDetails = GetShippingDetail();
-            item.Site = SiteCodeType.US;
-
-            request.Item = item;
-
-            VerifyAddItemResponseType response = service.VerifyAddItem(request);
-            Console.WriteLine("ItemID: {0}", response.ItemID);
-
-            // If item is verified, the item will be added.
-            if (response.ItemID == "0")
-            {
-                Console.WriteLine("=====================================");
-                Console.WriteLine("Add Item Verified");
-                Console.WriteLine("=====================================");
-                AddItemRequest(item);
+                string s = exc.Message;
             }
         }
 
