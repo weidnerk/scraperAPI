@@ -98,6 +98,7 @@ namespace scrapeAPI.Models
         [Key]
         public string ItemId { get; set; }
         public string Title { get; set; }
+        public string ListingTitle { get; set; }
         public List<OrderHistory> Orders { get; set; }
         public string EbayUrl { get; set; }
         public string Description { get; set; }
@@ -107,6 +108,7 @@ namespace scrapeAPI.Models
         public string Source { get; set; }
         public string PrimaryCategoryID { get; set; }
         public string PrimaryCategoryName { get; set; }
+        public byte SourceId { get; set; }
     }
 
     public class IntModel
