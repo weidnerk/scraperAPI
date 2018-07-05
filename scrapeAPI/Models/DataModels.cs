@@ -111,6 +111,17 @@ namespace scrapeAPI.Models
         public byte SourceId { get; set; }
     }
 
+    [Table("vwPriceCompare")]
+    public class ImageCompare
+    {
+        public string SourceItemNo { get; set; }
+        public string SourceImgUrl { get; set; }
+        public string EbayImgUrl { get; set; }
+        public int CategoryId { get; set; }
+        [Key]
+        public DateTime DateOfPurchase { get; set; }
+    }
+
     public class IntModel
     {
         public string ID

@@ -27,6 +27,7 @@ namespace scrapeAPI.Models
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<SearchHistory> SearchHistory { get; set; }
         public DbSet<Listing> Listings { get; set; }
+        public DbSet<ImageCompare> ItemImages { get; set; }
 
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager

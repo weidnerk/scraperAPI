@@ -227,6 +227,15 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        // get source and ebay images
+        [HttpGet]
+        [Route("compareimages")]
+        public List<ImageCompare> GetImages(int categoryId)
+        {
+            var result = db.ItemImages.Where(r => r.CategoryId == categoryId).ToList();
+            return result ;
+        }
+
         [HttpGet]
         [Route("emailtaken")]
         public async Task<IHttpActionResult> GetEmailTaken(string email)
