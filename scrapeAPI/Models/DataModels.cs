@@ -119,10 +119,25 @@ namespace scrapeAPI.Models
         public string EbayImgUrl { get; set; }
         public int CategoryId { get; set; }
         [Key]
+        [Column(Order = 1)]
         public DateTime DateOfPurchase { get; set; }
         public int EbayImgCount { get; set; }
         public string PictureUrl { get; set; }
         public string EbayUrl { get; set; }
+        [Key]
+        [Column(Order = 2)]
+        public string EbayItemId { get; set; }
+        public string SourceUrl { get; set; }
+        public string SourceTitle { get; set; }
+        public string EbayTitle { get; set; }
+        public string EbaySeller { get; set; }
+        public string SoldQty { get; set; }
+        public string Limit { get; set; }
+        public string Availability { get; set; }
+        public decimal SourcePrice { get; set; }
+        public decimal EbaySellerPrice { get; set; }
+        public string SourceRating { get; set; }
+        public string PrimaryCategoryName { get; set; }
     }
 
     public class IntModel
