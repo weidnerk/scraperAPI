@@ -233,6 +233,11 @@ namespace scrapeAPI.Controllers
         public List<ImageCompare> GetImages(int categoryId)
         {
             var result = db.ItemImages.Where(r => r.CategoryId == categoryId).ToList();
+            foreach (ImageCompare rec in result)
+            {
+                var i = dsutil.DSUtil.DelimitedToList(rec.PictureUrl, ';');
+                rec.EbayImgCount = i.Count();
+            }
             return result ;
         }
 

@@ -120,6 +120,9 @@ namespace scrapeAPI.Models
         public int CategoryId { get; set; }
         [Key]
         public DateTime DateOfPurchase { get; set; }
+        public int EbayImgCount { get; set; }
+        public string PictureUrl { get; set; }
+        public string EbayUrl { get; set; }
     }
 
     public class IntModel

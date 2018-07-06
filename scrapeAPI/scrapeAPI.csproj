@@ -457,6 +457,12 @@
       <CachedSettingsPropName>scrapeAPI_com_ebay_developer_FindingService</CachedSettingsPropName>
     </WebReferenceUrl>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\dsutil\dsutil.csproj">
+      <Project>{7fa17f92-860b-4367-ab69-a3a417a29a79}</Project>
+      <Name>dsutil</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
