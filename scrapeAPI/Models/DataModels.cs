@@ -111,16 +111,39 @@ namespace scrapeAPI.Models
         public byte SourceId { get; set; }
     }
 
+    [Table("PostedListings")]
+    public class PostedListing
+    {
+        public string EbaySeller { get; set; }
+        [Key]
+        public string EbayItemID { get; set; }
+        public string EbayUrl { get; set; }
+        public int SourceID { get; set; }
+        public string SupplierItemID { get; set; }
+        public string SourceUrl { get; set; }
+        public decimal SupplierPrice { get; set; }
+        public string Title { get; set; }
+        public decimal Price { get; set; }
+        public string Description { get; set; }
+        public string Pictures { get; set; }
+        public int CategoryID { get; set; }
+        public string PrimaryCategoryID { get; set; }
+        public string PrimaryCategoryName { get; set; }
+        public string ListedItemID { get; set; }
+        public DateTime? Listed { get; set; }
+        public DateTime? Removed { get; set; }
+    }
+
     [Table("vwPriceCompare")]
     public class ImageCompare
     {
+        [Key]
+        [Column(Order = 1)]
         public string SourceItemNo { get; set; }
         public string SourceImgUrl { get; set; }
         public string EbayImgUrl { get; set; }
         public int CategoryId { get; set; }
-        [Key]
-        [Column(Order = 1)]
-        public DateTime DateOfPurchase { get; set; }
+        //public DateTime DateOfPurchase { get; set; }
         public int EbayImgCount { get; set; }
         public string PictureUrl { get; set; }
         public string EbayUrl { get; set; }
@@ -130,14 +153,26 @@ namespace scrapeAPI.Models
         public string SourceUrl { get; set; }
         public string SourceTitle { get; set; }
         public string EbayTitle { get; set; }
+        [Key]
+        [Column(Order = 3)]
         public string EbaySeller { get; set; }
-        public string SoldQty { get; set; }
+        public int SoldQty { get; set; }
         public string Limit { get; set; }
         public string Availability { get; set; }
         public decimal SourcePrice { get; set; }
+        [Key]
+        [Column(Order = 4)]
         public decimal EbaySellerPrice { get; set; }
         public string SourceRating { get; set; }
+        public string PrimaryCategoryID { get; set; }
         public string PrimaryCategoryName { get; set; }
+        public long FeedbackScore { get; set; }
+        public string SourceDescription { get; set; }
+        public string EbayDescription { get; set; }
+        public decimal ShippingAmount { get; set; }
+        public DateTime? PostedListingCreated { get; set; }
+        public DateTime? Listed { get; set; }
+        public DateTime? Removed { get; set; }
     }
 
     public class IntModel

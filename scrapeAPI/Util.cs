@@ -24,5 +24,19 @@ namespace scrapeAPI
             string[] array = str.Split(limiter);
             return array.ToList();
         }
+
+        public static string GetErrMsg(Exception exc)
+        {
+            string msg = exc.Message;
+            if (exc.InnerException != null)
+            {
+                msg += exc.InnerException.Message;
+                if (exc.InnerException.InnerException != null)
+                {
+                    msg += exc.InnerException.InnerException.Message;
+                }
+            }
+            return msg;
+        }
     }
 }

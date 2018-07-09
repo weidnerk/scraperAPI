@@ -27,6 +27,7 @@ namespace scrapeAPI.Models
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<SearchHistory> SearchHistory { get; set; }
         public DbSet<Listing> Listings { get; set; }
+        public DbSet<PostedListing> PostedListings { get; set; }
         public DbSet<ImageCompare> ItemImages { get; set; }
 
         private ApplicationUserManager _userManager;
@@ -45,26 +46,71 @@ namespace scrapeAPI.Models
             return found;
         }
 
+        public async Task<PostedListing> GetPostedListing(string itemId)
+        {
+            var found = await this.PostedListings.FirstOrDefaultAsync(r => r.EbayItemID == itemId);
+            return found;
+        }
+
         public async Task ListingSave(Listing listing)
         {
-            var found = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == listing.ItemId);
-            if (found == null)
-                Listings.Add(listing);
-            else
+            try
             {
-                found.ListingPrice = listing.ListingPrice;
-                found.Source = listing.Source;
-                found.PictureUrl = listing.PictureUrl;
-                found.Title = listing.Title;
-                found.ListingTitle = listing.ListingTitle;
-                found.EbayUrl = listing.EbayUrl;
-                found.PrimaryCategoryID = listing.PrimaryCategoryID;
-                found.PrimaryCategoryName = listing.PrimaryCategoryName;
-                found.Description = listing.Description;
-                found.SourceId = listing.SourceId;
-                this.Entry(found).State = EntityState.Modified;
+                var found = await this.Listings.FirstOrDefaultAsync(r => r.ItemId == listing.ItemId);
+                if (found == null)
+                    Listings.Add(listing);
+                else
+                {
+                    found.ListingPrice = listing.ListingPrice;
+                    found.Source = listing.Source;
+                    found.PictureUrl = listing.PictureUrl;
+                    found.Title = listing.Title;
+                    found.ListingTitle = listing.ListingTitle;
+                    found.EbayUrl = listing.EbayUrl;
+                    found.PrimaryCategoryID = listing.PrimaryCategoryID;
+                    found.PrimaryCategoryName = listing.PrimaryCategoryName;
+                    found.Description = listing.Description;
+                    found.SourceId = listing.SourceId;
+                    this.Entry(found).State = EntityState.Modified;
+                }
+                await this.SaveChangesAsync();
             }
-            await this.SaveChangesAsync();
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("", exc);
+            }
+        }
+
+        public async Task PostedListingSave(PostedListing listing)
+        {
+            try
+            {
+                var found = await this.PostedListings.FirstOrDefaultAsync(r => r.EbayItemID == listing.EbayItemID);
+                if (found == null)
+                    PostedListings.Add(listing);
+                else
+                {
+                    found.EbaySeller = listing.EbaySeller;
+                    found.Price = listing.Price;
+                    found.CategoryID = listing.CategoryID;
+                    found.SupplierItemID = listing.SupplierItemID;
+                    found.SourceUrl = listing.SourceUrl;
+                    found.Pictures = listing.Pictures;
+                    found.Title = listing.Title;
+                    found.Title = listing.Title;
+                    found.EbayUrl = listing.EbayUrl;
+                    found.PrimaryCategoryID = listing.PrimaryCategoryID;
+                    found.PrimaryCategoryName = listing.PrimaryCategoryName;
+                    found.Description = listing.Description;
+                    found.SourceID = listing.SourceID;  // 1=sams
+                    this.Entry(found).State = EntityState.Modified;
+                }
+                await this.SaveChangesAsync();
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("", exc);
+            }
         }
 
         public async Task<Listing> ListingGet(string itemId)
@@ -200,5 +246,43 @@ namespace scrapeAPI.Models
             }
             return taken;
         }
+
+        public async Task<bool> UpdateListedItemID(PostedListing listing, string listedItemID)
+        {
+            bool ret = false;
+            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.SourceID == listing.SourceID && r.SupplierItemID == listing.SupplierItemID);
+            if (rec != null)
+            {
+                ret = true;
+                rec.ListedItemID = listedItemID;
+
+                using (var context = new DataModelsDB())
+                {
+                    // Pass the entity to Entity Framework and mark it as modified
+                    context.Entry(rec).State = EntityState.Modified;
+                    context.SaveChanges();
+                }
+            }
+            return ret;
+        }
+        public async Task<bool> UpdateRemovedDate(PostedListing listing)
+        {
+            bool ret = false;
+            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.SourceID == listing.SourceID && r.SupplierItemID == listing.SupplierItemID);
+            if (rec != null)
+            {
+                ret = true;
+                rec.Removed = DateTime.Now;
+
+                using (var context = new DataModelsDB())
+                {
+                    // Pass the entity to Entity Framework and mark it as modified
+                    context.Entry(rec).State = EntityState.Modified;
+                    context.SaveChanges();
+                }
+            }
+            return ret;
+        }
+
     }
 }

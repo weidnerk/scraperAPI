@@ -20,8 +20,9 @@ namespace scrapeAPI
         ///     FREE shipping
         ///     buyer pays for return shipping
         /// </summary>
-        public static void VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs)
+        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs)
         {
+            string listedItemID = null;
             try
             {
                 //pictureURLs = new List<string>(){
@@ -60,7 +61,11 @@ namespace scrapeAPI
                 item.Country = CountryCodeType.US;
                 item.Currency = CurrencyCodeType.USD;
                 item.DispatchTimeMax = 3;
+
+                // https://developer.ebay.com/devzone/xml/docs/reference/ebay/types/ListingDurationCodeType.html
                 item.ListingDuration = "Days_30";
+                item.ListingDuration = "GTC";
+
                 // Buy It Now fixed price
                 item.ListingType = ListingTypeCodeType.FixedPriceItem;
                 // Auction
@@ -102,12 +107,14 @@ namespace scrapeAPI
                     Console.WriteLine("=====================================");
                     Console.WriteLine("Add Item Verified");
                     Console.WriteLine("=====================================");
-                    AddItemRequest(item);
+                    listedItemID = AddItemRequest(item);
                 }
+                return listedItemID;
             }
             catch (Exception exc)
             {
                 string s = exc.Message;
+                return null;
             }
         }
 
@@ -138,7 +145,7 @@ namespace scrapeAPI
         /// Add item to eBay. Once verified.
         /// </summary>
         /// <param name="item">Accepts ItemType object from VerifyAddItem method.</param>
-        public static void AddItemRequest(ItemType item)
+        public static string AddItemRequest(ItemType item)
         {
             eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("AddItem");
 
@@ -152,6 +159,7 @@ namespace scrapeAPI
 
             Console.WriteLine("Item Added");
             Console.WriteLine("ItemID: {0}", response.ItemID); // Item ID
+            return response.ItemID;
         }
 
         /// <summary>

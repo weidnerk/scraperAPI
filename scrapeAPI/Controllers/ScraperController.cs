@@ -19,6 +19,7 @@ using System.Web;
 using Microsoft.AspNet.Identity.Owin;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Web.Http.Results;
 
 namespace scrapeAPI.Controllers
 {
@@ -230,15 +231,23 @@ namespace scrapeAPI.Controllers
         // get source and ebay images
         [HttpGet]
         [Route("compareimages")]
-        public List<ImageCompare> GetImages(int categoryId)
+        public IHttpActionResult GetImages(int categoryId)
         {
-            var result = db.ItemImages.Where(r => r.CategoryId == categoryId).ToList();
-            foreach (ImageCompare rec in result)
+            try
             {
-                var i = dsutil.DSUtil.DelimitedToList(rec.PictureUrl, ';');
-                rec.EbayImgCount = i.Count();
+                var result = db.ItemImages.Where(r => r.CategoryId == categoryId).OrderBy(x => x.SourceItemNo).ToList();
+                foreach (ImageCompare rec in result)
+                {
+                    var i = dsutil.DSUtil.DelimitedToList(rec.PictureUrl, ';');
+                    rec.EbayImgCount = i.Count();
+                }
+                return Ok(result);
             }
-            return result ;
+            catch (Exception exc)
+            {
+                string msg = Util.GetErrMsg(exc);
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg));
+            }
         }
 
         [HttpGet]
@@ -369,6 +378,23 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("storepostedlisting")]
+        public async Task<IHttpActionResult> StorePostedListing(PostedListing listing)
+        {
+            try
+            {
+                await db.PostedListingSave(listing);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("StorePostedListing", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+
         [HttpGet]
         [Route("createlisting")]
         public async Task<IHttpActionResult> CreateListing(string itemId)
@@ -381,6 +407,41 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = HomeController.ErrMsg("StoreListing", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+
+        [HttpGet]
+        [Route("removelisting")]
+        public async Task<IHttpActionResult> RemoveListing(string ebayItemId)
+        {
+            try
+            {
+                var item = db.PostedListings.Single(r => r.EbayItemID == ebayItemId);
+                ebayAPIs.EndFixedPriceItem(item.ListedItemID);
+
+                await db.UpdateRemovedDate(item);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
+            }
+        }
+
+        [HttpGet]
+        [Route("createpostedlisting")]
+        public async Task<IHttpActionResult> CreatePostedListing(string itemId)
+        {
+            try
+            {
+                await PostedListingCreateAsync(itemId);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("CreatePostedListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -400,6 +461,25 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        protected async Task PostedListingCreateAsync(string itemId)
+        {
+            var listing = await db.GetPostedListing(itemId);
+            if (listing != null)
+            {
+                List<string> pictureURLs = Util.DelimitedToList(listing.Pictures, ';');
+                string verifyItemID = eBayItem.VerifyAddItemRequest(listing.Title,
+                    listing.Description,
+                    listing.PrimaryCategoryID,
+                    (double)listing.Price,
+                    pictureURLs);
+                if (!listing.Listed.HasValue)
+                {
+                    listing.Listed = DateTime.Now;
+                }
+                await db.UpdateListedItemID(listing, verifyItemID);
+            }
+        }
+
         [HttpGet]
         [Route("getlisting")]
         public async Task<IHttpActionResult> GetListing(string itemId)
@@ -414,6 +494,45 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = HomeController.ErrMsg("GetListing", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+        [HttpGet]
+        [Route("getitem")]
+        public IHttpActionResult GetItem(string ebayItemId, string ebayPrice)
+        {
+            try
+            {
+                // a seller may have sold his item at different prices
+                decimal price = Convert.ToDecimal(ebayPrice);
+                var item = db.ItemImages.Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price);
+                if (item == null)
+                    return NotFound();
+                return Ok(item);
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("GetItem", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+        [HttpGet]
+        [Route("getpostedlisting")]
+        public IHttpActionResult GetPostedListing(string ebayItemId)
+        {
+            try
+            {
+                // a seller may have sold his item at different prices
+                var item = db.PostedListings.SingleOrDefault(r => r.EbayItemID == ebayItemId);
+                if (item == null)
+                    return NotFound();
+                return Ok(item);
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("GetPostedListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }

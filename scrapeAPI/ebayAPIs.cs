@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using System.Xml.Serialization;
 using System.IO;
 using System.Xml.Linq;
+using eBay.Service.Util;
 
 namespace scrapeAPI
 {
@@ -29,6 +30,37 @@ namespace scrapeAPI
 
     public class ebayAPIs
     {
+        public static void EndFixedPriceItem(string itemID)
+        {
+
+            //create the context
+            ApiContext context = new ApiContext();
+
+            //set the User token
+            string token = AppSettingsHelper.Token;
+            context.ApiCredential.eBayToken = token;
+
+            //set the server url
+            string endpoint = AppSettingsHelper.Endpoint;
+            context.SoapApiServerUrl = endpoint;
+
+            //enable logging
+            context.ApiLogManager = new ApiLogManager();
+            context.ApiLogManager.ApiLoggerList.Add(new FileLogger("endprice_log.txt", true, true, true));
+            context.ApiLogManager.EnableLogging = true;
+
+            //set the version
+            context.Version = "817";
+            context.Site = eBay.Service.Core.Soap.SiteCodeType.US;
+
+            EndFixedPriceItemCall endFP = new EndFixedPriceItemCall(context);
+
+            endFP.ItemID = itemID;
+            endFP.EndingReason = EndReasonCodeType.NotAvailable;
+
+            endFP.Execute();
+            Console.WriteLine(endFP.ApiResponse.Ack + " Ended ItemID " + endFP.ItemID);
+        }
 
         // findCompletedItems
         // this is a member of the Finding API.  My understanding is that the .NET SDK only supports the Trading API
