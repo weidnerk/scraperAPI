@@ -129,7 +129,10 @@ namespace scrapeAPI
             //adding domestic shipping
 
             ShippingServiceOptionsType domesticShipping1 = new ShippingServiceOptionsType();
-            domesticShipping1.ShippingService = ShippingServiceCodeType.ShippingMethodStandard.ToString();
+
+            //domesticShipping1.ShippingService = ShippingServiceCodeType.ShippingMethodStandard.ToString();    // displays as "Standard Shipping"
+            domesticShipping1.ShippingService = ShippingServiceCodeType.Other.ToString();                       // displays as "Economy Shipping"
+
             domesticShipping1.ShippingServiceCost = new AmountType { Value = 0, currencyID = CurrencyCodeType.USD };
             domesticShipping1.ShippingInsuranceCost = new AmountType { Value = 0, currencyID = CurrencyCodeType.USD };
             domesticShipping1.ShippingServicePriority = 4;
