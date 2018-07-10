@@ -60,7 +60,7 @@ namespace scrapeAPI
                 item.ConditionID = 1000;    // new
                 item.Country = CountryCodeType.US;
                 item.Currency = CurrencyCodeType.USD;
-                item.DispatchTimeMax = 3;
+                item.DispatchTimeMax = 2;       // pretty sure this is handling time
 
                 // https://developer.ebay.com/devzone/xml/docs/reference/ebay/types/ListingDurationCodeType.html
                 item.ListingDuration = "Days_30";
@@ -82,13 +82,16 @@ namespace scrapeAPI
                 item.PictureDetails.PictureURL = new StringCollection();
                 item.PictureDetails.PictureURL.AddRange(pictureURLs.ToArray());
                 item.PostalCode = "33772";
-                item.Quantity = 1; // 1 If Auction
+                item.Quantity = 1;
+
+                string returnDescr = "Please return if unstatisfied.";
+                // returnDescr = "30 day returns. Buyer pays for return shipping";
                 item.ReturnPolicy = new ReturnPolicyType
                 {
                     ReturnsAcceptedOption = "ReturnsAccepted",
                     ReturnsWithinOption = "Days_30",
                     //RefundOption = "MoneyBack",
-                    Description = "Please return if unstatisfied.",
+                    Description = returnDescr,
                     ShippingCostPaidByOption = "Buyer",
                     RestockingFeeValue = "Percent_20",
                     RestockingFeeValueOption = "Percent_20"
