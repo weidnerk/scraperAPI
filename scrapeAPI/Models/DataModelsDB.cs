@@ -110,6 +110,7 @@ namespace scrapeAPI.Models
             catch (Exception exc)
             {
                 string msg = HomeController.ErrMsg("", exc);
+                throw;
             }
         }
 
