@@ -134,11 +134,10 @@ namespace scrapeAPI.Models
         public DateTime? Removed { get; set; }
     }
 
+    // can have repeating ebayitemid with different prices
     [Table("vwPriceCompare")]
     public class ImageCompare
     {
-        [Key]
-        [Column(Order = 1)]
         public string SourceItemNo { get; set; }
         public string SourceImgUrl { get; set; }
         public string EbayImgUrl { get; set; }
@@ -148,20 +147,18 @@ namespace scrapeAPI.Models
         public string PictureUrl { get; set; }
         public string EbayUrl { get; set; }
         [Key]
-        [Column(Order = 2)]
+        [Column(Order = 1)]
         public string EbayItemId { get; set; }
         public string SourceUrl { get; set; }
         public string SourceTitle { get; set; }
         public string EbayTitle { get; set; }
-        [Key]
-        [Column(Order = 3)]
         public string EbaySeller { get; set; }
         public int SoldQty { get; set; }
         public string Limit { get; set; }
         public string Availability { get; set; }
         public decimal SourcePrice { get; set; }
         [Key]
-        [Column(Order = 4)]
+        [Column(Order = 2)]
         public decimal EbaySellerPrice { get; set; }
         public string SourceRating { get; set; }
         public string PrimaryCategoryID { get; set; }

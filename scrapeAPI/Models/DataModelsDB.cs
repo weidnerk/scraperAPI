@@ -251,7 +251,7 @@ namespace scrapeAPI.Models
         public async Task<bool> UpdateListedItemID(PostedListing listing, string listedItemID)
         {
             bool ret = false;
-            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.SourceID == listing.SourceID && r.SupplierItemID == listing.SupplierItemID);
+            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.EbayItemID == listing.EbayItemID);
             if (rec != null)
             {
                 ret = true;
@@ -266,10 +266,11 @@ namespace scrapeAPI.Models
             }
             return ret;
         }
+
         public async Task<bool> UpdateRemovedDate(PostedListing listing)
         {
             bool ret = false;
-            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.SourceID == listing.SourceID && r.SupplierItemID == listing.SupplierItemID);
+            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.EbayItemID == listing.EbayItemID);
             if (rec != null)
             {
                 ret = true;
