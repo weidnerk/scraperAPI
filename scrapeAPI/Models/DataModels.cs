@@ -170,6 +170,8 @@ namespace scrapeAPI.Models
         public DateTime? PostedListingCreated { get; set; }
         public DateTime? Listed { get; set; }
         public DateTime? Removed { get; set; }
+        public decimal MinPrice { get; set; }               // need to sell for at least this to break even
+        public decimal CostPlusTax { get; set; }
     }
 
     public class IntModel
