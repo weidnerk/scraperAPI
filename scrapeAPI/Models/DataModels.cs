@@ -170,6 +170,8 @@ namespace scrapeAPI.Models
         public long FeedbackScore { get; set; }
         public string SourceDescription { get; set; }
         public string EbayDescription { get; set; }
+        [Key]
+        [Column(Order = 4)]
         public decimal ShippingAmount { get; set; }
         public DateTime? PostedListingCreated { get; set; }
         public DateTime? Listed { get; set; }
