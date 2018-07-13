@@ -134,10 +134,14 @@ namespace scrapeAPI.Models
         public DateTime? Removed { get; set; }
     }
 
-    // can have repeating ebayitemid with different prices
+    // How is key defined?
+    // Can have repeating ebayitemid with different prices
+    // and can have same ebay item mapped to multiple sams's items
     [Table("vwPriceCompare")]
     public class ImageCompare
     {
+        [Key]
+        [Column(Order = 1)]
         public string SourceItemNo { get; set; }
         public string SourceImgUrl { get; set; }
         public string EbayImgUrl { get; set; }
@@ -147,7 +151,7 @@ namespace scrapeAPI.Models
         public string PictureUrl { get; set; }
         public string EbayUrl { get; set; }
         [Key]
-        [Column(Order = 1)]
+        [Column(Order = 2)]
         public string EbayItemId { get; set; }
         public string SourceUrl { get; set; }
         public string SourceTitle { get; set; }
@@ -158,7 +162,7 @@ namespace scrapeAPI.Models
         public string Availability { get; set; }
         public decimal SourcePrice { get; set; }
         [Key]
-        [Column(Order = 2)]
+        [Column(Order = 3)]
         public decimal EbaySellerPrice { get; set; }
         public string SourceRating { get; set; }
         public string PrimaryCategoryID { get; set; }
