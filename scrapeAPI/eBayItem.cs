@@ -20,8 +20,9 @@ namespace scrapeAPI
         ///     FREE shipping
         ///     buyer pays for return shipping
         /// </summary>
-        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs)
+        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs, ref List<string> errors)
         {
+            //errors = null;
             string listedItemID = null;
             try
             {
@@ -92,9 +93,10 @@ namespace scrapeAPI
                     ReturnsWithinOption = "Days_30",
                     //RefundOption = "MoneyBack",
                     Description = returnDescr,
-                    ShippingCostPaidByOption = "Buyer",
-                    RestockingFeeValue = "Percent_20",
-                    RestockingFeeValueOption = "Percent_20"
+                    ShippingCostPaidByOption = "Buyer"
+                    //,
+                    //RestockingFeeValue = "Percent_20",
+                    //RestockingFeeValueOption = "Percent_20"
                 };
                 item.ShippingDetails = GetShippingDetail();
                 item.Site = SiteCodeType.US;
@@ -111,6 +113,13 @@ namespace scrapeAPI
                     Console.WriteLine("Add Item Verified");
                     Console.WriteLine("=====================================");
                     listedItemID = AddItemRequest(item);
+                }
+                else
+                {
+                    foreach(ErrorType e in response.Errors)
+                    {
+                        errors.Add(e.LongMessage);
+                    }
                 }
                 return listedItemID;
             }

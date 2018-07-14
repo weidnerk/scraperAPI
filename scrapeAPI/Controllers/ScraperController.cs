@@ -404,8 +404,14 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                await ListingCreateAsync(itemId);
-                return Ok();
+                var errors = await ListingCreateAsync(itemId);
+                if (errors != null)
+                {
+                    var errStr = Util.ListToDelimited(errors.ToArray(), ';');
+                    return BadRequest(errStr);
+                }
+                else
+                    return Ok();
             }
             catch (Exception exc)
             {
@@ -439,8 +445,14 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                await PostedListingCreateAsync(itemId);
-                return Ok();
+                var errors = await PostedListingCreateAsync(itemId);
+                if (errors.Count == 0)
+                    return Ok();
+                else
+                {
+                    var errStr = Util.ListToDelimited(errors.ToArray(), ';');
+                    return BadRequest(errStr);
+                }
             }
             catch (Exception exc)
             {
@@ -450,8 +462,9 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        protected async Task ListingCreateAsync(string itemId)
+        protected async Task<List<string>> ListingCreateAsync(string itemId)
         {
+            var errors = new List<string>();
             var listing = await db.GetListing(itemId);
             if (listing != null)
             {
@@ -460,12 +473,15 @@ namespace scrapeAPI.Controllers
                     "Description of item",
                     listing.PrimaryCategoryID,
                     (double)listing.ListingPrice,
-                    pictureURLs);
+                    pictureURLs,
+                    ref errors);
             }
+            return errors;
         }
 
-        protected async Task PostedListingCreateAsync(string itemId)
+        protected async Task<List<string>> PostedListingCreateAsync(string itemId)
         {
+            var errors = new List<string>();
             var listing = await db.GetPostedListing(itemId);
             if (listing != null)
             {
@@ -474,13 +490,18 @@ namespace scrapeAPI.Controllers
                     listing.Description,
                     listing.PrimaryCategoryID,
                     (double)listing.Price,
-                    pictureURLs);
-                if (!listing.Listed.HasValue)
+                    pictureURLs,
+                    ref errors);
+                if (errors.Count == 0)
                 {
-                    listing.Listed = DateTime.Now;
+                    if (!listing.Listed.HasValue)
+                    {
+                        listing.Listed = DateTime.Now;
+                    }
+                    await db.UpdateListedItemID(listing, verifyItemID);
                 }
-                await db.UpdateListedItemID(listing, verifyItemID);
             }
+            return errors;
         }
 
         [HttpGet]
