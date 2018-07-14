@@ -26,15 +26,6 @@ namespace scrapeAPI
             string listedItemID = null;
             try
             {
-                //pictureURLs = new List<string>(){
-                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/ZJcAAOSwzE9a0Qpl/$_57.JPG",
-                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/6eQAAOSwER1a0Qpn/$_57.JPG",
-                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/YPIAAOSwb~Ja0Qpq/$_57.JPG",
-                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/zhsAAOSwLjRa0Qps/$_57.JPG",
-                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/f-8AAOSwF-Ja0Qpv/$_57.JPG",
-                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/kokAAOSwbLZa0Qpy/$_57.JPG",
-                //    "https://i.ebayimg.com/00/s/MTUwMFgxNTAw/z/aZkAAOSwlila0Qp0/$_57.JPG"
-                //};
                 eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("VerifyAddItem");
 
                 VerifyAddItemRequestType request = new VerifyAddItemRequestType();
