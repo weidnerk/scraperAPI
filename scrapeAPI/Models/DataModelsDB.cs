@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
+using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNet.Identity.Owin;
@@ -28,7 +32,8 @@ namespace scrapeAPI.Models
         public DbSet<SearchHistory> SearchHistory { get; set; }
         public DbSet<Listing> Listings { get; set; }
         public DbSet<PostedListing> PostedListings { get; set; }
-        public DbSet<ImageCompare> ItemImages { get; set; }
+        //public DbSet<ImageCompare> ItemImages { get; set; }
+        public DbSet<SearchReport> SearchResults { get; set; }
 
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
@@ -38,6 +43,16 @@ namespace scrapeAPI.Models
             {
                 _userManager = value;
             }
+        }
+
+        public List<SearchReport> GetSearchReport(int categoryId)
+        {
+            List<SearchReport> data =
+                Database.SqlQuery<SearchReport>(
+                "select * from dbo.fnPriceCompare(@categoryId)",
+                new SqlParameter("@categoryId", categoryId))
+            .ToList();
+            return data;
         }
 
         public async Task<Listing> GetListing(string itemId)

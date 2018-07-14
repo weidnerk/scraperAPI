@@ -235,13 +235,16 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var result = db.ItemImages.Where(r => r.CategoryId == categoryId).OrderBy(x => x.SourceItemNo).ToList();
-                foreach (ImageCompare rec in result)
+                //var p = db.SearchResults.Where(r => r.CategoryId == categoryId).ToList();
+                var p = db.GetSearchReport(categoryId).OrderBy(x => x.SourceItemNo).ToList();
+
+                //var result = db.ItemImages.Where(r => r.CategoryId == categoryId).OrderBy(x => x.SourceItemNo).ToList();
+                foreach (SearchReport rec in p)
                 {
                     var i = dsutil.DSUtil.DelimitedToList(rec.PictureUrl, ';');
                     rec.EbayImgCount = i.Count();
                 }
-                return Ok(result);
+                return Ok(p);
             }
             catch (Exception exc)
             {
@@ -498,15 +501,16 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
         [HttpGet]
         [Route("getitem")]
-        public IHttpActionResult GetItem(string ebayItemId, string ebayPrice)
+        public IHttpActionResult GetItem(string ebayItemId, string ebayPrice, int categoryId)
         {
             try
             {
                 // a seller may have sold his item at different prices
                 decimal price = Convert.ToDecimal(ebayPrice);
-                var item = db.ItemImages.Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price);
+                var item = db.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId);
                 if (item == null)
                     return NotFound();
                 return Ok(item);
@@ -518,6 +522,7 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
         [HttpGet]
         [Route("getpostedlisting")]
         public IHttpActionResult GetPostedListing(string ebayItemId)

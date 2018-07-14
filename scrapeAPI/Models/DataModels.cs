@@ -137,21 +137,67 @@ namespace scrapeAPI.Models
     // How is key defined?
     // Can have repeating ebayitemid with different prices
     // and can have same ebay item mapped to multiple sams's items
-    [Table("vwPriceCompare")]
-    public class ImageCompare
+    //[Table("vwPriceCompare")]
+    //public class ImageCompare
+    //{
+    //    [Key]
+    //    [Column(Order = 2)]
+    //    public string SourceItemNo { get; set; }
+    //    public string SourceImgUrl { get; set; }
+    //    public string EbayImgUrl { get; set; }
+    //    [Key]
+    //    [Column(Order = 1)]
+    //    public int CategoryId { get; set; }
+    //    //public DateTime DateOfPurchase { get; set; }
+    //    public int EbayImgCount { get; set; }
+    //    public string PictureUrl { get; set; }
+    //    public string EbayUrl { get; set; }
+    //    [Key]
+    //    [Column(Order = 3)]
+    //    public string EbayItemId { get; set; }
+    //    public string SourceUrl { get; set; }
+    //    public string SourceTitle { get; set; }
+    //    public string EbayTitle { get; set; }
+    //    public string EbaySeller { get; set; }
+    //    public int SoldQty { get; set; }
+    //    public string Limit { get; set; }
+    //    public string Availability { get; set; }
+    //    public decimal SourcePrice { get; set; }
+    //    [Key]
+    //    [Column(Order = 4)]
+    //    public decimal EbaySellerPrice { get; set; }
+    //    public string SourceRating { get; set; }
+    //    public string PrimaryCategoryID { get; set; }
+    //    public string PrimaryCategoryName { get; set; }
+    //    public long FeedbackScore { get; set; }
+    //    public string SourceDescription { get; set; }
+    //    public string EbayDescription { get; set; }
+    //    [Key]
+    //    [Column(Order = 5)]
+    //    public decimal ShippingAmount { get; set; }
+    //    public DateTime? PostedListingCreated { get; set; }
+    //    public DateTime? Listed { get; set; }
+    //    public DateTime? Removed { get; set; }
+    //    public decimal MinPrice { get; set; }               // need to sell for at least this to break even
+    //    public decimal CostPlusTax { get; set; }
+    //}
+
+    public class SearchReport
     {
         [Key]
-        [Column(Order = 1)]
+        [Column(Order = 2)]
         public string SourceItemNo { get; set; }
         public string SourceImgUrl { get; set; }
         public string EbayImgUrl { get; set; }
+        [Key]
+        [Column(Order = 1)]
         public int CategoryId { get; set; }
         //public DateTime DateOfPurchase { get; set; }
         public int EbayImgCount { get; set; }
         public string PictureUrl { get; set; }
         public string EbayUrl { get; set; }
         [Key]
-        [Column(Order = 2)]
+        [Column(Order = 3)]
         public string EbayItemId { get; set; }
         public string SourceUrl { get; set; }
         public string SourceTitle { get; set; }
@@ -162,7 +208,7 @@ namespace scrapeAPI.Models
         public string Availability { get; set; }
         public decimal SourcePrice { get; set; }
         [Key]
-        [Column(Order = 3)]
+        [Column(Order = 4)]
         public decimal EbaySellerPrice { get; set; }
         public string SourceRating { get; set; }
         public string PrimaryCategoryID { get; set; }
@@ -171,7 +217,7 @@ namespace scrapeAPI.Models
         public string SourceDescription { get; set; }
         public string EbayDescription { get; set; }
         [Key]
-        [Column(Order = 4)]
+        [Column(Order = 5)]
         public decimal ShippingAmount { get; set; }
         public DateTime? PostedListingCreated { get; set; }
         public DateTime? Listed { get; set; }
