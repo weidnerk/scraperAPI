@@ -103,7 +103,7 @@ namespace scrapeAPI
                     Console.WriteLine("=====================================");
                     Console.WriteLine("Add Item Verified");
                     Console.WriteLine("=====================================");
-                    listedItemID = AddItemRequest(item);
+                    listedItemID = AddItemRequest(item, ref errors);
                 }
                 else
                 {
@@ -152,7 +152,7 @@ namespace scrapeAPI
         /// Add item to eBay. Once verified.
         /// </summary>
         /// <param name="item">Accepts ItemType object from VerifyAddItem method.</param>
-        public static string AddItemRequest(ItemType item)
+        public static string AddItemRequest(ItemType item, ref List<string> errors)
         {
             eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("AddItem");
 
@@ -163,6 +163,10 @@ namespace scrapeAPI
             request.Item = item;
 
             AddItemResponseType response = service.AddItem(request);
+            foreach (ErrorType e in response.Errors)
+            {
+                errors.Add(e.LongMessage);
+            }
 
             Console.WriteLine("Item Added");
             Console.WriteLine("ItemID: {0}", response.ItemID); // Item ID
