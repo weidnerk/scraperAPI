@@ -132,6 +132,7 @@ namespace scrapeAPI.Models
         public string ListedItemID { get; set; }
         public DateTime? Listed { get; set; }
         public DateTime? Removed { get; set; }
+        public byte ListedQty { get; set; }
     }
 
     // How is key defined?
@@ -184,20 +185,14 @@ namespace scrapeAPI.Models
 
     public class SearchReport
     {
-        [Key]
-        [Column(Order = 2)]
+        public int ID { get; set; }
         public string SourceItemNo { get; set; }
         public string SourceImgUrl { get; set; }
         public string EbayImgUrl { get; set; }
-        [Key]
-        [Column(Order = 1)]
         public int CategoryId { get; set; }
-        //public DateTime DateOfPurchase { get; set; }
         public int EbayImgCount { get; set; }
         public string PictureUrl { get; set; }
         public string EbayUrl { get; set; }
-        [Key]
-        [Column(Order = 3)]
         public string EbayItemId { get; set; }
         public string SourceUrl { get; set; }
         public string SourceTitle { get; set; }
@@ -207,8 +202,6 @@ namespace scrapeAPI.Models
         public string Limit { get; set; }
         public string Availability { get; set; }
         public decimal SourcePrice { get; set; }
-        [Key]
-        [Column(Order = 4)]
         public decimal EbaySellerPrice { get; set; }
         public string SourceRating { get; set; }
         public string PrimaryCategoryID { get; set; }
@@ -216,14 +209,15 @@ namespace scrapeAPI.Models
         public long FeedbackScore { get; set; }
         public string SourceDescription { get; set; }
         public string EbayDescription { get; set; }
-        [Key]
-        [Column(Order = 5)]
         public decimal ShippingAmount { get; set; }
         public DateTime? PostedListingCreated { get; set; }
         public DateTime? Listed { get; set; }
         public DateTime? Removed { get; set; }
         public decimal MinPrice { get; set; }               // need to sell for at least this to break even
         public decimal CostPlusTax { get; set; }
+        public byte? ListedQty { get; set; }
+        public DateTime? DatePurchased { get; set; }
+        public string ListedItemID { get; set; }
     }
 
     public class IntModel

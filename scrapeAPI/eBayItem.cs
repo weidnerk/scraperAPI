@@ -20,7 +20,7 @@ namespace scrapeAPI
         ///     FREE shipping
         ///     buyer pays for return shipping
         /// </summary>
-        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs, ref List<string> errors)
+        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs, ref List<string> errors, byte qtyToList)
         {
             //errors = null;
             string listedItemID = null;
@@ -74,7 +74,7 @@ namespace scrapeAPI
                 item.PictureDetails.PictureURL = new StringCollection();
                 item.PictureDetails.PictureURL.AddRange(pictureURLs.ToArray());
                 item.PostalCode = "33772";
-                item.Quantity = 1;
+                item.Quantity = qtyToList;
 
                 string returnDescr = "Please return if unstatisfied.";
                 // returnDescr = "30 day returns. Buyer pays for return shipping";

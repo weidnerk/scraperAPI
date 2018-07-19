@@ -465,17 +465,17 @@ namespace scrapeAPI.Controllers
         protected async Task<List<string>> ListingCreateAsync(string itemId)
         {
             var errors = new List<string>();
-            var listing = await db.GetListing(itemId);
-            if (listing != null)
-            {
-                List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
-                eBayItem.VerifyAddItemRequest(listing.Title,
-                    "Description of item",
-                    listing.PrimaryCategoryID,
-                    (double)listing.ListingPrice,
-                    pictureURLs,
-                    ref errors);
-            }
+            //var listing = await db.GetListing(itemId);
+            //if (listing != null)
+            //{
+            //    List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
+            //    eBayItem.VerifyAddItemRequest(listing.Title,
+            //        "Description of item",
+            //        listing.PrimaryCategoryID,
+            //        (double)listing.ListingPrice,
+            //        pictureURLs,
+            //        ref errors);
+            //}
             return errors;
         }
 
@@ -491,7 +491,8 @@ namespace scrapeAPI.Controllers
                     listing.PrimaryCategoryID,
                     (double)listing.Price,
                     pictureURLs,
-                    ref errors);
+                    ref errors,
+                    listing.ListedQty);
                 if (errors.Count == 0)
                 {
                     if (!listing.Listed.HasValue)
@@ -525,13 +526,11 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getitem")]
-        public IHttpActionResult GetItem(string ebayItemId, string ebayPrice, int categoryId)
+        public IHttpActionResult GetItem(int ID, int categoryId)
         {
             try
             {
-                // a seller may have sold his item at different prices
-                decimal price = Convert.ToDecimal(ebayPrice);
-                var item = db.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId);
+                var item = db.GetSearchReport(categoryId).Single(r => r.ID == ID && r.CategoryId == categoryId);
                 if (item == null)
                     return NotFound();
                 return Ok(item);

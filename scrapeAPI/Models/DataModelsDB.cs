@@ -118,6 +118,7 @@ namespace scrapeAPI.Models
                     found.PrimaryCategoryName = listing.PrimaryCategoryName;
                     found.Description = listing.Description;
                     found.SourceID = listing.SourceID;  // 1=sams
+                    found.ListedQty = listing.ListedQty;
                     this.Entry(found).State = EntityState.Modified;
                 }
                 await this.SaveChangesAsync();
