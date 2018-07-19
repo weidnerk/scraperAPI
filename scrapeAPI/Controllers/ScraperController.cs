@@ -497,13 +497,15 @@ namespace scrapeAPI.Controllers
                 // might get warnings and still get a listing item number
                 if (errors.Count == 0)
                 {
+                }
+                if (!string.IsNullOrEmpty(verifyItemID))
+                {
                     if (!listing.Listed.HasValue)
                     {
                         listing.Listed = DateTime.Now;
                     }
-                }
-                if (!string.IsNullOrEmpty(verifyItemID))
                     await db.UpdateListedItemID(listing, verifyItemID);
+                }
             }
             return errors;
         }
