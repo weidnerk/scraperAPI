@@ -493,14 +493,17 @@ namespace scrapeAPI.Controllers
                     pictureURLs,
                     ref errors,
                     listing.ListedQty);
+
+                // might get warnings and still get a listing item number
                 if (errors.Count == 0)
                 {
                     if (!listing.Listed.HasValue)
                     {
                         listing.Listed = DateTime.Now;
                     }
-                    await db.UpdateListedItemID(listing, verifyItemID);
                 }
+                if (!string.IsNullOrEmpty(verifyItemID))
+                    await db.UpdateListedItemID(listing, verifyItemID);
             }
             return errors;
         }
