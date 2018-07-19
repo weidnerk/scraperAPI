@@ -185,14 +185,21 @@ namespace scrapeAPI.Models
 
     public class SearchReport
     {
-        public int ID { get; set; }
+        public int? PostedListingID { get; set; }    // from PostedListings
+        [Key]
+        [Column(Order = 2)]
         public string SourceItemNo { get; set; }
         public string SourceImgUrl { get; set; }
         public string EbayImgUrl { get; set; }
+        [Key]
+        [Column(Order = 1)]
         public int CategoryId { get; set; }
+        //public DateTime DateOfPurchase { get; set; }
         public int EbayImgCount { get; set; }
         public string PictureUrl { get; set; }
         public string EbayUrl { get; set; }
+        [Key]
+        [Column(Order = 3)]
         public string EbayItemId { get; set; }
         public string SourceUrl { get; set; }
         public string SourceTitle { get; set; }
@@ -202,6 +209,8 @@ namespace scrapeAPI.Models
         public string Limit { get; set; }
         public string Availability { get; set; }
         public decimal SourcePrice { get; set; }
+        [Key]
+        [Column(Order = 4)]
         public decimal EbaySellerPrice { get; set; }
         public string SourceRating { get; set; }
         public string PrimaryCategoryID { get; set; }
@@ -209,6 +218,8 @@ namespace scrapeAPI.Models
         public long FeedbackScore { get; set; }
         public string SourceDescription { get; set; }
         public string EbayDescription { get; set; }
+        [Key]
+        [Column(Order = 5)]
         public decimal ShippingAmount { get; set; }
         public DateTime? PostedListingCreated { get; set; }
         public DateTime? Listed { get; set; }
