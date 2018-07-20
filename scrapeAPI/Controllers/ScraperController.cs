@@ -531,12 +531,13 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getitem")]
-        public IHttpActionResult GetItem(string ebayItemId, string ebayPrice, int categoryId)
+        public IHttpActionResult GetItem(string ebayItemId, string ebayPrice, int categoryId, string shippingAmt)
         {
             try
             {
                 decimal price = Convert.ToDecimal(ebayPrice);
-                var item = db.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId);
+                decimal shippingAmount = Convert.ToDecimal(shippingAmt);
+                var item = db.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId && r.ShippingAmount == shippingAmount);
                 if (item == null)
                     return NotFound();
                 return Ok(item);
