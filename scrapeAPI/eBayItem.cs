@@ -83,7 +83,7 @@ namespace scrapeAPI
                     ReturnsAcceptedOption = "ReturnsAccepted",
                     ReturnsWithinOption = "Days_30",
                     //RefundOption = "MoneyBack",
-                    Description = returnDescr,
+                    //Description = returnDescr,
                     ShippingCostPaidByOption = "Buyer"
                     //,
                     //RestockingFeeValue = "Percent_20",
