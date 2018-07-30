@@ -34,6 +34,7 @@ namespace scrapeAPI.Models
         public DbSet<PostedListing> PostedListings { get; set; }
         //public DbSet<ImageCompare> ItemImages { get; set; }
         public DbSet<SearchReport> SearchResults { get; set; }
+        public DbSet<SourceCategories> SourceCategories { get; set; }
 
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager

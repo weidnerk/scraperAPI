@@ -276,4 +276,11 @@ namespace scrapeAPI.Models
         public SearchItem searchItem { get; set; }
         public int PageNumber { get; set; }
     }
+
+    [Table("SourceCategories")]
+    public class SourceCategories
+    {
+        public int ID { get; set; }
+        public string SubCategory { get; set; }
+    }
 }

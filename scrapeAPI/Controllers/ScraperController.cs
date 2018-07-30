@@ -569,5 +569,21 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        [HttpGet]
+        [Route("getcategories")]
+        public IHttpActionResult GetCategories()
+        {
+            try
+            {
+                return Ok(db.SourceCategories.ToList());
+            }
+            catch (Exception exc)
+            {
+                string msg = HomeController.ErrMsg("GetCategories", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
     }
 }
