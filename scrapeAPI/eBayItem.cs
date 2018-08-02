@@ -68,7 +68,7 @@ namespace scrapeAPI
             };
                 item.AutoPay = true;    // require immediate payment
                                         // Default testing paypal email address
-                item.PayPalEmailAddress = "weidnerk@gmail.com";
+                item.PayPalEmailAddress = "ventures2019@gmail.com";
 
                 item.PictureDetails = new PictureDetailsType();
                 item.PictureDetails.PictureURL = new StringCollection();

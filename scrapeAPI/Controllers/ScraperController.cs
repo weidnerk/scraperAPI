@@ -352,7 +352,8 @@ namespace scrapeAPI.Controllers
                     return Ok(false);
                 else
                 {
-                    var i = await ebayAPIs.GetSingleItem(itemId, user);
+                    var profile = db.UserProfiles.Find(user.Id);
+                    var i = await ebayAPIs.GetSingleItem(itemId, profile.AppID);
                     return Ok(i);
                 }
             }

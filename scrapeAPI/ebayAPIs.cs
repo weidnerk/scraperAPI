@@ -475,14 +475,14 @@ namespace scrapeAPI
 
         // Purpose of GetSingleItem is to fetch properties such as a listing's description and photos
         // it is used when performing an auto-listing
-        public static async Task<Listing> GetSingleItem(string itemId, ApplicationUser user)
+        public static async Task<Listing> GetSingleItem(string itemId, string appid)
         {
             StringReader sr;
             string output;
             try
             {
                 DataModelsDB db = new DataModelsDB();
-                var profile = db.UserProfiles.Find(user.Id);
+                //var profile = db.UserProfiles.Find(user.Id);
 
                 //CustomShoppingService service = new CustomShoppingService();
                 //service.Url = "http://open.api.ebay.com/shopping";
@@ -497,7 +497,7 @@ namespace scrapeAPI
                 // Note: Since this is a demo appid, it is very critical to replace the appid with yours to ensure the proper servicing of your application.
                 //svc.Url = string.Format("http://open.api.ebay.com/shopping?appid={0}&version=523&siteid=0&callname=GetSingleItem&responseencoding=SOAP&requestencoding=SOAP", profile.AppID);
                 //svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,TextDescription&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
-                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
+                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", appid, itemId);
                 // create a new request type
                 GetSingleItemRequestType request = new GetSingleItemRequestType();
                 // put in your own item number
