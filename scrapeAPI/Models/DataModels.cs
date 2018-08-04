@@ -109,6 +109,9 @@ namespace scrapeAPI.Models
         public string PrimaryCategoryID { get; set; }
         public string PrimaryCategoryName { get; set; }
         public byte SourceId { get; set; }
+        public int Qty { get; set; }
+        public string ListingStatus { get; set; }
+
     }
 
     [Table("PostedListings")]

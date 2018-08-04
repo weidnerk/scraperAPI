@@ -62,6 +62,42 @@ namespace scrapeAPI
             Console.WriteLine(endFP.ApiResponse.Ack + " Ended ItemID " + endFP.ItemID);
         }
 
+        public static string ReviseQty(string listedItemID, int qty)
+        {
+
+            //create the context
+            ApiContext context = new ApiContext();
+
+            //set the User token
+            string token = AppSettingsHelper.Token;
+            context.ApiCredential.eBayToken = token;
+
+            //set the server url
+            string endpoint = AppSettingsHelper.Endpoint;
+            context.SoapApiServerUrl = endpoint;
+
+            //enable logging
+            context.ApiLogManager = new ApiLogManager();
+            context.ApiLogManager.ApiLoggerList.Add(new FileLogger("ebay_log.txt", true, true, true));
+            context.ApiLogManager.EnableLogging = true;
+
+            //set the version
+            context.Version = "817";
+            context.Site = eBay.Service.Core.Soap.SiteCodeType.US;
+
+            ReviseFixedPriceItemCall reviseFP = new ReviseFixedPriceItemCall(context);
+
+            ItemType item = new ItemType();
+            item.ItemID = listedItemID;
+            item.Quantity = qty;
+
+            reviseFP.Item = item;
+
+            reviseFP.Execute();
+            return reviseFP.ApiResponse.Ack.ToString();
+        }
+
+
         // findCompletedItems
         // this is a member of the Finding API.  My understanding is that the .NET SDK only supports the Trading API
         public static async Task FindItemsAsync()
@@ -497,7 +533,7 @@ namespace scrapeAPI
                 // Note: Since this is a demo appid, it is very critical to replace the appid with yours to ensure the proper servicing of your application.
                 //svc.Url = string.Format("http://open.api.ebay.com/shopping?appid={0}&version=523&siteid=0&callname=GetSingleItem&responseencoding=SOAP&requestencoding=SOAP", profile.AppID);
                 //svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,TextDescription&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
-                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", appid, itemId);
+                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", appid, itemId);
                 // create a new request type
                 GetSingleItemRequestType request = new GetSingleItemRequestType();
                 // put in your own item number
@@ -537,7 +573,10 @@ namespace scrapeAPI
                                  Price = r2.Element("ConvertedCurrentPrice"),
                                  ListingUrl = r2.Element("ViewItemURLForNaturalSearch"),
                                  PrimaryCategoryID = r2.Element("PrimaryCategoryID"),
-                                 PrimaryCategoryName = r2.Element("PrimaryCategoryName")
+                                 PrimaryCategoryName = r2.Element("PrimaryCategoryName"),
+                                 Quantity = r2.Element("Quantity"),
+                                 QuantitySold = r2.Element("QuantitySold"),
+                                 ListingStatus = r2.Element("ListingStatus")
                              }).Single();
 
                     var list = qryRecords.Elements("PictureURL")
@@ -552,6 +591,9 @@ namespace scrapeAPI
                     si.EbayUrl = r.ListingUrl.Value;
                     si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
                     si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
+                    si.Qty = Convert.ToInt32(r.Quantity.Value) - Convert.ToInt32(r.QuantitySold.Value);
+                    si.ListingStatus = r.ListingStatus.Value;
+                    //si.Qty = Convert.ToInt32(r.Quantity.Value);
                     return si;
                 }
             }
