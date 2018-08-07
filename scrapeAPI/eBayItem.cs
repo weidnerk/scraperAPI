@@ -90,7 +90,7 @@ namespace scrapeAPI
                     //RestockingFeeValueOption = "Percent_20"
                 };
                 item.ShippingDetails = GetShippingDetail();
-                item.DispatchTimeMax = 3;
+                item.DispatchTimeMax = 3;   // aka handling time
                 item.Site = SiteCodeType.US;
 
                 request.Item = item;
