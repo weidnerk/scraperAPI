@@ -90,6 +90,7 @@ namespace scrapeAPI
                     //RestockingFeeValueOption = "Percent_20"
                 };
                 item.ShippingDetails = GetShippingDetail();
+                item.DispatchTimeMax = 3;
                 item.Site = SiteCodeType.US;
 
                 request.Item = item;
@@ -142,8 +143,13 @@ namespace scrapeAPI
             domesticShipping1.ShippingServicePriority = 4;
             domesticShipping1.LocalPickup = false;
             domesticShipping1.FreeShipping = true;
+
+            // var s = new DispatchTimeMaxDetailsType();
+            // s.DispatchTimeMax = 3;
+
             sd.ShippingServiceOptions = new ShippingServiceOptionsTypeCollection(new[] { domesticShipping1 });
             sd.ShippingType = ShippingTypeCodeType.Flat;
+            
 
             return sd;
         }

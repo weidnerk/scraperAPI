@@ -94,7 +94,16 @@ namespace scrapeAPI
             reviseFP.Item = item;
 
             reviseFP.Execute();
-            return reviseFP.ApiResponse.Ack.ToString();
+            var r = reviseFP.ApiResponse;
+            string msg = r.Ack.ToString();
+            if (r.Errors.Count > 0)
+            {
+                foreach(eBay.Service.Core.Soap.ErrorType e in r.Errors)
+                {
+                    msg += " " + e.LongMessage;
+                }
+            }
+            return msg;
         }
 
 
