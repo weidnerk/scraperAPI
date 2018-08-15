@@ -76,8 +76,25 @@ namespace scrapeAPI
                 item.PostalCode = "33772";
                 item.Quantity = qtyToList;
 
+                item.ItemSpecifics = new NameValueListTypeCollection();
+
+                NameValueListTypeCollection ItemSpecs = new NameValueListTypeCollection();
+
+                var nv1 = new eBay.Service.Core.Soap.NameValueListType();
+                StringCollection valueCol1 = new StringCollection();
+
+                nv1.Name = "Brand";
+                valueCol1.Add("Unbranded");
+                nv1.Value = valueCol1;
+
+                ItemSpecs.Add(nv1);
+                item.ItemSpecifics = ItemSpecs;
+
                 var pd = new ProductListingDetailsType();
-                pd.BrandMPN.Brand = "Unbranded";
+                //var brand = new BrandMPNType();
+                //brand.Brand = "Unbranded";
+                //brand.MPN = unavailable;
+                //pd.BrandMPN = brand;
                 pd.UPC = "Does not apply";
                 item.ProductListingDetails = pd;
 
