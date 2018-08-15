@@ -62,9 +62,12 @@ namespace scrapeAPI
             Console.WriteLine(endFP.ApiResponse.Ack + " Ended ItemID " + endFP.ItemID);
         }
 
-        public static string ReviseQty(string listedItemID, int qty)
-        {
 
+        // use this for itemspecifics:
+        // https://ebaydts.com/eBayKBDetails?KBid=1647
+        //
+        public static string ReviseQty(string listedItemID, int? qty = null, double? price = null) 
+        {
             //create the context
             ApiContext context = new ApiContext();
 
@@ -89,7 +92,40 @@ namespace scrapeAPI
 
             ItemType item = new ItemType();
             item.ItemID = listedItemID;
-            item.Quantity = qty;
+
+            if (qty.HasValue)
+                item.Quantity = qty.Value;
+
+            if (price.HasValue)
+            {
+                item.StartPrice = new eBay.Service.Core.Soap.AmountType
+                {
+                    Value = price.Value,
+                    currencyID = eBay.Service.Core.Soap.CurrencyCodeType.USD
+                };
+            }
+
+            item.ItemSpecifics = new NameValueListTypeCollection();
+
+            NameValueListTypeCollection ItemSpecs = new NameValueListTypeCollection();
+
+            var nv1 = new eBay.Service.Core.Soap.NameValueListType();
+            StringCollection valueCol1 = new StringCollection();
+
+            nv1.Name = "Brand";
+            valueCol1.Add("Unbranded");
+            nv1.Value = valueCol1;
+
+            ItemSpecs.Add(nv1);
+            item.ItemSpecifics = ItemSpecs;
+
+            var pd = new ProductListingDetailsType();
+            //var brand = new BrandMPNType();
+            //brand.Brand = "Unbranded";
+            //brand.MPN = unavailable;
+            //pd.BrandMPN = brand;
+            pd.UPC = "Does not apply";
+            item.ProductListingDetails = pd;
 
             reviseFP.Item = item;
 
@@ -106,6 +142,36 @@ namespace scrapeAPI
             return msg;
         }
 
+        public static string GetebayDetails()
+        {
+            string unavailable = null;
+            try
+            {
+                ApiContext context = new ApiContext();
+                string token = AppSettingsHelper.Token;
+                context.ApiCredential.eBayToken = token;
+                context.SoapApiServerUrl = "https://api.ebay.com/wsapi";
+                // set the version 
+                context.Version = "865";
+                context.Site = eBay.Service.Core.Soap.SiteCodeType.US;
+
+                GeteBayDetailsCall request = new GeteBayDetailsCall(context);
+                request.DetailNameList = new DetailNameCodeTypeCollection();
+                request.DetailNameList.Add(DetailNameCodeType.ProductDetails);
+                GeteBayDetailsResponseType response = new GeteBayDetailsResponseType();
+                request.Execute();
+                response = request.ApiResponse;
+                if (response.Ack == eBay.Service.Core.Soap.AckCodeType.Success)
+                {
+                    unavailable = response.ProductDetails.ProductIdentifierUnavailableText;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return unavailable;
+        }
 
         // findCompletedItems
         // this is a member of the Finding API.  My understanding is that the .NET SDK only supports the Trading API

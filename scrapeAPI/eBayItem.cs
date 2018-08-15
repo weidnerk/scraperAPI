@@ -63,9 +63,9 @@ namespace scrapeAPI
                 // Auction
                 //item.ListingType = ListingTypeCodeType.Chinese; 
                 item.PaymentMethods = new BuyerPaymentMethodCodeTypeCollection
-            {
-                BuyerPaymentMethodCodeType.PayPal
-            };
+                {
+                    BuyerPaymentMethodCodeType.PayPal
+                };
                 item.AutoPay = true;    // require immediate payment
                                         // Default testing paypal email address
                 item.PayPalEmailAddress = "ventures2019@gmail.com";
@@ -75,6 +75,11 @@ namespace scrapeAPI
                 item.PictureDetails.PictureURL.AddRange(pictureURLs.ToArray());
                 item.PostalCode = "33772";
                 item.Quantity = qtyToList;
+
+                var pd = new ProductListingDetailsType();
+                pd.BrandMPN.Brand = "Unbranded";
+                pd.UPC = "Does not apply";
+                item.ProductListingDetails = pd;
 
                 string returnDescr = "Please return if unstatisfied.";
                 // returnDescr = "30 day returns. Buyer pays for return shipping";
