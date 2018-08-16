@@ -20,13 +20,16 @@ using Microsoft.AspNet.Identity.Owin;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Web.Http.Results;
+using dsmodels;
 
 namespace scrapeAPI.Controllers
 {
     [Authorize]
     public class ScraperController : ApiController
     {
-        DataModelsDB db = new DataModelsDB();
+        dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+        Models.DataModelsDB models = new Models.DataModelsDB();
+
         const string _filename = "order.csv";
         readonly string _logfile = "scrape_log.txt";
 
@@ -101,7 +104,7 @@ namespace scrapeAPI.Controllers
                 sh.Seller = seller;
                 sh.DaysBack = daysBack;
                 sh.MinSoldFilter = minSold;
-                await db.SearchHistorySave(sh);
+                await models.SearchHistorySave(sh);
 
                 var mv = await GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, user);
                 return Ok(mv);
@@ -119,7 +122,7 @@ namespace scrapeAPI.Controllers
         protected async Task<ModelView> GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, ApplicationUser user)
         {
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
-            var profile = db.UserProfiles.Find(user.Id);
+            var profile = models.UserProfiles.Find(user.Id);
             return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
         }
 
@@ -147,7 +150,7 @@ namespace scrapeAPI.Controllers
                 //                   grp.Key.DateOfPurchase
                 //               }).ToList();
 
-                var results = (from c in db.OrderHistory
+                var results = (from c in models.OrderHistory
                                where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
                                select c
                                ).ToList();
@@ -186,21 +189,21 @@ namespace scrapeAPI.Controllers
                     x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice <= maxPrice)));
 
                 // count listings processed so far
-                var listings = from o in db.OrderHistory
+                var listings = from o in models.OrderHistory
                                where o.RptNumber == rptNumber
                                group o by new { o.Title } into grp
                                select grp;
 
                 // count listings processed so far - matches
                 var matchedlistings = from c in results
-                                      join o in db.OrderHistory on c.Title equals o.Title
+                                      join o in models.OrderHistory on c.Title equals o.Title
                                       where o.RptNumber == rptNumber && !o.ListingEnded
                                       group c by new { c.Title, c.EbayUrl, o.RptNumber, c.ImageUrl } into grp
                                       select grp;
 
                 // count orders processed so far - matches
                 var orders = from c in results
-                             join o in db.OrderHistory on c.Title equals o.Title
+                             join o in models.OrderHistory on c.Title equals o.Title
                              where o.RptNumber == rptNumber && !o.ListingEnded
                              select o;
 
@@ -236,7 +239,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 //var p = db.SearchResults.Where(r => r.CategoryId == categoryId).ToList();
-                var p = db.GetSearchReport(categoryId).OrderBy(x => x.SourceItemNo).ToList();
+                var p = models.GetSearchReport(categoryId).OrderBy(x => x.SourceItemNo).ToList();
 
                 //var result = db.ItemImages.Where(r => r.CategoryId == categoryId).OrderBy(x => x.SourceItemNo).ToList();
                 foreach (SearchReport rec in p)
@@ -352,7 +355,7 @@ namespace scrapeAPI.Controllers
                     return Ok(false);
                 else
                 {
-                    var profile = db.UserProfiles.Find(user.Id);
+                    var profile = models.UserProfiles.Find(user.Id);
                     var i = await ebayAPIs.GetSingleItem(itemId, profile.AppID);
                     return Ok(i);
                 }
@@ -371,12 +374,12 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                await db.ListingSave(listing);
+                await models.ListingSave(listing);
                 return Ok();
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("StoreListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -388,12 +391,12 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                await db.PostedListingSave(listing);
+                await db.PostedListingSaveAsync(listing);
                 return Ok();
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("StorePostedListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("StorePostedListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -416,7 +419,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("StoreListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -431,7 +434,7 @@ namespace scrapeAPI.Controllers
                 var item = db.PostedListings.Single(r => r.EbayItemID == ebayItemId);
                 ebayAPIs.EndFixedPriceItem(item.ListedItemID);
 
-                await db.UpdateRemovedDate(item);
+                await models.UpdateRemovedDate(item);
                 return Ok();
             }
             catch (Exception exc)
@@ -457,7 +460,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("CreatePostedListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("CreatePostedListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -505,7 +508,41 @@ namespace scrapeAPI.Controllers
                     {
                         listing.Listed = DateTime.Now;
                     }
-                    await db.UpdateListedItemID(listing, verifyItemID);
+                    await models.UpdateListedItemID(listing, verifyItemID);
+                }
+            }
+            return errors;
+        }
+
+        public async Task<List<string>> PostedListingCreateAsync(int sourceID, string supplierItemID)
+        {
+            //dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+            //Models.DataModelsDB models = new Models.DataModelsDB();
+
+            var errors = new List<string>();
+            var listing = await db.GetPostedListing(sourceID, supplierItemID);
+            if (listing != null)
+            {
+                List<string> pictureURLs = Util.DelimitedToList(listing.Pictures, ';');
+                string verifyItemID = eBayItem.VerifyAddItemRequest(listing.Title,
+                    listing.Description,
+                    listing.PrimaryCategoryID,
+                    (double)listing.Price,
+                    pictureURLs,
+                    ref errors,
+                    listing.ListedQty);
+
+                // might get warnings and still get a listing item number
+                if (errors.Count == 0)
+                {
+                }
+                if (!string.IsNullOrEmpty(verifyItemID))
+                {
+                    if (!listing.Listed.HasValue)
+                    {
+                        listing.Listed = DateTime.Now;
+                    }
+                    await models.UpdateListedItemID(listing, verifyItemID);
                 }
             }
             return errors;
@@ -517,14 +554,14 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var listing = await db.ListingGet(itemId);
+                var listing = await models.ListingGet(itemId);
                 if (listing == null)
                     return NotFound();
                 return Ok(listing);
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("GetListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -538,14 +575,14 @@ namespace scrapeAPI.Controllers
             {
                 decimal price = Convert.ToDecimal(ebayPrice);
                 decimal shippingAmount = Convert.ToDecimal(shippingAmt);
-                var item = db.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId && r.ShippingAmount == shippingAmount);
+                var item = models.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId && r.ShippingAmount == shippingAmount);
                 if (item == null)
                     return NotFound();
                 return Ok(item);
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("GetItem", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetItem", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -565,7 +602,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("GetPostedListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetPostedListing", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -577,11 +614,11 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                return Ok(db.SourceCategories.ToList());
+                return Ok(models.SourceCategories.ToList());
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("GetCategories", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetCategories", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }

@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using dsmodels;
 using Microsoft.AspNet.Identity.Owin;
 using scrapeAPI.Controllers;
 
@@ -93,41 +94,7 @@ namespace scrapeAPI.Models
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("", exc);
-            }
-        }
-
-        public async Task PostedListingSave(PostedListing listing)
-        {
-            try
-            {
-                var found = await this.PostedListings.FirstOrDefaultAsync(r => r.EbayItemID == listing.EbayItemID);
-                if (found == null)
-                    PostedListings.Add(listing);
-                else
-                {
-                    found.EbaySeller = listing.EbaySeller;
-                    found.Price = listing.Price;
-                    found.CategoryID = listing.CategoryID;
-                    found.SupplierItemID = listing.SupplierItemID;
-                    found.SourceUrl = listing.SourceUrl;
-                    found.Pictures = listing.Pictures;
-                    found.Title = listing.Title;
-                    found.Title = listing.Title;
-                    found.EbayUrl = listing.EbayUrl;
-                    found.PrimaryCategoryID = listing.PrimaryCategoryID;
-                    found.PrimaryCategoryName = listing.PrimaryCategoryName;
-                    found.Description = listing.Description;
-                    found.SourceID = listing.SourceID;  // 1=sams
-                    found.ListedQty = listing.ListedQty;
-                    this.Entry(found).State = EntityState.Modified;
-                }
-                await this.SaveChangesAsync();
-            }
-            catch (Exception exc)
-            {
-                string msg = HomeController.ErrMsg("", exc);
-                throw;
+                string msg = dsutil.DSUtil.ErrMsg("", exc);
             }
         }
 
@@ -140,7 +107,7 @@ namespace scrapeAPI.Models
             }
             catch (Exception exc)
             {
-                string msg = HomeController.ErrMsg("", exc);
+                string msg = dsutil.DSUtil.ErrMsg("", exc);
                 return null;
             }
         }
@@ -268,11 +235,12 @@ namespace scrapeAPI.Models
         public async Task<bool> UpdateListedItemID(PostedListing listing, string listedItemID)
         {
             bool ret = false;
-            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.EbayItemID == listing.EbayItemID);
+            var rec = await this.PostedListings.FirstOrDefaultAsync(r => r.SourceID == listing.SourceID && r.SupplierItemID == listing.SupplierItemID);
             if (rec != null)
             {
                 ret = true;
                 rec.ListedItemID = listedItemID;
+                rec.Listed = listing.Listed;
 
                 using (var context = new DataModelsDB())
                 {

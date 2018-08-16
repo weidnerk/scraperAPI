@@ -18,6 +18,7 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Xml.Linq;
 using eBay.Service.Util;
+using dsmodels;
 
 namespace scrapeAPI
 {
@@ -342,7 +343,7 @@ namespace scrapeAPI
         // also look at GetOrderTransactions()
         public static TransactionTypeCollection GetItemTransactions(string itemId, DateTime ModTimeFrom, DateTime ModTimeTo, ApplicationUser user)
         {
-            DataModelsDB db = new DataModelsDB();
+            Models.DataModelsDB db = new Models.DataModelsDB();
             var profile = db.UserProfiles.Find(user.Id);
             ApiContext oContext = new ApiContext();
 
@@ -407,7 +408,7 @@ namespace scrapeAPI
         {
             try
             {
-                DataModelsDB db = new DataModelsDB();
+                Models.DataModelsDB db = new Models.DataModelsDB();
                 var profile = db.UserProfiles.Find(user.Id);
                 ApiContext oContext = new ApiContext();
 
@@ -449,7 +450,7 @@ namespace scrapeAPI
         {
             try
             {
-                DataModelsDB db = new DataModelsDB();
+                Models.DataModelsDB db = new Models.DataModelsDB();
                 var profile = db.UserProfiles.Find(user.Id);
                 ApiContext oContext = new ApiContext();
 
@@ -492,7 +493,7 @@ namespace scrapeAPI
         {
             try
             {
-                DataModelsDB db = new DataModelsDB();
+                Models.DataModelsDB db = new Models.DataModelsDB();
                 var profile = db.UserProfiles.Find(user.Id);
                 ApiContext oContext = new ApiContext();
 
@@ -592,7 +593,7 @@ namespace scrapeAPI
             string output;
             try
             {
-                DataModelsDB db = new DataModelsDB();
+                Models.DataModelsDB db = new Models.DataModelsDB();
                 //var profile = db.UserProfiles.Find(user.Id);
 
                 //CustomShoppingService service = new CustomShoppingService();
@@ -683,7 +684,7 @@ namespace scrapeAPI
         // ended up with GetSingleItem() instead
         public static FindItemsAdvancedResponse FindByKeyword(ApplicationUser user)
         {
-            DataModelsDB db = new DataModelsDB();
+            Models.DataModelsDB db = new Models.DataModelsDB();
 
             // Setting the required proterty value
 
@@ -924,7 +925,7 @@ namespace scrapeAPI
 
         public static int ItemCount(string seller, int daysBack, ApplicationUser user, int rptNumber)
         {
-            DataModelsDB db = new DataModelsDB();
+            Models.DataModelsDB db = new Models.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
             var listings = new List<Listing>();
@@ -960,7 +961,7 @@ namespace scrapeAPI
 
         public static async Task<ModelView> ToStart(string seller, int daysBack, ApplicationUser user, int rptNumber)
         {
-            DataModelsDB db = new DataModelsDB();
+            Models.DataModelsDB db = new Models.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
             var listings = new List<Listing>();
@@ -1001,7 +1002,7 @@ namespace scrapeAPI
         // Store transactions for a page of results
         protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
         {
-            DataModelsDB db = new DataModelsDB();
+            Models.DataModelsDB db = new Models.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
 
