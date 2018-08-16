@@ -483,6 +483,7 @@ namespace scrapeAPI.Controllers
             return errors;
         }
 
+        // itemId is id of the ebay seller's listing
         protected async Task<List<string>> PostedListingCreateAsync(string itemId)
         {
             var errors = new List<string>();

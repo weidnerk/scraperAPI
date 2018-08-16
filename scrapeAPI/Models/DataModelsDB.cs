@@ -63,12 +63,6 @@ namespace scrapeAPI.Models
             return found;
         }
 
-        public async Task<PostedListing> GetPostedListing(string itemId)
-        {
-            var found = await this.PostedListings.FirstOrDefaultAsync(r => r.EbayItemID == itemId);
-            return found;
-        }
-
         public async Task ListingSave(Listing listing)
         {
             try
