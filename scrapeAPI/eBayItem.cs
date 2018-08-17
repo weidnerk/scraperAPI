@@ -11,6 +11,7 @@ namespace scrapeAPI
         /// <summary>
         /// Verify whether item is ready to be added to eBay.
         /// 
+        /// Return listedItemID, output error 
         /// My presets are: 
         ///     NEW condition 
         ///     BuyItNow fixed price
@@ -81,13 +82,20 @@ namespace scrapeAPI
                 NameValueListTypeCollection ItemSpecs = new NameValueListTypeCollection();
 
                 var nv1 = new eBay.Service.Core.Soap.NameValueListType();
+                var nv2 = new eBay.Service.Core.Soap.NameValueListType();
                 StringCollection valueCol1 = new StringCollection();
+                StringCollection valueCol2 = new StringCollection();
 
                 nv1.Name = "Brand";
                 valueCol1.Add("Unbranded");
                 nv1.Value = valueCol1;
 
+                nv2.Name = "MPN";
+                valueCol2.Add("Does Not Apply");
+                nv2.Value = valueCol2;
+
                 ItemSpecs.Add(nv1);
+                ItemSpecs.Add(nv2);
                 item.ItemSpecifics = ItemSpecs;
 
                 var pd = new ProductListingDetailsType();
