@@ -515,13 +515,14 @@ namespace scrapeAPI.Controllers
             return errors;
         }
 
-        public async Task<List<string>> PostedListingCreateAsync(int sourceID, string supplierItemID)
+        // return errors
+        public async Task<List<string>> PostedListingCreateAsync(StagedListing staged)
         {
             //dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             //Models.DataModelsDB models = new Models.DataModelsDB();
 
             var errors = new List<string>();
-            var listing = await db.GetPostedListing(sourceID, supplierItemID);
+            var listing = await db.GetPostedListing(staged.SourceID, staged.SupplierItemID);
             if (listing != null)
             {
                 List<string> pictureURLs = Util.DelimitedToList(listing.Pictures, ';');
@@ -539,6 +540,7 @@ namespace scrapeAPI.Controllers
                 }
                 if (!string.IsNullOrEmpty(verifyItemID))
                 {
+                    staged.ListedItemID = verifyItemID;
                     if (!listing.Listed.HasValue)
                     {
                         listing.Listed = DateTime.Now;
