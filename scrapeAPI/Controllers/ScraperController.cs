@@ -617,7 +617,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                return Ok(models.SourceCategories.ToList());
+                return Ok(models.SourceCategories.Where(r => r.SourceID == 2).ToList());
             }
             catch (Exception exc)
             {

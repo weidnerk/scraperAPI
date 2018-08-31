@@ -229,5 +229,6 @@ namespace scrapeAPI.Models
     {
         public int ID { get; set; }
         public string SubCategory { get; set; }
+        public int SourceID { get; set; }
     }
 }
