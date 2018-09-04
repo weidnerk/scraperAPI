@@ -402,28 +402,28 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("createlisting")]
-        public async Task<IHttpActionResult> CreateListing(string itemId)
-        {
-            try
-            {
-                var errors = await ListingCreateAsync(itemId);
-                if (errors != null)
-                {
-                    var errStr = Util.ListToDelimited(errors.ToArray(), ';');
-                    return BadRequest(errStr);
-                }
-                else
-                    return Ok();
-            }
-            catch (Exception exc)
-            {
-                string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
-                HomeController.WriteFile(_logfile, msg);
-                return BadRequest(msg);
-            }
-        }
+        //[HttpGet]
+        //[Route("createlisting")]
+        //public async Task<IHttpActionResult> CreateListing(string itemId)
+        //{
+        //    try
+        //    {
+        //        var errors = await ListingCreateAsync(itemId);
+        //        if (errors != null)
+        //        {
+        //            var errStr = Util.ListToDelimited(errors.ToArray(), ';');
+        //            return BadRequest(errStr);
+        //        }
+        //        else
+        //            return Ok();
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
+        //        HomeController.WriteFile(_logfile, msg);
+        //        return BadRequest(msg);
+        //    }
+        //}
 
         [HttpGet]
         [Route("removelisting")]
@@ -466,22 +466,22 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        protected async Task<List<string>> ListingCreateAsync(string itemId)
-        {
-            var errors = new List<string>();
-            //var listing = await db.GetListing(itemId);
-            //if (listing != null)
-            //{
-            //    List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
-            //    eBayItem.VerifyAddItemRequest(listing.Title,
-            //        "Description of item",
-            //        listing.PrimaryCategoryID,
-            //        (double)listing.ListingPrice,
-            //        pictureURLs,
-            //        ref errors);
-            //}
-            return errors;
-        }
+        //protected async Task<List<string>> ListingCreateAsync(string itemId)
+        //{
+        //    var errors = new List<string>();
+        //    //var listing = await db.GetListing(itemId);
+        //    //if (listing != null)
+        //    //{
+        //    //    List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
+        //    //    eBayItem.VerifyAddItemRequest(listing.Title,
+        //    //        "Description of item",
+        //    //        listing.PrimaryCategoryID,
+        //    //        (double)listing.ListingPrice,
+        //    //        pictureURLs,
+        //    //        ref errors);
+        //    //}
+        //    return errors;
+        //}
 
         // itemId is id of the ebay seller's listing
         protected async Task<List<string>> PostedListingCreateAsync(string itemId)
