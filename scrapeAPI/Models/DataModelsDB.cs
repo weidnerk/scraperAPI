@@ -51,7 +51,7 @@ namespace scrapeAPI.Models
         {
             List<SearchReport> data =
                 Database.SqlQuery<SearchReport>(
-                "select * from dbo.fnPriceCompare(@categoryId)",
+                "select * from dbo.fnWalPriceCompare(@categoryId)",
                 new SqlParameter("@categoryId", categoryId))
             .ToList();
             return data;
