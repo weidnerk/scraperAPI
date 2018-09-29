@@ -9,17 +9,6 @@ using System.Web;
 
 namespace scrapeAPI.Models
 {
-    [Table("SearchHistory")]
-    public class SearchHistory
-    {
-        public int Id { get; set; }
-        public string UserId { get; set; }
-        public int ReportNumber { get; set; }
-        public string Seller { get; set; }
-        public int DaysBack { get; set; }
-        public int MinSoldFilter { get; set; }
-
-    }
 
     [Table("UserProfile")]
     public class UserProfile
@@ -71,6 +60,8 @@ namespace scrapeAPI.Models
         public int TotalOrders { get; set; }
         public double ElapsedSeconds { get; set; }
         public int PercentTotalItemsProcesssed { get; set; }
+        public int ReportNumber { get; set; }
+        public int ItemCount { get; set; }
     }
 
     // Listing is used for the research reporting.
@@ -224,11 +215,4 @@ namespace scrapeAPI.Models
         public int PageNumber { get; set; }
     }
 
-    [Table("SourceCategories")]
-    public class SourceCategories
-    {
-        public int ID { get; set; }
-        public string SubCategory { get; set; }
-        public int SourceID { get; set; }
-    }
 }

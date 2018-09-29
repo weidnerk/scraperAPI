@@ -1100,20 +1100,31 @@ namespace scrapeAPI
             }
         }
 
+        protected static string FormateBayTime(DateTime dt)
+        {
+            string dtStr = dt.Year + "-" + dt.Month.ToString("00") + "-" + dt.Day.ToString("00") + "T" + dt.Hour.ToString("00") + ":" + dt.Minute.ToString("00") + ":00.000Z";
+            return dtStr;
+        }
+
         protected static FindCompletedItemsRequest BuildReqest(string seller, int daysBack)
         {
             FindCompletedItemsRequest request = new FindCompletedItemsRequest();
 
             ItemFilter filterSeller = new ItemFilter();
             filterSeller.name = ItemFilterType.Seller;
-            filterSeller.paramName = "name";
-            filterSeller.paramValue = "Seller";
+            //filterSeller.paramName = "name";
+            //filterSeller.paramValue = "Seller";
             filterSeller.value = new string[] { seller };
 
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
-            string ModTimeToStr = ModTimeTo.Year + "-" + ModTimeTo.Month.ToString("00") + "-" + ModTimeTo.Day.ToString("00") + "T00:00:00.000Z";
-            string ModTimeFromStr = ModTimeFrom.Year + "-" + ModTimeFrom.Month.ToString("00") + "-" + ModTimeFrom.Day.ToString("00") + "T00:00:00.000Z";
+            string ModTimeToStr = FormateBayTime(ModTimeTo);
+            string ModTimeFromStr = FormateBayTime(ModTimeFrom); 
+
+            //DateTime ModTimeTo = DateTime.Now;
+            //DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
+            //string ModTimeToStr = ModTimeTo.ToString();
+            //string ModTimeFromStr = ModTimeFrom.ToString();
 
             ItemFilter filterEndTimeFrom = new ItemFilter();
             filterEndTimeFrom.name = ItemFilterType.EndTimeFrom;
@@ -1138,6 +1149,7 @@ namespace scrapeAPI
             itemFilters[0] = filterSeller;
             itemFilters[1] = filterEndTimeFrom;
             itemFilters[2] = filterEndTimeTo;
+            //itemFilters[3] = filterSoldOnly;
 
             request.itemFilter = itemFilters;
             return request;

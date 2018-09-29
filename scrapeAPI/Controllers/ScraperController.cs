@@ -43,6 +43,12 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [Route("getsearchhistory")]
+        public IHttpActionResult GetSearchHistory()
+        {
+            return Ok(models.SearchHistory.OrderByDescending(x => x.Updated));
+        }
+
         // Unused after developing GetSingleItem()
         [Route("prodbyid")]
         [HttpGet]
@@ -65,18 +71,27 @@ namespace scrapeAPI.Controllers
 
         [Route("numitemssold")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string userName, int rptNumber)
+        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string userName)
         {
             try
             {
                 // stub to delete a user
                 //AccountController.DeleteUsr("ventures2021@gmail.com");
                 //AccountController.DeleteUsr("aaronmweidner@gmail.com");
-
                 var user = await UserManager.FindByNameAsync(userName);
 
-                int itemCount = ebayAPIs.ItemCount(seller, daysBack, user, rptNumber);
-                return Ok(itemCount);
+                var sh = new SearchHistory();
+                sh.UserId = user.Id;
+                sh.Seller = seller;
+                sh.DaysBack = daysBack;
+                sh.MinSoldFilter = minSold;
+                var sh_updated = await db.SearchHistorySave(sh);
+
+                int itemCount = ebayAPIs.ItemCount(seller, daysBack, user, sh_updated.Id);
+                var mv = new ModelView();
+                mv.ItemCount = itemCount;
+                mv.ReportNumber = sh_updated.Id;
+                return Ok(mv);
             }
             catch (Exception exc)
             {
@@ -88,7 +103,7 @@ namespace scrapeAPI.Controllers
 
         [Route("getsellersold")]
         [HttpGet]
-        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, string userName)
+        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int minSold, string userName, int reportNumber)
         {
             try
             {
@@ -98,15 +113,8 @@ namespace scrapeAPI.Controllers
                 var user = await UserManager.FindByNameAsync(userName);
 
                 ebayAPIs.GetAPIStatus(user);
-                var sh = new SearchHistory();
-                sh.UserId = user.Id;
-                sh.ReportNumber = rptNumber;
-                sh.Seller = seller;
-                sh.DaysBack = daysBack;
-                sh.MinSoldFilter = minSold;
-                await models.SearchHistorySave(sh);
 
-                var mv = await GetSellerSoldAsync(seller, daysBack, resultsPerPg, rptNumber, minSold, user);
+                var mv = await GetSellerSoldAsync(seller, daysBack, resultsPerPg, reportNumber, minSold, user);
                 return Ok(mv);
             }
             catch (Exception exc)
@@ -613,17 +621,34 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getcategories")]
-        public IHttpActionResult GetCategories()
+        public IHttpActionResult GetCategories(int sourceId)
         {
             try
             {
-                return Ok(models.SourceCategories.Where(r => r.SourceID == 2).ToList());
+                return Ok(db.SourceCategories.Where(r => r.SourceID == sourceId).OrderBy(o => o.SubCategory).ToList());
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetCategories", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
+            }
+        }
+
+        [HttpDelete]
+        [Route("deletescan/{rptNumber}")]
+        [AcceptVerbs("DELETE")]
+        public async Task<IHttpActionResult> DeleteScan(int rptNumber)
+        {
+            try
+            {
+               await db.HistoryRemove(rptNumber);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = exc.Message;
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
     }

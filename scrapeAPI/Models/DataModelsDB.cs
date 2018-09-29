@@ -17,6 +17,8 @@ namespace scrapeAPI.Models
 
     public class DataModelsDB : DbContext
     {
+        dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+
         static DataModelsDB()
         {
             //do not try to create a database 
@@ -35,7 +37,6 @@ namespace scrapeAPI.Models
         public DbSet<PostedListing> PostedListings { get; set; }
         //public DbSet<ImageCompare> ItemImages { get; set; }
         public DbSet<SearchReport> SearchResults { get; set; }
-        public DbSet<SourceCategories> SourceCategories { get; set; }
 
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
@@ -49,12 +50,27 @@ namespace scrapeAPI.Models
 
         public List<SearchReport> GetSearchReport(int categoryId)
         {
-            List<SearchReport> data =
+            int sourceId = db.SourceIDFromCategory(categoryId);
+            if (sourceId == 2)
+            {
+                List<SearchReport> data =
+                    Database.SqlQuery<SearchReport>(
+                    "select * from dbo.fnWalPriceCompare(@categoryId)",
+                    new SqlParameter("@categoryId", categoryId))
+                .ToList();
+                return data;
+            }
+
+            if (sourceId == 1)
+            {
+                List<SearchReport> data =
                 Database.SqlQuery<SearchReport>(
-                "select * from dbo.fnWalPriceCompare(@categoryId)",
+                "select * from dbo.fnPriceCompare(@categoryId)",
                 new SqlParameter("@categoryId", categoryId))
-            .ToList();
-            return data;
+                .ToList();
+                return data;
+            }
+            return null;
         }
 
         public async Task<Listing> GetListing(string itemId)
@@ -135,18 +151,6 @@ namespace scrapeAPI.Models
                 ret = exc.Message;
             }
             return ret;
-        }
-
-        public async Task SearchHistorySave(SearchHistory sh)
-        {
-            try
-            {
-                SearchHistory.Add(sh);
-                await this.SaveChangesAsync();
-            }
-            catch (Exception exc)
-            {
-            }
         }
 
         public async Task<UserProfile> UserProfileGet(ApplicationUser usr)
