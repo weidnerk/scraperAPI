@@ -10,17 +10,6 @@ using System.Web;
 namespace scrapeAPI.Models
 {
 
-    [Table("UserProfile")]
-    public class UserProfile
-    {
-        public string Id { get; set; }
-        public string AppID { get; set; }
-        public string DevID { get; set; }
-        public string CertID { get; set; }
-        public string UserToken { get; set; }
-        public string Firstname { get; set; }
-        public string Lastname { get; set; }
-    }
     public class UserProfileVM
     {
         public string Id { get; set; }
@@ -31,6 +20,7 @@ namespace scrapeAPI.Models
         public string UserToken { get; set; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
+        public string ApplicationID { get; set; }
     }
 
     public class ModelViewTimesSold
@@ -51,11 +41,14 @@ namespace scrapeAPI.Models
         public decimal SupplierPrice { get; set; }
         public DateTime? EarliestSold { get; set; }
         public string ItemId { get; set; }
+        public DateTime? Listed { get; set; }
+        public string SellingState { get; set; }
+        public string ListingStatus { get; set; }
     }
 
     public class ModelView
     {
-        public List<Listing> Listings { get; set; }
+        public List<ListingX> Listings { get; set; }
         public int MatchedListings { get; set; }
         public int TotalOrders { get; set; }
         public double ElapsedSeconds { get; set; }
@@ -78,7 +71,7 @@ namespace scrapeAPI.Models
     //    public string EbayUrl { get; set; }
     //    public string Description { get; set; }
     //    public decimal SupplierPrice { get; set; }
-    //    public string PictureUrl { get;set; }   // store picture urls as a semi-colon delimited string
+    //    public string PictureUrl { get; set; }   // store picture urls as a semi-colon delimited string
     //    public decimal ListingPrice { get; set; }
     //    public string Source { get; set; }
     //    public string PrimaryCategoryID { get; set; }
@@ -204,7 +197,7 @@ namespace scrapeAPI.Models
         public DateTime? Removed { get; set; }
         public decimal MinPrice { get; set; }               // need to sell for at least this to break even
         public decimal CostPlusTax { get; set; }
-        public byte? ListedQty { get; set; }
+        public byte? Qty { get; set; }
         public DateTime? DatePurchased { get; set; }
         public string ListedItemID { get; set; }
     }

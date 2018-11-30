@@ -9,16 +9,15 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using scrapeAPI.Models;
 using System.Collections.Generic;
 using scrapeAPI.Controllers;
-using Newtonsoft.Json;
 using System.Xml.Serialization;
 using System.IO;
 using System.Xml.Linq;
 using eBay.Service.Util;
 using dsmodels;
+using Microsoft.AspNet.Identity;
 
 namespace scrapeAPI
 {
@@ -31,6 +30,10 @@ namespace scrapeAPI
 
     public class ebayAPIs
     {
+        readonly static string _logfile = "scrape_log.txt";
+        dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+        Models.DataModelsDB models = new Models.DataModelsDB();
+
         public static void EndFixedPriceItem(string itemID)
         {
 
@@ -67,7 +70,7 @@ namespace scrapeAPI
         // use this for itemspecifics:
         // https://ebaydts.com/eBayKBDetails?KBid=1647
         //
-        public static string ReviseQty(string listedItemID, int? qty = null, double? price = null) 
+        public static string ReviseItem(string listedItemID, int? qty = null, double? price = null, string title = null) 
         {
             //create the context
             ApiContext context = new ApiContext();
@@ -106,6 +109,11 @@ namespace scrapeAPI
                 };
             }
 
+            if (!string.IsNullOrEmpty(title))
+            {
+                item.Title = title;
+            }
+            /*
             item.ItemSpecifics = new NameValueListTypeCollection();
 
             NameValueListTypeCollection ItemSpecs = new NameValueListTypeCollection();
@@ -135,6 +143,7 @@ namespace scrapeAPI
             //pd.BrandMPN = brand;
             pd.UPC = "Does not apply";
             item.ProductListingDetails = pd;
+            */
 
             reviseFP.Item = item;
 
@@ -351,8 +360,8 @@ namespace scrapeAPI
         // also look at GetOrderTransactions()
         public static TransactionTypeCollection GetItemTransactions(string itemId, DateTime ModTimeFrom, DateTime ModTimeTo, ApplicationUser user)
         {
-            Models.DataModelsDB db = new Models.DataModelsDB();
-            var profile = db.UserProfiles.Find(user.Id);
+            dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+            var profile = db.GetUserProfile(user.Id);
             ApiContext oContext = new ApiContext();
 
             //set the dev,app,cert information
@@ -416,8 +425,8 @@ namespace scrapeAPI
         {
             try
             {
-                Models.DataModelsDB db = new Models.DataModelsDB();
-                var profile = db.UserProfiles.Find(user.Id);
+                dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+                var profile = db.GetUserProfile(user.Id);
                 ApiContext oContext = new ApiContext();
 
                 //set the dev,app,cert information
@@ -458,8 +467,8 @@ namespace scrapeAPI
         {
             try
             {
-                Models.DataModelsDB db = new Models.DataModelsDB();
-                var profile = db.UserProfiles.Find(user.Id);
+                dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+                var profile = db.GetUserProfile(user.Id);
                 ApiContext oContext = new ApiContext();
 
                 //set the dev,app,cert information
@@ -501,8 +510,8 @@ namespace scrapeAPI
         {
             try
             {
-                Models.DataModelsDB db = new Models.DataModelsDB();
-                var profile = db.UserProfiles.Find(user.Id);
+                dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+                var profile = db.GetUserProfile(user.Id);
                 ApiContext oContext = new ApiContext();
 
                 //set the dev,app,cert information
@@ -595,10 +604,12 @@ namespace scrapeAPI
 
         // Purpose of GetSingleItem is to fetch properties such as a listing's description and photos
         // it is used when performing an auto-listing
-        public static async Task<Listing> GetSingleItem(string itemId, string appid)
+        public static async Task<ListingX> GetSingleItem(string itemId, string appid)
         {
+            string errMsg = null;
             StringReader sr;
             string output;
+
             try
             {
                 Models.DataModelsDB db = new Models.DataModelsDB();
@@ -614,9 +625,6 @@ namespace scrapeAPI
 
                 Shopping svc = new Shopping();
                 // set the URL and it's parameters
-                // Note: Since this is a demo appid, it is very critical to replace the appid with yours to ensure the proper servicing of your application.
-                //svc.Url = string.Format("http://open.api.ebay.com/shopping?appid={0}&version=523&siteid=0&callname=GetSingleItem&responseencoding=SOAP&requestencoding=SOAP", profile.AppID);
-                //svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,TextDescription&appid={0}&version=515&ItemID={1}", profile.AppID, itemId);
                 svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", appid, itemId);
                 // create a new request type
                 GetSingleItemRequestType request = new GetSingleItemRequestType();
@@ -639,16 +647,26 @@ namespace scrapeAPI
 
                     #region Could not get xml deserialization to work - very annoying!
                     XmlSerializer x = new XmlSerializer(typeof(GetSingleItemResponseType));
-                                        //output = @"<?xml version='1.0' encoding='UTF-8'?>
+                    //output = @"<?xml version='1.0' encoding='UTF-8'?>
                     //  <GetSingleItemResponse>
                     //   <Timestamp>2018-04-18T21:18:17.064Z</Timestamp>
                     //</GetSingleItemResponse>
                     //";
                     #endregion
 
+                    errMsg = GetSingleItemError(output);
+                    if (!string.IsNullOrEmpty(errMsg))
+                    {
+                        throw new Exception(errMsg);
+                    }
+
                     XElement root = XElement.Parse(output);
                     var qryRecords = from record in root.Elements("Item")
                                      select record;
+                    if (qryRecords.Count() == 0)
+                    {
+                        return null;
+                    }
                     var r = (from r2 in qryRecords
                              select new
                              {
@@ -664,10 +682,10 @@ namespace scrapeAPI
                              }).Single();
 
                     var list = qryRecords.Elements("PictureURL")
-                           .Select(element => element.Value)
-                           .ToArray();
+                            .Select(element => element.Value)
+                            .ToArray();
 
-                    var si = new Listing();
+                    var si = new ListingX();
                     si.PictureUrl = Util.ListToDelimited(list, ';');
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
@@ -675,16 +693,37 @@ namespace scrapeAPI
                     si.EbayUrl = r.ListingUrl.Value;
                     si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
                     si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
-                    si.Qty = Convert.ToInt32(r.Quantity.Value) - Convert.ToInt32(r.QuantitySold.Value);
+                    byte x1 = Convert.ToByte(r.Quantity.Value);
+                    byte x2 = Convert.ToByte(r.QuantitySold.Value);
+                    si.Qty = (byte)(x1 - x2);
                     si.ListingStatus = r.ListingStatus.Value;
                     //si.Qty = Convert.ToInt32(r.Quantity.Value);
                     return si;
                 }
             }
-            catch (Exception ex)
+            catch (Exception exc)
             {
-                throw (ex);
+                string msg = " GetSingleItem " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                throw;
             }
+        }
+
+        protected static string GetSingleItemError(string output)
+        {
+            string errMsg = null;
+            try
+            {
+                var elem = XElement.Parse(output);
+                string xmlErr = null;
+                xmlErr = (string)elem.Element("Errors").Element("ShortMessage");
+                if (!string.IsNullOrEmpty(xmlErr))
+                {
+                    errMsg = xmlErr;
+                }
+            }
+            catch { }
+            return errMsg;
         }
 
         // Was being developed when trying to get details of an item number
@@ -692,13 +731,13 @@ namespace scrapeAPI
         // ended up with GetSingleItem() instead
         public static FindItemsAdvancedResponse FindByKeyword(ApplicationUser user)
         {
-            Models.DataModelsDB db = new Models.DataModelsDB();
+            dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
 
             // Setting the required proterty value
 
             CustomFindAdvanced service = new CustomFindAdvanced();
             service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
-            var profile = db.UserProfiles.Find(user.Id);
+            var profile = db.GetUserProfile(user.Id);
             service.appID = profile.AppID;
             FindItemsAdvancedRequest request = new FindItemsAdvancedRequest();
             request.keywords = "302704549832";
@@ -933,15 +972,15 @@ namespace scrapeAPI
 
         public static int ItemCount(string seller, int daysBack, ApplicationUser user, int rptNumber)
         {
-            Models.DataModelsDB db = new Models.DataModelsDB();
+            dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
-            var listings = new List<Listing>();
+            var listings = new List<ListingX>();
             int totalCount = 0;
 
             CustomFindSold service = new CustomFindSold();
             service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
-            var profile = db.UserProfiles.Find(user.Id);
+            var profile = db.GetUserProfile(user.Id);
             service.appID = profile.AppID;
             int currentPageNumber = 1;
 
@@ -969,14 +1008,16 @@ namespace scrapeAPI
 
         public static async Task<ModelView> ToStart(string seller, int daysBack, ApplicationUser user, int rptNumber)
         {
-            Models.DataModelsDB db = new Models.DataModelsDB();
+            dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
-            var listings = new List<Listing>();
+            var listings = new List<ListingX>();
 
             CustomFindSold service = new CustomFindSold();
             service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
-            var profile = db.UserProfiles.Find(user.Id);
+
+            // don't put actual db code here - need function to return profile object
+            var profile = db.GetUserProfile(user.Id);
             service.appID = profile.AppID;
             int currentPageNumber = 1;
 
@@ -1008,22 +1049,26 @@ namespace scrapeAPI
         }
 
         // Store transactions for a page of results
-        protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
+        protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<ListingX> listings, int pg)
         {
-            Models.DataModelsDB db = new Models.DataModelsDB();
+            dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
 
+            var profile = db.GetUserProfile(user.Id);
             foreach (SearchItem searchItem in result.item)
             {
+                var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID);
                 //var a = searchItem.itemId;
                 //var b = searchItem.title;
                 //var c = searchItem.listingInfo.listingType;
                 //var d = searchItem.viewItemURL;
                 //var e = searchItem.sellingStatus.currentPrice.Value;
                 //var f = searchItem.galleryURL;
+                //var g = searchItem.sellingStatus;
+                //var h = searchItem.sellingStatus.timeLeft;
 
-                var listing = new Listing();
+                var listing = new ListingX();
                 listing.Title = searchItem.title;
 
                 // loop through each order
@@ -1050,7 +1095,7 @@ namespace scrapeAPI
                             order.Title = searchItem.title;
                             order.Qty = item.QuantityPurchased.ToString();
 
-                            order.SupplierPrice = item.TransactionPrice.Value.ToString();
+                            order.SellerPrice = item.TransactionPrice.Value.ToString();
 
                             order.DateOfPurchase = item.CreatedDate;
                             order.EbayUrl = searchItem.viewItemURL;
@@ -1058,11 +1103,13 @@ namespace scrapeAPI
                             var pictures = searchItem.pictureURLLarge;
                             order.PageNumber = pg;
                             order.ItemId = searchItem.itemId;
+                            order.SellingState = searchItem.sellingStatus.sellingState;
+                            order.ListingStatus = i.ListingStatus;
 
                             // testing GetSingleItem
                             // purpose of GetSingleItem is to fetch properties like listing descriptiong
                             // it is used when performing an auto-listing
-                            // var r = await GetSingleItem(order.ItemId, user);
+                            // var r = await GetSingleItem(user.UserName, order.ItemId);
 
                             orderHistory.Add(order);
                         }
@@ -1096,6 +1143,7 @@ namespace scrapeAPI
                 {
                     string msg = " StoreTransactions " + exc.Message;
                     HomeController.WriteFile(_logfile, msg);
+                    throw;
                 }
             }
         }

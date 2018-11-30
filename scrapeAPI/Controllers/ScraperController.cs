@@ -130,7 +130,7 @@ namespace scrapeAPI.Controllers
         protected async Task<ModelView> GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, ApplicationUser user)
         {
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
-            var profile = models.UserProfiles.Find(user.Id);
+            var profile = db.GetUserProfile(user.Id);
             return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
         }
 
@@ -158,23 +158,26 @@ namespace scrapeAPI.Controllers
                 //                   grp.Key.DateOfPurchase
                 //               }).ToList();
 
-                var results = (from c in models.OrderHistory
-                               where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
+                var results = (from c in models.SellerOrderHistory
+                               where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom // && c.ItemId == "352518109311"
                                select c
                                ).ToList();
 
                 // group by title and price and filter by minSold
                 var x = from a in results
-                        group a by new { a.Title, a.SupplierPrice } into grp
+                        group a by new { a.Title, a.SellerPrice, a.ItemId } into grp
                         select new
-                              {
-                                grp.Key.Title,
-                                Price = Convert.ToDecimal(grp.Key.SupplierPrice),
-                                Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
-                                MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase)),
-                                Url = grp.Max(s => s.EbayUrl),
-                                ImageUrl = grp.Max(s => s.ImageUrl),
-                                ItemId = grp.Max(s => s.ItemId)
+                        {
+                            grp.Key.Title,
+                            Price = Convert.ToDecimal(grp.Key.SellerPrice),
+                            Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
+                            MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase)),
+                            Url = grp.Max(s => s.EbayUrl),
+                            ImageUrl = grp.Max(s => s.ImageUrl),
+                            ItemId = grp.Max(s => s.ItemId),
+                            SellingState = grp.Max(s => s.SellingState),
+                            ListingStatus = grp.Max(s => s.ListingStatus),
+                            Listed = grp.Max(s => s.Listed)
                         } into g
                               where g.Qty >= minSold
                               orderby g.MaxDate descending
@@ -186,32 +189,35 @@ namespace scrapeAPI.Controllers
                                   SupplierPrice = g.Price,
                                   SoldQty = g.Qty,
                                   EarliestSold = g.MaxDate,
-                                  ItemId = g.ItemId
-                              };
+                                  ItemId = g.ItemId,
+                                  SellingState = g.SellingState,
+                                  ListingStatus = g.ListingStatus,
+                                  Listed = g.Listed
+                        };
 
                 // filter by min and max price
                 if (minPrice.HasValue)
-                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice >= minPrice)));
+                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice >= minPrice)));
 
                 if (maxPrice.HasValue)
-                    x = Enumerable.Where<TimesSold>(x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice <= maxPrice)));
+                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice <= maxPrice)));
 
                 // count listings processed so far
-                var listings = from o in models.OrderHistory
+                var listings = from o in models.SellerOrderHistory
                                where o.RptNumber == rptNumber
                                group o by new { o.Title } into grp
                                select grp;
 
                 // count listings processed so far - matches
                 var matchedlistings = from c in results
-                                      join o in models.OrderHistory on c.Title equals o.Title
+                                      join o in models.SellerOrderHistory on c.Title equals o.Title
                                       where o.RptNumber == rptNumber && !o.ListingEnded
                                       group c by new { c.Title, c.EbayUrl, o.RptNumber, c.ImageUrl } into grp
                                       select grp;
 
                 // count orders processed so far - matches
                 var orders = from c in results
-                             join o in models.OrderHistory on c.Title equals o.Title
+                             join o in models.SellerOrderHistory on c.Title equals o.Title
                              where o.RptNumber == rptNumber && !o.ListingEnded
                              select o;
 
@@ -252,9 +258,27 @@ namespace scrapeAPI.Controllers
                 //var result = db.ItemImages.Where(r => r.CategoryId == categoryId).OrderBy(x => x.SourceItemNo).ToList();
                 foreach (SearchReport rec in p)
                 {
-                    var i = dsutil.DSUtil.DelimitedToList(rec.PictureUrl, ';');
+                    var i = dsutil.DSUtil.DelimitedToList(rec.SourceImgUrl, ';');
                     rec.EbayImgCount = i.Count();
                 }
+                return Ok(p);
+            }
+            catch (Exception exc)
+            {
+                string msg = Util.GetErrMsg(exc);
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg));
+            }
+        }
+
+        [HttpGet]
+        [Route("getappids")]
+        public async Task<IHttpActionResult> GetAppIds(string username)
+        {
+            try
+            {
+                var user = await UserManager.FindByNameAsync(username);
+                var p = db.GetAppIDs(user.Id);
+
                 return Ok(p);
             }
             catch (Exception exc)
@@ -363,7 +387,7 @@ namespace scrapeAPI.Controllers
                     return Ok(false);
                 else
                 {
-                    var profile = models.UserProfiles.Find(user.Id);
+                    var profile = db.GetUserProfile(user.Id);
                     var i = await ebayAPIs.GetSingleItem(itemId, profile.AppID);
                     return Ok(i);
                 }
@@ -378,11 +402,12 @@ namespace scrapeAPI.Controllers
 
         [HttpPost]
         [Route("storelisting")]
-        public async Task<IHttpActionResult> StoreListing(Listing listing)
+        public async Task<IHttpActionResult> StoreListing(ListingX listing)
         {
             try
             {
-                await models.ListingSave(listing);
+                listing.Qty = 1;
+                await db.ListingSave(listing);
                 return Ok();
             }
             catch (Exception exc)
@@ -395,7 +420,7 @@ namespace scrapeAPI.Controllers
 
         [HttpPost]
         [Route("storepostedlisting")]
-        public async Task<IHttpActionResult> StorePostedListing(PostedListing listing)
+        public async Task<IHttpActionResult> StorePostedListing(ListingX listing)
         {
             try
             {
@@ -410,28 +435,33 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route("createlisting")]
-        //public async Task<IHttpActionResult> CreateListing(string itemId)
-        //{
-        //    try
-        //    {
-        //        var errors = await ListingCreateAsync(itemId);
-        //        if (errors != null)
-        //        {
-        //            var errStr = Util.ListToDelimited(errors.ToArray(), ';');
-        //            return BadRequest(errStr);
-        //        }
-        //        else
-        //            return Ok();
-        //    }
-        //    catch (Exception exc)
-        //    {
-        //        string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
-        //        HomeController.WriteFile(_logfile, msg);
-        //        return BadRequest(msg);
-        //    }
-        //}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="itemId">ebay seller listing id</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("createlisting")]
+        public async Task<IHttpActionResult> CreateListing(string itemId)
+        {
+            try
+            {
+                var errors = await ListingCreateAsync(itemId);
+                if (errors != null)
+                {
+                    var errStr = Util.ListToDelimited(errors.ToArray(), ';');
+                    return BadRequest(errStr);
+                }
+                else
+                    return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("CreateListing", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
 
         [HttpGet]
         [Route("removelisting")]
@@ -439,10 +469,10 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var item = db.PostedListings.Single(r => r.EbayItemID == ebayItemId);
+                var item = db.Listings.Single(r => r.ListedItemID == ebayItemId);
                 ebayAPIs.EndFixedPriceItem(item.ListedItemID);
 
-                await models.UpdateRemovedDate(item);
+                await db.UpdateRemovedDate(item);
                 return Ok();
             }
             catch (Exception exc)
@@ -474,22 +504,52 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        //protected async Task<List<string>> ListingCreateAsync(string itemId)
-        //{
-        //    var errors = new List<string>();
-        //    //var listing = await db.GetListing(itemId);
-        //    //if (listing != null)
-        //    //{
-        //    //    List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
-        //    //    eBayItem.VerifyAddItemRequest(listing.Title,
-        //    //        "Description of item",
-        //    //        listing.PrimaryCategoryID,
-        //    //        (double)listing.ListingPrice,
-        //    //        pictureURLs,
-        //    //        ref errors);
-        //    //}
-        //    return errors;
-        //}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="itemId">ebay seller listing id</param>
+        /// <returns></returns>
+        protected async Task<List<string>> ListingCreateAsync(string itemId)
+        {
+            var errors = new List<string>();
+            var listing = await db.ListingXGet(itemId);     // item has to be stored before it can be listed
+            if (listing != null)
+            {
+                // if item is listed already, then revise
+                if (listing.Listed == null)
+                {
+                    List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
+                    string verifyItemID = eBayItem.VerifyAddItemRequest(listing.ListingTitle,
+                        listing.Description,
+                        listing.PrimaryCategoryID,
+                        (double)listing.ListingPrice,
+                        pictureURLs,
+                        ref errors,
+                        2);
+
+                    // might get warnings and still get a listing item number
+                    if (errors.Count == 0)
+                    {
+                    }
+                    if (!string.IsNullOrEmpty(verifyItemID))
+                    {
+                        if (!listing.Listed.HasValue)
+                        {
+                            listing.Listed = DateTime.Now;
+                        }
+                        await db.UpdateListedItemID(listing, verifyItemID);
+                    }
+                }
+                else
+                {
+                    ebayAPIs.ReviseItem(listing.ListedItemID, 
+                                        qty: listing.Qty, 
+                                        price: Convert.ToDouble(listing.ListingPrice), 
+                                        title: listing.ListingTitle);
+                }
+            }
+            return errors;
+        }
 
         // itemId is id of the ebay seller's listing
         protected async Task<List<string>> PostedListingCreateAsync(string itemId)
@@ -498,14 +558,14 @@ namespace scrapeAPI.Controllers
             var listing = await db.GetPostedListing(itemId);
             if (listing != null)
             {
-                List<string> pictureURLs = Util.DelimitedToList(listing.Pictures, ';');
+                List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
                 string verifyItemID = eBayItem.VerifyAddItemRequest(listing.Title,
                     listing.Description,
                     listing.PrimaryCategoryID,
-                    (double)listing.Price,
+                    (double)listing.ListingPrice,
                     pictureURLs,
                     ref errors,
-                    listing.ListedQty);
+                    listing.Qty);
 
                 // might get warnings and still get a listing item number
                 if (errors.Count == 0)
@@ -517,7 +577,7 @@ namespace scrapeAPI.Controllers
                     {
                         listing.Listed = DateTime.Now;
                     }
-                    await models.UpdateListedItemID(listing, verifyItemID);
+                    await db.UpdateListedItemID(listing, verifyItemID);
                 }
             }
             return errors;
@@ -533,14 +593,14 @@ namespace scrapeAPI.Controllers
             var listing = await db.GetPostedListing(staged.SourceID, staged.SupplierItemID);
             if (listing != null)
             {
-                List<string> pictureURLs = Util.DelimitedToList(listing.Pictures, ';');
+                List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
                 string verifyItemID = eBayItem.VerifyAddItemRequest(listing.Title,
                     listing.Description,
                     listing.PrimaryCategoryID,
-                    (double)listing.Price,
+                    (double)listing.ListingPrice,
                     pictureURLs,
                     ref errors,
-                    listing.ListedQty);
+                    listing.Qty);
 
                 // might get warnings and still get a listing item number
                 if (errors.Count == 0)
@@ -553,7 +613,7 @@ namespace scrapeAPI.Controllers
                     {
                         listing.Listed = DateTime.Now;
                     }
-                    await models.UpdateListedItemID(listing, verifyItemID);
+                    await db.UpdateListedItemID(listing, verifyItemID);
                 }
             }
             return errors;
@@ -565,7 +625,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var listing = await models.ListingGet(itemId);
+                var listing = await db.ListingGet(itemId);
                 if (listing == null)
                     return NotFound();
                 return Ok(listing);
@@ -573,6 +633,25 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+
+        [HttpGet]
+        [Route("getlistingx")]
+        public async Task<IHttpActionResult> GetListingX(string itemId)
+        {
+            try
+            {
+                var listing = await db.ListingXGet(itemId);
+                if (listing == null)
+                    return NotFound();
+                return Ok(listing);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetListingX", exc);
                 HomeController.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
@@ -606,7 +685,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 // a seller may have sold his item at different prices
-                var item = db.PostedListings.SingleOrDefault(r => r.EbayItemID == ebayItemId);
+                var item = db.Listings.SingleOrDefault(r => r.ListedItemID == ebayItemId);
                 if (item == null)
                     return NotFound();
                 return Ok(item);

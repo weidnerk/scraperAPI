@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.ModelBinding;
+using dsmodels;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
@@ -45,7 +46,8 @@ namespace scrapeAPI.Controllers
     [RoutePrefix("api/Account")]
     public class AccountController : ApiController
     {
-        private DataModelsDB db = new DataModelsDB();
+        private scrapeAPI.Models.DataModelsDB db = new scrapeAPI.Models.DataModelsDB();
+        dsmodels.DataModelsDB models = new dsmodels.DataModelsDB();
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
         const string _logfile = "scrape_log.txt";
@@ -155,12 +157,29 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("usersettingsave")]
+        public async Task<IHttpActionResult> UserSettingSave(UserSettings setting, string username)
+        {
+            try
+            {
+                await models.UserSettingSaveAsync(setting, username);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = " UserSettingSave " + exc.Message;
+                HomeController.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+
         [HttpGet]
         [Route("userprofileget")]
         public async Task<IHttpActionResult> UserProfileGet(string userName)
         {
             var user = await UserManager.FindByNameAsync(userName);
-            var p = await db.UserProfileGet(user);
+            var p = db.UserProfileGet(user);
             if (p == null)
                 return NotFound();
             else
