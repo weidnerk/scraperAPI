@@ -32,16 +32,10 @@ namespace scrapeAPI.Models
 
         public DbSet<OrderHistory> OrderHistory { get; set; }
         public DbSet<SellerOrderHistory> SellerOrderHistory { get; set; }
-        
-        
         public DbSet<SearchHistory> SearchHistory { get; set; }
-        //public DbSet<Listing> Listings { get; set; }
-        //public DbSet<ListingX> ListingsX { get; set; }
-        //public DbSet<PostedListing> PostedListings { get; set; }
-        //public DbSet<ImageCompare> ItemImages { get; set; }
         public DbSet<SearchReport> SearchResults { get; set; }
-
         private ApplicationUserManager _userManager;
+
         public ApplicationUserManager UserManager
         {
             get => _userManager ?? HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
@@ -153,28 +147,6 @@ namespace scrapeAPI.Models
             }
             return taken;
         }
-
-
-        //public async Task<bool> UpdateListedItemID(ListingX listing, string listedItemID)
-        //{
-        //    bool ret = false;
-        //    var rec = await this.ListingsX.FirstOrDefaultAsync(r => r.ItemId == listing.ItemId);
-        //    if (rec != null)
-        //    {
-        //        ret = true;
-        //        rec.ListedItemID = listedItemID;
-        //        rec.Listed = listing.Listed;
-
-        //        using (var context = new DataModelsDB())
-        //        {
-        //            // Pass the entity to Entity Framework and mark it as modified
-        //            context.Entry(rec).State = EntityState.Modified;
-        //            context.SaveChanges();
-        //        }
-        //    }
-        //    return ret;
-        //}
-
 
     }
 }

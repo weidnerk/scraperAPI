@@ -21,7 +21,7 @@ namespace scrapeAPI
         ///     FREE shipping
         ///     buyer pays for return shipping
         /// </summary>
-        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs, ref List<string> errors, byte qtyToList)
+        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs, ref List<string> errors, int qtyToList)
         {
             //errors = null;
             string listedItemID = null;

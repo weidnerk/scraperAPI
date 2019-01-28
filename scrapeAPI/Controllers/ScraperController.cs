@@ -64,7 +64,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = " GetProdById " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -96,7 +96,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = " GetNumItemsSold " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -108,7 +108,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
-                HomeController.WriteFile(_logfile, header);
+                dsutil.DSUtil.WriteFile(_logfile, header);
 
                 var user = await UserManager.FindByNameAsync(userName);
 
@@ -120,7 +120,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = " FetchSeller " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -240,7 +240,7 @@ namespace scrapeAPI.Controllers
                         msg += " " + exc.InnerException.InnerException.Message;
                     }
                 }
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -304,7 +304,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetEmailTaken: " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -325,7 +325,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetUsernameTaken: " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -348,7 +348,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetTradingAPIUsage: " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -371,7 +371,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetTokenStatus: " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -395,7 +395,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetTokenStatus: " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -413,7 +413,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -430,7 +430,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StorePostedListing", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -458,7 +458,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("CreateListing", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -499,7 +499,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("CreatePostedListing", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -633,7 +633,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -652,7 +652,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListingX", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -673,7 +673,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetItem", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -693,7 +693,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetPostedListing", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -709,7 +709,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetCategories", exc);
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }

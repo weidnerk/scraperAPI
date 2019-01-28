@@ -152,7 +152,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = " UserProfileSave " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -169,7 +169,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = " UserSettingSave " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
@@ -258,7 +258,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                HomeController.WriteFile(_logfile, "SetRandomPassword " + exc.Message);
+                dsutil.DSUtil.WriteFile(_logfile, "SetRandomPassword " + exc.Message);
                 return InternalServerError(exc);
             }
         }

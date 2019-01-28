@@ -369,10 +369,6 @@ namespace scrapeAPI
             oContext.ApiCredential.ApiAccount.Application = profile.AppID;
             oContext.ApiCredential.ApiAccount.Certificate = profile.CertID;
             oContext.ApiCredential.eBayToken = profile.UserToken;
-            //oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["devID"];
-            //oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["appID"];
-            //oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["certID"];
-            //oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["ebayToken"];
 
             //set the endpoint (sandbox) use https://api.ebay.com/wsapi for production
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
@@ -693,9 +689,9 @@ namespace scrapeAPI
                     si.EbayUrl = r.ListingUrl.Value;
                     si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
                     si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
-                    byte x1 = Convert.ToByte(r.Quantity.Value);
-                    byte x2 = Convert.ToByte(r.QuantitySold.Value);
-                    si.Qty = (byte)(x1 - x2);
+                    int x1 = Convert.ToInt32(r.Quantity.Value);
+                    int x2 = Convert.ToInt32(r.QuantitySold.Value);
+                    si.Qty = x1 - x2;
                     si.ListingStatus = r.ListingStatus.Value;
                     //si.Qty = Convert.ToInt32(r.Quantity.Value);
                     return si;
@@ -704,7 +700,7 @@ namespace scrapeAPI
             catch (Exception exc)
             {
                 string msg = " GetSingleItem " + exc.Message;
-                HomeController.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 throw;
             }
         }
@@ -1116,7 +1112,7 @@ namespace scrapeAPI
                         else
                         {
                             // i don't see this ever being executed which makes sense if querying only sold items
-                            HomeController.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null");
+                            dsutil.DSUtil.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null");
                         }
                     }
                     if (transactions.Count == 0)
@@ -1142,7 +1138,7 @@ namespace scrapeAPI
                 catch (Exception exc)
                 {
                     string msg = " StoreTransactions " + exc.Message;
-                    HomeController.WriteFile(_logfile, msg);
+                    dsutil.DSUtil.WriteFile(_logfile, msg);
                     throw;
                 }
             }
