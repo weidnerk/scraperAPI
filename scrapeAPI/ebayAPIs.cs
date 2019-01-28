@@ -220,7 +220,7 @@ namespace scrapeAPI
         // a variety of this is to use findCompletedItems
         //
         // I don't know how to filter this by completed items
-        protected static void GetSellerList_notused(string seller)
+        public static void GetSellerList(string seller)
         {
             // TODO: Add code to start application here
             //
@@ -228,12 +228,12 @@ namespace scrapeAPI
             ApiContext oContext = new ApiContext();
 
             // set the dev,app,cert information
-            oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["devID"];
-            oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["appID"];
-            oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["certID"];
+            oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["AppID"];
+            oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["DevID"];
+            oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["CertID"];
 
             // set the AuthToken
-            oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["ebayToken"];
+            oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["Token"];
 
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
 
@@ -304,6 +304,7 @@ namespace scrapeAPI
             oGetSellerListCall.Sort = 2;
             // see http://developer.ebay.com/DevZone/SOAP/docs/WSDL/xsd/1/element/1597.htm for Sort documentation
 
+            int cnt = 0;
             try
             {
                 ItemTypeCollection oItems = oGetSellerListCall.GetSellerList();
@@ -326,6 +327,7 @@ namespace scrapeAPI
                     Console.WriteLine("Current Price is " + oItem.SellingStatus.CurrentPrice.currencyID.ToString() + " " + oItem.SellingStatus.CurrentPrice.Value.ToString());
                     Console.WriteLine("End Time is " + oItem.ListingDetails.EndTime.ToLongDateString() + " " + oItem.ListingDetails.EndTime.ToLongTimeString());
                     //}
+                    Console.WriteLine("count: " + (++cnt));
                     Console.WriteLine("");
 
                     // the data that is accessible through the item object
