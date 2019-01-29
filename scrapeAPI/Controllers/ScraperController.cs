@@ -2,7 +2,7 @@
  * Note there are 2 Web references: com.ebay.developer and com.ebay.developer1 - they are not duplicate references:
  * 
  *      com.ebay.developer is a reference to the Finding API
- *      com.ebay.developer1 is a reference to the Shopping API
+ *      com.ebay.developer1 is a reference to the Shopping API (GetSingleItem)
  * 
  * This is notated further in the 'eBay API Website' doc
  * 

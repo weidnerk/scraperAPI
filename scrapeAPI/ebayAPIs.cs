@@ -504,6 +504,11 @@ namespace scrapeAPI
             }
         }
 
+        /// <summary>
+        /// https://stackoverflow.com/questions/33095566/i-am-trying-to-check-for-expired-token-for-ebay-sdk-with-getclientalertsauthtoke
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public static TokenStatusTypeCustom GetTokenStatus(ApplicationUser user)
         {
             try

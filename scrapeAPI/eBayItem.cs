@@ -1,4 +1,10 @@
-﻿using eBay.Service.Core.Soap;
+﻿/*
+ * This file is heavily dependent on the .NET SDK (References/eBay.Service)
+ * but different in that calls go through the eBayAPIInterfaceService object.
+ * 
+ * 
+ */
+using eBay.Service.Core.Soap;
 using System;
 using System.Collections.Generic;
 using System.Linq;
