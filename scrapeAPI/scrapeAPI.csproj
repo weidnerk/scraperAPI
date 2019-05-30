@@ -470,6 +470,10 @@
       <Project>{7fa17f92-860b-4367-ab69-a3a417a29a79}</Project>
       <Name>dsutil</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\wallib\wallib\wallib.csproj">
+      <Project>{cd20dfe3-8d85-435a-a129-9319bc47a348}</Project>
+      <Name>wallib</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -44,11 +44,12 @@ namespace scrapeAPI.Models
         public DateTime? Listed { get; set; }
         public string SellingState { get; set; }
         public string ListingStatus { get; set; }
+        public decimal? ListingPrice { get; set; }
     }
 
     public class ModelView
     {
-        public List<ListingX> Listings { get; set; }
+        public List<Listing> Listings { get; set; }
         public int MatchedListings { get; set; }
         public int TotalOrders { get; set; }
         public double ElapsedSeconds { get; set; }

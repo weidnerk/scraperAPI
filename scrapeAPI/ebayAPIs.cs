@@ -622,7 +622,7 @@ namespace scrapeAPI
 
         // Purpose of GetSingleItem is to fetch properties such as a listing's description and photos
         // it is used when performing an auto-listing
-        public static async Task<ListingX> GetSingleItem(string itemId, string appid)
+        public static async Task<Listing> GetSingleItem(string itemId, string appid)
         {
             string errMsg = null;
             StringReader sr;
@@ -696,14 +696,15 @@ namespace scrapeAPI
                                  PrimaryCategoryName = r2.Element("PrimaryCategoryName"),
                                  Quantity = r2.Element("Quantity"),
                                  QuantitySold = r2.Element("QuantitySold"),
-                                 ListingStatus = r2.Element("ListingStatus")
+                                 ListingStatus = r2.Element("ListingStatus"),
+                                 Seller = r2.Element("Seller").Element("UserID")
                              }).Single();
 
                     var list = qryRecords.Elements("PictureURL")
                             .Select(element => element.Value)
                             .ToArray();
 
-                    var si = new ListingX();
+                    var si = new Listing();
                     si.PictureUrl = Util.ListToDelimited(list, ';');
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
@@ -713,8 +714,9 @@ namespace scrapeAPI
                     si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
                     int x1 = Convert.ToInt32(r.Quantity.Value);
                     int x2 = Convert.ToInt32(r.QuantitySold.Value);
-                    si.Qty = x1 - x2;
+                    si.Qty = x1 - x2;   // available qty; https://forums.developer.ebay.com/questions/11293/how-to-get-item-quantity-available.html
                     si.ListingStatus = r.ListingStatus.Value;
+                    si.Seller = r.Seller.Value;
                     //si.Qty = Convert.ToInt32(r.Quantity.Value);
                     return si;
                 }
@@ -993,7 +995,7 @@ namespace scrapeAPI
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
-            var listings = new List<ListingX>();
+            var listings = new List<Listing>();
             int totalCount = 0;
 
             CustomFindSold service = new CustomFindSold();
@@ -1024,12 +1026,20 @@ namespace scrapeAPI
             return totalCount;
         }
 
+        /// <summary>
+        /// Essential function that fetch's seller's sales and stores.
+        /// </summary>
+        /// <param name="seller"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="user"></param>
+        /// <param name="rptNumber"></param>
+        /// <returns></returns>
         public static async Task<ModelView> ToStart(string seller, int daysBack, ApplicationUser user, int rptNumber)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
-            var listings = new List<ListingX>();
+            var listings = new List<Listing>();
 
             CustomFindSold service = new CustomFindSold();
             service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
@@ -1040,14 +1050,19 @@ namespace scrapeAPI
             int currentPageNumber = 1;
 
             var request = BuildReqest(seller, daysBack);
+            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales for " + seller);
             var response = ebayAPIs.GetResults(service, request, currentPageNumber);
+            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales complete");
+
             if (response.ack == AckValue.Success)
             {
                 var result = response.searchResult;
                 if (result != null && result.count > 0)
                 {
+                    // store the sales
                     await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
 
+                    // are there more pages of results?
                     for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
                     {
                         currentPageNumber += 1;
@@ -1066,14 +1081,25 @@ namespace scrapeAPI
             return null;
         }
 
-        // Store transactions for a page of results
-        protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<ListingX> listings, int pg)
+        /// <summary>
+        /// Store seller's transactions for a page of results 
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="user"></param>
+        /// <param name="rptNumber"></param>
+        /// <param name="listings"></param>
+        /// <param name="pg"></param>
+        /// <returns></returns>
+        protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
 
             var profile = db.GetUserProfile(user.Id);
+
+            // Iterate completed items
             foreach (SearchItem searchItem in result.item)
             {
                 var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID);
@@ -1086,7 +1112,7 @@ namespace scrapeAPI
                 //var g = searchItem.sellingStatus;
                 //var h = searchItem.sellingStatus.timeLeft;
 
-                var listing = new ListingX();
+                var listing = new Listing();
                 listing.Title = searchItem.title;
 
                 // loop through each order
@@ -1098,10 +1124,14 @@ namespace scrapeAPI
                     // We have queried for only sold times, but sometimes this returns nothing, possibly due to date range.
                     // Or may happen because of this:
                     // 'This listing was ended by the seller because the item is no longer available.'
+
+                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId);
                     transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
+                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete");
+
                     var orderHistory = new List<OrderHistory>();
 
-                    // iterate transactions for an item
+                    // Iterate transactions for an item
                     foreach (TransactionType item in transactions)
                     {
                         // did it sell?
@@ -1172,6 +1202,12 @@ namespace scrapeAPI
             return dtStr;
         }
 
+        /// <summary>
+        /// Build request to fetch seller's sales
+        /// </summary>
+        /// <param name="seller"></param>
+        /// <param name="daysBack"></param>
+        /// <returns></returns>
         protected static FindCompletedItemsRequest BuildReqest(string seller, int daysBack)
         {
             FindCompletedItemsRequest request = new FindCompletedItemsRequest();
@@ -1221,6 +1257,13 @@ namespace scrapeAPI
             return request;
         }
 
+        /// <summary>
+        /// Actual fetch of seller's completed items
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="request"></param>
+        /// <param name="currentPageNumber"></param>
+        /// <returns></returns>
         public static FindCompletedItemsResponse GetResults(CustomFindSold service, FindCompletedItemsRequest request, int currentPageNumber)
         {
             request.paginationInput = GetNextPage(currentPageNumber);

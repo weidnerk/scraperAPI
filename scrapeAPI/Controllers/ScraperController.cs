@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Web.Http.Results;
 using dsmodels;
+using Microsoft.AspNet.Identity;
 
 namespace scrapeAPI.Controllers
 {
@@ -101,6 +102,16 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// This is entry point to product research
+        /// </summary>
+        /// <param name="seller"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="resultsPerPg"></param>
+        /// <param name="minSold"></param>
+        /// <param name="userName"></param>
+        /// <param name="reportNumber"></param>
+        /// <returns></returns>
         [Route("getsellersold")]
         [HttpGet]
         public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int minSold, string userName, int reportNumber)
@@ -134,6 +145,18 @@ namespace scrapeAPI.Controllers
             return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
         }
 
+        /// <summary>
+        /// Create a report of sales results
+        /// 
+        /// This may be called on a timer to keep feeding results.
+        /// 
+        /// </summary>
+        /// <param name="rptNumber"></param>
+        /// <param name="minSold"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="minPrice"></param>
+        /// <param name="maxPrice"></param>
+        /// <returns></returns>
         [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}")]
         [HttpGet]
         public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice)
@@ -177,7 +200,8 @@ namespace scrapeAPI.Controllers
                             ItemId = grp.Max(s => s.ItemId),
                             SellingState = grp.Max(s => s.SellingState),
                             ListingStatus = grp.Max(s => s.ListingStatus),
-                            Listed = grp.Max(s => s.Listed)
+                            Listed = grp.Max(s => s.Listed),
+                            ListingPrice = grp.Max(s => s.ListingPrice)
                         } into g
                               where g.Qty >= minSold
                               orderby g.MaxDate descending
@@ -192,7 +216,8 @@ namespace scrapeAPI.Controllers
                                   ItemId = g.ItemId,
                                   SellingState = g.SellingState,
                                   ListingStatus = g.ListingStatus,
-                                  Listed = g.Listed
+                                  Listed = g.Listed,
+                                  ListingPrice = g.ListingPrice
                         };
 
                 // filter by min and max price
@@ -377,8 +402,8 @@ namespace scrapeAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getsingleitem")]
-        public async Task<IHttpActionResult> GetSingleItem(string userName, string itemId)
+        [Route("getsellerlisting")]
+        public async Task<IHttpActionResult> GetSellerListing(string userName, string itemId)
         {
             try
             {
@@ -402,10 +427,11 @@ namespace scrapeAPI.Controllers
 
         [HttpPost]
         [Route("storelisting")]
-        public async Task<IHttpActionResult> StoreListing(ListingX listing)
+        public async Task<IHttpActionResult> StoreListing(Listing listing)
         {
             try
             {
+                string strCurrentUserId = User.Identity.GetUserId();
                 listing.Qty = 1;
                 await db.ListingSave(listing);
                 return Ok();
@@ -420,7 +446,7 @@ namespace scrapeAPI.Controllers
 
         [HttpPost]
         [Route("storepostedlisting")]
-        public async Task<IHttpActionResult> StorePostedListing(ListingX listing)
+        public async Task<IHttpActionResult> StorePostedListing(Listing listing)
         {
             try
             {
@@ -512,7 +538,7 @@ namespace scrapeAPI.Controllers
         protected async Task<List<string>> ListingCreateAsync(string itemId)
         {
             var errors = new List<string>();
-            var listing = await db.ListingXGet(itemId);     // item has to be stored before it can be listed
+            var listing = await db.ListingGet(itemId);     // item has to be stored before it can be listed
             if (listing != null)
             {
                 // if item is listed already, then revise
@@ -639,24 +665,42 @@ namespace scrapeAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getlistingx")]
-        public async Task<IHttpActionResult> GetListingX(string itemId)
+        [Route("getlistings")]
+        public IHttpActionResult GetListings()
         {
             try
             {
-                var listing = await db.ListingXGet(itemId);
-                if (listing == null)
+                var listings = db.GetListings();
+                if (listings == null)
                     return NotFound();
-                return Ok(listing);
+                return Ok(listings);
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("GetListingX", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetListings", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg);
                 return BadRequest(msg);
             }
         }
 
+
+        [HttpGet]
+        [Route("getwmderived")]
+        public async Task<IHttpActionResult> GetWMDerived(string url)
+        {
+            try
+            {
+                var w = await wallib.Class1.GetDetail(url);
+                decimal derived = wallib.Class1.reprice(w.Price, 1.28);
+                return Ok(derived);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetWMDerived", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
         [HttpGet]
         [Route("getitem")]
         public IHttpActionResult GetItem(string ebayItemId, string ebayPrice, int categoryId, string shippingAmt)
