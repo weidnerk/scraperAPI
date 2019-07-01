@@ -106,7 +106,7 @@ namespace scrapeAPI.Models
                     newprofile.CertID = p.CertID;
                     newprofile.DevID = p.DevID;
                     newprofile.UserToken = p.UserToken;
-                    newprofile.Id = user.Id;
+                    newprofile.UserID = user.Id;
                     newprofile.Firstname = p.Firstname;
                     newprofile.Lastname = p.Lastname;
                     db.UserProfiles.Add(newprofile);
