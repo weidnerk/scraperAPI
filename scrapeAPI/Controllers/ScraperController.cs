@@ -312,7 +312,7 @@ namespace scrapeAPI.Controllers
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg));
             }
         }
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("emailtaken")]
         public async Task<IHttpActionResult> GetEmailTaken(string email)
@@ -333,7 +333,7 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("usernametaken")]
         public async Task<IHttpActionResult> GetUsernameTaken(string username)

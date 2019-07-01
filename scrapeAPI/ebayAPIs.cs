@@ -693,7 +693,7 @@ namespace scrapeAPI
                                  Price = r2.Element("ConvertedCurrentPrice"),
                                  ListingUrl = r2.Element("ViewItemURLForNaturalSearch"),
                                  PrimaryCategoryID = r2.Element("PrimaryCategoryID"),
-                                 PrimaryCategoryName = r2.Element("PrimaryCategoryName"),
+                                 PrimaryCategoryName = r2.Element("PrimaryCategoryName").ElementValueNull(),
                                  Quantity = r2.Element("Quantity"),
                                  QuantitySold = r2.Element("QuantitySold"),
                                  ListingStatus = r2.Element("ListingStatus"),
@@ -711,7 +711,7 @@ namespace scrapeAPI
                     si.SupplierPrice = Convert.ToDecimal(r.Price.Value);
                     si.EbayUrl = r.ListingUrl.Value;
                     si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
-                    si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
+                    si.PrimaryCategoryName = r.PrimaryCategoryName;
                     int x1 = Convert.ToInt32(r.Quantity.Value);
                     int x2 = Convert.ToInt32(r.QuantitySold.Value);
                     si.Qty = x1 - x2;   // available qty; https://forums.developer.ebay.com/questions/11293/how-to-get-item-quantity-available.html
@@ -723,7 +723,7 @@ namespace scrapeAPI
             }
             catch (Exception exc)
             {
-                string msg = " GetSingleItem " + exc.Message;
+                string msg = "itemid: " + itemId.ToString() + " GetSingleItem " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg);
                 throw;
             }
@@ -1143,7 +1143,16 @@ namespace scrapeAPI
                             order.Title = searchItem.title;
                             order.Qty = item.QuantityPurchased.ToString();
 
-                            order.SellerPrice = item.TransactionPrice.Value.ToString();
+                            if (item.TransactionPrice == null)
+                            {
+                                // is this bcs sellerPaidStatus="notpaid"?
+                                order.SellerPrice = "0.0";
+                                dsutil.DSUtil.WriteFile(_logfile, string.Format("StoreTransactions: item.TransactionPrice == null for item: {0}", searchItem.itemId));
+                            }
+                            else
+                            {
+                                order.SellerPrice = item.TransactionPrice.Value.ToString();
+                            }
 
                             order.DateOfPurchase = item.CreatedDate;
                             order.EbayUrl = searchItem.viewItemURL;
