@@ -1,20 +1,16 @@
-﻿using System;
+﻿using dsmodels;
+using Microsoft.AspNet.Identity.Owin;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using dsmodels;
-using Microsoft.AspNet.Identity.Owin;
-using scrapeAPI.Controllers;
 
 namespace scrapeAPI.Models
 {
-
     public class DataModelsDB : DbContext
     {
         dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
@@ -68,6 +64,16 @@ namespace scrapeAPI.Models
                 return data;
             }
             return null;
+        }
+
+        public IQueryable<TimesSold> GetScanData(int rptNumber, DateTime dateFrom)
+        {
+            var data = Database.SqlQuery<TimesSold>(
+                "exec sp_GetScanReport @rptNumber, @dateFrom",
+                new SqlParameter("rptNumber", rptNumber),
+                new SqlParameter("dateFrom", dateFrom)
+                ).AsQueryable();
+            return data;
         }
 
         public UserProfile UserProfileGet(ApplicationUser usr)
@@ -131,7 +137,6 @@ namespace scrapeAPI.Models
             return ret;
         }
 
-
         public async Task<bool> GetEmailTaken(string email)
         {
             bool taken = true;
@@ -147,6 +152,5 @@ namespace scrapeAPI.Models
             }
             return taken;
         }
-
     }
 }

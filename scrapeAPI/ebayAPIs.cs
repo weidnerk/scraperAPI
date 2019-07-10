@@ -990,6 +990,14 @@ namespace scrapeAPI
             }
         }
 
+        /// <summary>
+        /// Returns Completed Items
+        /// </summary>
+        /// <param name="seller"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="user"></param>
+        /// <param name="rptNumber"></param>
+        /// <returns></returns>
         public static int ItemCount(string seller, int daysBack, ApplicationUser user, int rptNumber)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
@@ -1004,7 +1012,7 @@ namespace scrapeAPI
             service.appID = profile.AppID;
             int currentPageNumber = 1;
 
-            var request = BuildReqest(seller, daysBack);
+            var request = BuildReqest(seller, daysBack);    // creates FindCompletedItemsRequest
             var response = ebayAPIs.GetResults(service, request, currentPageNumber);
             if (response.ack == AckValue.Success)
             {
@@ -1012,7 +1020,6 @@ namespace scrapeAPI
                 totalCount = result.count;
                 if (result != null && result.count > 0)
                 {
-
                     for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
                     {
                         currentPageNumber += 1;
@@ -1213,6 +1220,8 @@ namespace scrapeAPI
 
         /// <summary>
         /// Build request to fetch seller's sales
+        /// 07.05.2019 needs further clarification - eBay told me a completed listing is a listing that ended which may or may not have sold,
+        /// but that's not what this returns.
         /// </summary>
         /// <param name="seller"></param>
         /// <param name="daysBack"></param>

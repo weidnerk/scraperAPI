@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Web.Http.Results;
 using dsmodels;
 using Microsoft.AspNet.Identity;
-
+using System.Data.Entity.SqlServer;
 namespace scrapeAPI.Controllers
 {
     [Authorize]
@@ -45,9 +45,10 @@ namespace scrapeAPI.Controllers
         }
 
         [Route("getsearchhistory")]
-        public IHttpActionResult GetSearchHistory()
+        public async Task<IHttpActionResult> GetSearchHistory(string userName)
         {
-            return Ok(models.SearchHistory.OrderByDescending(x => x.Updated));
+            var user = await UserManager.FindByNameAsync(userName);
+            return Ok(models.SearchHistory.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated));
         }
 
         // Unused after developing GetSingleItem()
@@ -70,6 +71,15 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Store the search result in SearchHistory and use FindingService to get a count.
+        /// </summary>
+        /// <param name="seller"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="resultsPerPg"></param>
+        /// <param name="minSold"></param>
+        /// <param name="userName"></param>
+        /// <returns></returns>
         [Route("numitemssold")]
         [HttpGet]
         public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string userName)
@@ -103,7 +113,7 @@ namespace scrapeAPI.Controllers
         }
 
         /// <summary>
-        /// This is entry point to product research
+        /// Init scan of seller.
         /// </summary>
         /// <param name="seller"></param>
         /// <param name="daysBack"></param>
@@ -136,20 +146,29 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        // Recall FindCompletedItems will only give us up to 100 listings
-        // interesting case is 'fabulousfinds101' - 
+        /// <summary>
+        /// Will start seller scan.
+        /// 
+        /// Recall FindCompletedItems will only give us up to 100 listings 
+        /// Interesting case is 'fabulousfinds101' -
+        /// </summary>
+        /// <param name="seller"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="resultsPerPg"></param>
+        /// <param name="rptNumber"></param>
+        /// <param name="minSold"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
         protected async Task<ModelView> GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, ApplicationUser user)
         {
             HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
             var profile = db.GetUserProfile(user.Id);
-            return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);
+            return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);   // scan the seller
         }
 
         /// <summary>
-        /// Create a report of sales results
-        /// 
+        /// Get stored scan.
         /// This may be called on a timer to keep feeding results.
-        /// 
         /// </summary>
         /// <param name="rptNumber"></param>
         /// <param name="minSold"></param>
@@ -167,6 +186,61 @@ namespace scrapeAPI.Controllers
 
             try
             {
+                string msg = "start GetReport ";
+                dsutil.DSUtil.WriteFile(_logfile, msg);
+
+                var x = models.GetScanData(rptNumber, ModTimeFrom);
+
+                // filter by min and max price
+                if (minPrice.HasValue)
+                {
+                    x = x.Where(p => p.SupplierPrice >= minPrice);
+                }
+                if (maxPrice.HasValue)
+                {
+                    x = x.Where(p => p.SupplierPrice <= maxPrice);
+                }
+                x = x.Where(p => p.SoldQty >= minSold);
+                x = x.OrderByDescending(p => p.LatestSold);
+                var mv = new ModelViewTimesSold();
+                mv.TimesSoldRpt = x.ToList();
+                mv.ListingsProcessed = 0;
+                mv.TotalOrders = 0;
+                mv.MatchedListings = 0;
+
+                msg = "end GetReport ";
+                dsutil.DSUtil.WriteFile(_logfile, msg);
+
+                return Ok(mv);
+            }
+            catch (Exception exc)
+            {
+                string msg = " GetReport " + exc.Message;
+                if (exc.InnerException != null)
+                {
+                    msg += " " + exc.InnerException.Message;
+                    if (exc.InnerException.InnerException != null)
+                    {
+                        msg += " " + exc.InnerException.InnerException.Message;
+                    }
+                }
+                dsutil.DSUtil.WriteFile(_logfile, msg);
+                return BadRequest(msg);
+            }
+        }
+
+        [Route("getreport_back/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}")]
+        [HttpGet]
+        public IHttpActionResult GetReport_back(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice)
+        {
+            //bool endedListings = (showNoOrders == "0") ? false : true;
+            DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
+            DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
+
+            try
+            {
+                string msg = "start GetReport ";
+                dsutil.DSUtil.WriteFile(_logfile, msg);
                 // materialize the date from SQL Server first since SQL Server doesn't understand Convert.ToInt32 on Qty
                 //var results = (from c in db.OrderHistory
                 //               where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
@@ -181,10 +255,13 @@ namespace scrapeAPI.Controllers
                 //                   grp.Key.DateOfPurchase
                 //               }).ToList();
 
+                // pulls from vwSellerOrderHistory
                 var results = (from c in models.SellerOrderHistory
                                where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom // && c.ItemId == "352518109311"
                                select c
                                ).ToList();
+                msg = "finish vwSellerOrderHistory";
+                dsutil.DSUtil.WriteFile(_logfile, msg);
 
                 // group by title and price and filter by minSold
                 var x = from a in results
@@ -203,29 +280,35 @@ namespace scrapeAPI.Controllers
                             Listed = grp.Max(s => s.Listed),
                             ListingPrice = grp.Max(s => s.ListingPrice)
                         } into g
-                              where g.Qty >= minSold
-                              orderby g.MaxDate descending
+                        where g.Qty >= minSold
+                        orderby g.MaxDate descending
                         select new TimesSold
-                              {
-                                  Title = g.Title,
-                                  EbayUrl = g.Url,
-                                  ImageUrl = g.ImageUrl,
-                                  SupplierPrice = g.Price,
-                                  SoldQty = g.Qty,
-                                  EarliestSold = g.MaxDate,
-                                  ItemId = g.ItemId,
-                                  SellingState = g.SellingState,
-                                  ListingStatus = g.ListingStatus,
-                                  Listed = g.Listed,
-                                  ListingPrice = g.ListingPrice
+                        {
+                            Title = g.Title,
+                            EbayUrl = g.Url,
+                            ImageUrl = g.ImageUrl,
+                            SupplierPrice = g.Price,
+                            SoldQty = g.Qty,
+                            LatestSold = g.MaxDate,
+                            ItemId = g.ItemId,
+                            SellingState = g.SellingState,
+                            ListingStatus = g.ListingStatus,
+                            Listed = g.Listed,
+                            ListingPrice = g.ListingPrice
                         };
+
+                msg = "finish group by title ";
+                dsutil.DSUtil.WriteFile(_logfile, msg);
 
                 // filter by min and max price
                 if (minPrice.HasValue)
-                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice >= minPrice)));
-
+                {
+                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice >= minPrice))).AsQueryable();
+                }
                 if (maxPrice.HasValue)
-                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice <= maxPrice)));
+                {
+                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice <= maxPrice))).AsQueryable();
+                }
 
                 // count listings processed so far
                 var listings = from o in models.SellerOrderHistory
@@ -252,6 +335,9 @@ namespace scrapeAPI.Controllers
                 mv.TotalOrders = orders.Count();
                 mv.MatchedListings = matchedlistings.Count();
 
+                msg = "end GetReport ";
+                dsutil.DSUtil.WriteFile(_logfile, msg);
+
                 return Ok(mv);
             }
             catch (Exception exc)
@@ -270,7 +356,16 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        // get source and ebay images
+        protected void GetScanReport()
+        {
+            
+        }
+
+        /// <summary>
+        /// get source and ebay images 
+        /// </summary>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("compareimages")]
         public IHttpActionResult GetImages(int categoryId)
@@ -295,6 +390,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getappids")]
         public async Task<IHttpActionResult> GetAppIds(string username)
