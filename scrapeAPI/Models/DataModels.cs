@@ -23,12 +23,16 @@ namespace scrapeAPI.Models
         public string ApplicationID { get; set; }
     }
 
+    /// <summary>
+    /// Used for prior scan.
+    /// </summary>
     public class ModelViewTimesSold
     {
         public List<TimesSold> TimesSoldRpt { get; set; }
         public int ListingsProcessed { get; set; }
         public int TotalOrders { get; set; }
-        public int MatchedListings { get; set; }
+        // public int MatchedListings { get; set; }
+        public int ItemCount { get; set; }
     }
 
     public class TimesSold
@@ -47,10 +51,13 @@ namespace scrapeAPI.Models
         public decimal? ListingPrice { get; set; }
     }
 
+    /// <summary>
+    /// Used when doing scan.
+    /// </summary>
     public class ModelView
     {
         public List<Listing> Listings { get; set; }
-        public int MatchedListings { get; set; }
+        // public int MatchedListings { get; set; }
         public int TotalOrders { get; set; }
         public double ElapsedSeconds { get; set; }
         public int PercentTotalItemsProcesssed { get; set; }

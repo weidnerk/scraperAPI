@@ -206,7 +206,7 @@ namespace scrapeAPI.Controllers
                 mv.TimesSoldRpt = x.ToList();
                 mv.ListingsProcessed = 0;
                 mv.TotalOrders = 0;
-                mv.MatchedListings = 0;
+                mv.ItemCount = mv.TimesSoldRpt.Count;
 
                 msg = "end GetReport ";
                 dsutil.DSUtil.WriteFile(_logfile, msg);
@@ -333,7 +333,7 @@ namespace scrapeAPI.Controllers
                 mv.TimesSoldRpt = x.ToList();
                 mv.ListingsProcessed = listings.Count();
                 mv.TotalOrders = orders.Count();
-                mv.MatchedListings = matchedlistings.Count();
+                // mv.MatchedListings = matchedlistings.Count();
 
                 msg = "end GetReport ";
                 dsutil.DSUtil.WriteFile(_logfile, msg);
