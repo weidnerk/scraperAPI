@@ -176,10 +176,10 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("userprofileget")]
-        public async Task<IHttpActionResult> UserProfileGet(string userName)
+        public async Task<IHttpActionResult> UserProfileGet(string userName, string appID)
         {
             var user = await UserManager.FindByNameAsync(userName);
-            var p = db.UserProfileGet(user);
+            var p = db.UserProfileGet(user, appID);
             if (p == null)
                 return NotFound();
             else

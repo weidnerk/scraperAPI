@@ -76,10 +76,18 @@ namespace scrapeAPI.Models
             return data;
         }
 
-        public UserProfile UserProfileGet(ApplicationUser usr)
+        public UserProfile UserProfileGet(ApplicationUser usr, string appID)
         {
-            var profile = db.GetUserProfile(usr.Id);
-            return profile;
+            if (!string.IsNullOrEmpty(appID))
+            {
+                var profile = db.GetUserProfile(usr.Id, appID);
+                return profile;
+            }
+            else
+            {
+                var profile = db.GetUserProfile(usr.Id);
+                return profile;
+            }
         }
 
         // return error string
