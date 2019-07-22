@@ -1109,6 +1109,10 @@ namespace scrapeAPI
             // Iterate completed items
             foreach (SearchItem searchItem in result.item)
             {
+                //if (searchItem.itemId != "303062973887")
+                //{
+                //    continue;
+                //}
                 var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID);
                 //var a = searchItem.itemId;
                 //var b = searchItem.title;
@@ -1133,6 +1137,10 @@ namespace scrapeAPI
                     // 'This listing was ended by the seller because the item is no longer available.'
 
                     dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId);
+                    //if (searchItem.itemId == "303062973887")
+                    //{
+                    //    int x = 9;
+                    //}
                     transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
                     dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete");
 
@@ -1160,6 +1168,7 @@ namespace scrapeAPI
                             {
                                 order.SellerPrice = item.TransactionPrice.Value.ToString();
                             }
+                            dsutil.DSUtil.WriteFile(_logfile, string.Format("Seller price: {0}", order.SellerPrice));
 
                             order.DateOfPurchase = item.CreatedDate;
                             order.EbayUrl = searchItem.viewItemURL;
@@ -1200,6 +1209,7 @@ namespace scrapeAPI
                     }
 
                     db.OrderHistorySave(orderHistory, rptNumber, false);
+                    dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave");
                     listing.Orders = orderHistory;
                     listings.Add(listing);
                 }
