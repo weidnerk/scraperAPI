@@ -506,16 +506,12 @@ namespace scrapeAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
             var user = new ApplicationUser() { UserName = model.Username, Email = model.Email };
-
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
-
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
             }
-
             var p = new UserProfileVM();
             p.Id = user.Id;
             p.Firstname = model.Firstname;
@@ -532,7 +528,6 @@ namespace scrapeAPI.Controllers
             {
                 return InternalServerError();
             }
-
             if (!result.Succeeded)
             {
                 if (result.Errors != null)
@@ -542,16 +537,13 @@ namespace scrapeAPI.Controllers
                         ModelState.AddModelError("", error);
                     }
                 }
-
                 if (ModelState.IsValid)
                 {
                     // No ModelState errors are available to send, so just return an empty BadRequest.
                     return BadRequest();
                 }
-
                 return BadRequest(ModelState);
             }
-
             return null;
         }
         // POST api/Account/RegisterExternal
@@ -564,7 +556,6 @@ namespace scrapeAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
             var info = await Authentication.GetExternalLoginInfoAsync();
             if (info == null)
             {
@@ -572,13 +563,11 @@ namespace scrapeAPI.Controllers
             }
 
             var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
-
             IdentityResult result = await UserManager.CreateAsync(user);
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
             }
-
             result = await UserManager.AddLoginAsync(user.Id, info.Login);
             if (!result.Succeeded)
             {

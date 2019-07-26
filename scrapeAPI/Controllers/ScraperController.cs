@@ -257,10 +257,8 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                //var p = db.SearchResults.Where(r => r.CategoryId == categoryId).ToList();
                 var p = models.GetSearchReport(categoryId).OrderBy(x => x.SourceItemNo).ToList();
 
-                //var result = db.ItemImages.Where(r => r.CategoryId == categoryId).OrderBy(x => x.SourceItemNo).ToList();
                 foreach (SearchReport rec in p)
                 {
                     var i = dsutil.DSUtil.DelimitedToList(rec.SourceImgUrl, ';');
