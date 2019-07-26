@@ -152,24 +152,24 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = " UserProfileSave " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
 
         [HttpPost]
-        [Route("usersettingsave")]
-        public async Task<IHttpActionResult> UserSettingSave(UserSettings setting, string username)
+        [Route("userprofilesave")]
+        public async Task<IHttpActionResult> UserProfileSave(UserProfile profile, string username)
         {
             try
             {
-                await models.UserSettingSaveAsync(setting, username);
+                await models.UserProfileSaveAsync(profile, username);
                 return Ok();
             }
             catch (Exception exc)
             {
-                string msg = " UserSettingSave " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                string msg = " UserProfileSave " + exc.Message;
+                dsutil.DSUtil.WriteFile(_logfile, msg, username);
                 return BadRequest(msg);
             }
         }
@@ -236,9 +236,9 @@ namespace scrapeAPI.Controllers
         [Route("setrandompassword")]
         public async Task<IHttpActionResult> SetRandomPassword(ForgotPasswordViewModel vm)
         {
+            var user = await UserManager.FindByEmailAsync(vm.EmailAddress);
             try
             {
-                var user = await UserManager.FindByEmailAsync(vm.EmailAddress);
                 if (user == null)
                 {
                     // Don't reveal that the user does not exist
@@ -258,7 +258,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                dsutil.DSUtil.WriteFile(_logfile, "SetRandomPassword " + exc.Message);
+                dsutil.DSUtil.WriteFile(_logfile, "SetRandomPassword " + exc.Message, user.UserName);
                 return InternalServerError(exc);
             }
         }

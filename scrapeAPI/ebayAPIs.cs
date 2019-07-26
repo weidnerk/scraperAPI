@@ -724,7 +724,7 @@ namespace scrapeAPI
             catch (Exception exc)
             {
                 string msg = "itemid: " + itemId.ToString() + " GetSingleItem " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 throw;
             }
         }
@@ -996,9 +996,8 @@ namespace scrapeAPI
         /// <param name="seller"></param>
         /// <param name="daysBack"></param>
         /// <param name="user"></param>
-        /// <param name="rptNumber"></param>
         /// <returns></returns>
-        public static int ItemCount(string seller, int daysBack, ApplicationUser user, int rptNumber)
+        public static int ItemCount(string seller, int daysBack, ApplicationUser user)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
@@ -1057,9 +1056,9 @@ namespace scrapeAPI
             int currentPageNumber = 1;
 
             var request = BuildReqest(seller, daysBack);
-            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales for " + seller);
+            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales for " + seller, user.UserName);
             var response = ebayAPIs.GetResults(service, request, currentPageNumber);
-            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales complete");
+            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales complete", user.UserName);
 
             if (response.ack == AckValue.Success)
             {
@@ -1100,19 +1099,34 @@ namespace scrapeAPI
         /// <returns></returns>
         protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
         {
-            dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+            // dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
 
-            var profile = db.GetUserProfile(user.Id);
+            UserProfile profile;
+            using (var db = new dsmodels.DataModelsDB())
+            {
+                profile = db.GetUserProfile(user.Id);
+            }
 
             // Iterate completed items
             foreach (SearchItem searchItem in result.item)
             {
-                //if (searchItem.itemId != "303062973887")
-                //{
-                //    continue;
-                //}
+                using (var db = new dsmodels.DataModelsDB())
+                {
+                    var f = db.SearchHistory.Where(p => p.Id == rptNumber).FirstOrDefault();
+                    if (f != null)
+                    {
+                        if (f.Running.HasValue)
+                        {
+                            if (!f.Running.Value)
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }
+
                 var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID);
                 //var a = searchItem.itemId;
                 //var b = searchItem.title;
@@ -1136,13 +1150,9 @@ namespace scrapeAPI
                     // Or may happen because of this:
                     // 'This listing was ended by the seller because the item is no longer available.'
 
-                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId);
-                    //if (searchItem.itemId == "303062973887")
-                    //{
-                    //    int x = 9;
-                    //}
+                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId, user.UserName);
                     transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
-                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete");
+                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete", user.UserName);
 
                     var orderHistory = new List<OrderHistory>();
 
@@ -1162,13 +1172,13 @@ namespace scrapeAPI
                             {
                                 // is this bcs sellerPaidStatus="notpaid"?
                                 order.SellerPrice = "0.0";
-                                dsutil.DSUtil.WriteFile(_logfile, string.Format("StoreTransactions: item.TransactionPrice == null for item: {0}", searchItem.itemId));
+                                dsutil.DSUtil.WriteFile(_logfile, string.Format("StoreTransactions: item.TransactionPrice == null for item: {0}", searchItem.itemId), user.UserName);
                             }
                             else
                             {
                                 order.SellerPrice = item.TransactionPrice.Value.ToString();
                             }
-                            dsutil.DSUtil.WriteFile(_logfile, string.Format("Seller price: {0}", order.SellerPrice));
+                            dsutil.DSUtil.WriteFile(_logfile, string.Format("Seller price: {0}", order.SellerPrice), user.UserName);
 
                             order.DateOfPurchase = item.CreatedDate;
                             order.EbayUrl = searchItem.viewItemURL;
@@ -1179,17 +1189,12 @@ namespace scrapeAPI
                             order.SellingState = searchItem.sellingStatus.sellingState;
                             order.ListingStatus = i.ListingStatus;
 
-                            // testing GetSingleItem
-                            // purpose of GetSingleItem is to fetch properties like listing descriptiong
-                            // it is used when performing an auto-listing
-                            // var r = await GetSingleItem(user.UserName, order.ItemId);
-
                             orderHistory.Add(order);
                         }
                         else
                         {
                             // i don't see this ever being executed which makes sense if querying only sold items
-                            dsutil.DSUtil.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null");
+                            dsutil.DSUtil.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null", user.UserName);
                         }
                     }
                     if (transactions.Count == 0)
@@ -1199,24 +1204,20 @@ namespace scrapeAPI
                         // 'Test listing - DO NOT BID OR BUY362254235623'
                         //
                         ++notSold;
-
-                        //var order = new OrderHistory();
-                        //order.Title = searchItem.searchItem.title;
-                        //order.Price = "-1";
-                        //order.Url = searchItem.searchItem.viewItemURL;
-                        //order.ItemId = searchItem.searchItem.itemId;
-                        //orderHistory.Add(order);
                     }
 
-                    db.OrderHistorySave(orderHistory, rptNumber, false);
-                    dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave");
+                    using (var db = new dsmodels.DataModelsDB())
+                    {
+                        db.OrderHistorySave(orderHistory, rptNumber, false);
+                    }
+                    dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave", user.UserName);
                     listing.Orders = orderHistory;
                     listings.Add(listing);
                 }
                 catch (Exception exc)
                 {
                     string msg = " StoreTransactions " + exc.Message;
-                    dsutil.DSUtil.WriteFile(_logfile, msg);
+                    dsutil.DSUtil.WriteFile(_logfile, msg, user.UserName);
                     throw;
                 }
             }

@@ -44,11 +44,26 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Get user's searches.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
         [Route("getsearchhistory")]
         public async Task<IHttpActionResult> GetSearchHistory(string userName)
         {
-            var user = await UserManager.FindByNameAsync(userName);
-            return Ok(models.SearchHistory.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated));
+            try
+            {
+                var user = await UserManager.FindByNameAsync(userName);
+                var sh = models.SearchHistory.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated);
+                return Ok(sh);
+            }
+            catch (Exception exc)
+            {
+                string msg = " GetSearchHistory " + exc.Message;
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
+                return BadRequest(msg);
+            }
         }
 
         // Unused after developing GetSingleItem()
@@ -66,7 +81,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = " GetProdById " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
@@ -96,18 +111,19 @@ namespace scrapeAPI.Controllers
                 sh.Seller = seller;
                 sh.DaysBack = daysBack;
                 sh.MinSoldFilter = minSold;
-                var sh_updated = await db.SearchHistorySave(sh);
+                var sh_updated = await db.SearchHistoryAdd(sh);
 
-                int itemCount = ebayAPIs.ItemCount(seller, daysBack, user, sh_updated.Id);
+                int itemCount = ebayAPIs.ItemCount(seller, daysBack, user);
                 var mv = new ModelView();
                 mv.ItemCount = itemCount;
                 mv.ReportNumber = sh_updated.Id;
+
                 return Ok(mv);
             }
             catch (Exception exc)
             {
                 string msg = " GetNumItemsSold " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
@@ -129,41 +145,37 @@ namespace scrapeAPI.Controllers
             try
             {
                 string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
-                dsutil.DSUtil.WriteFile(_logfile, header);
-
+                dsutil.DSUtil.WriteFile(_logfile, header, userName);
                 var user = await UserManager.FindByNameAsync(userName);
-
                 ebayAPIs.GetAPIStatus(user);
 
-                var mv = await GetSellerSoldAsync(seller, daysBack, resultsPerPg, reportNumber, minSold, user);
+                var mv = await ebayAPIs.ToStart(seller, daysBack, user, reportNumber);   // scan the seller
+
+                var sh = db.SearchHistory.Where(p => p.Id == reportNumber).FirstOrDefault();
+                sh.Running = false;
+                await db.SearchHistoryUpdate(sh);
+
                 return Ok(mv);
             }
             catch (Exception exc)
             {
                 string msg = " FetchSeller " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
 
-        /// <summary>
-        /// Will start seller scan.
-        /// 
-        /// Recall FindCompletedItems will only give us up to 100 listings 
-        /// Interesting case is 'fabulousfinds101' -
-        /// </summary>
-        /// <param name="seller"></param>
-        /// <param name="daysBack"></param>
-        /// <param name="resultsPerPg"></param>
-        /// <param name="rptNumber"></param>
-        /// <param name="minSold"></param>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        protected async Task<ModelView> GetSellerSoldAsync(string seller, int daysBack, int resultsPerPg, int rptNumber, int minSold, ApplicationUser user)
+        [Route("cancelscan/{rptNumber}")]
+        [HttpGet]
+        public async Task<IHttpActionResult> CancelScan(int rptNumber)
         {
-            HttpResponseMessage message = Request.CreateResponse<ModelView>(HttpStatusCode.NoContent, null);
-            var profile = db.GetUserProfile(user.Id);
-            return await ebayAPIs.ToStart(seller, daysBack, user, rptNumber);   // scan the seller
+            var f = db.SearchHistory.Where(p => p.Id == rptNumber).FirstOrDefault();
+            if (f != null)
+            {
+                f.Running = false;
+                await db.SearchHistoryUpdate(f);
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -187,7 +199,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 string msg = "start GetReport ";
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
 
                 var x = models.GetScanData(rptNumber, ModTimeFrom);
 
@@ -209,7 +221,7 @@ namespace scrapeAPI.Controllers
                 mv.ItemCount = mv.TimesSoldRpt.Count;
 
                 msg = "end GetReport ";
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
 
                 return Ok(mv);
             }
@@ -224,141 +236,14 @@ namespace scrapeAPI.Controllers
                         msg += " " + exc.InnerException.InnerException.Message;
                     }
                 }
-                dsutil.DSUtil.WriteFile(_logfile, msg);
-                return BadRequest(msg);
-            }
-        }
-
-        [Route("getreport_back/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}")]
-        [HttpGet]
-        public IHttpActionResult GetReport_back(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice)
-        {
-            //bool endedListings = (showNoOrders == "0") ? false : true;
-            DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
-            DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
-
-            try
-            {
-                string msg = "start GetReport ";
-                dsutil.DSUtil.WriteFile(_logfile, msg);
-                // materialize the date from SQL Server first since SQL Server doesn't understand Convert.ToInt32 on Qty
-                //var results = (from c in db.OrderHistory
-                //               where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom
-                //               group c by new { c.Title, c.Url, c.Price, c.ImageUrl, c.Qty, c.DateOfPurchase } into grp
-                //               select new
-                //               {
-                //                   grp.Key.Title,
-                //                   grp.Key.Url,
-                //                   grp.Key.Price,
-                //                   grp.Key.ImageUrl,
-                //                   grp.Key.Qty,
-                //                   grp.Key.DateOfPurchase
-                //               }).ToList();
-
-                // pulls from vwSellerOrderHistory
-                var results = (from c in models.SellerOrderHistory
-                               where c.RptNumber == rptNumber && c.DateOfPurchase >= ModTimeFrom // && c.ItemId == "352518109311"
-                               select c
-                               ).ToList();
-                msg = "finish vwSellerOrderHistory";
-                dsutil.DSUtil.WriteFile(_logfile, msg);
-
-                // group by title and price and filter by minSold
-                var x = from a in results
-                        group a by new { a.Title, a.SellerPrice, a.ItemId } into grp
-                        select new
-                        {
-                            grp.Key.Title,
-                            Price = Convert.ToDecimal(grp.Key.SellerPrice),
-                            Qty = grp.Sum(s => Convert.ToInt32(s.Qty)),
-                            MaxDate = grp.Max(s => Convert.ToDateTime(s.DateOfPurchase)),
-                            Url = grp.Max(s => s.EbayUrl),
-                            ImageUrl = grp.Max(s => s.ImageUrl),
-                            ItemId = grp.Max(s => s.ItemId),
-                            SellingState = grp.Max(s => s.SellingState),
-                            ListingStatus = grp.Max(s => s.ListingStatus),
-                            Listed = grp.Max(s => s.Listed),
-                            ListingPrice = grp.Max(s => s.ListingPrice)
-                        } into g
-                        where g.Qty >= minSold
-                        orderby g.MaxDate descending
-                        select new TimesSold
-                        {
-                            Title = g.Title,
-                            EbayUrl = g.Url,
-                            ImageUrl = g.ImageUrl,
-                            SupplierPrice = g.Price,
-                            SoldQty = g.Qty,
-                            LatestSold = g.MaxDate,
-                            ItemId = g.ItemId,
-                            SellingState = g.SellingState,
-                            ListingStatus = g.ListingStatus,
-                            Listed = g.Listed,
-                            ListingPrice = g.ListingPrice
-                        };
-
-                msg = "finish group by title ";
-                dsutil.DSUtil.WriteFile(_logfile, msg);
-
-                // filter by min and max price
-                if (minPrice.HasValue)
-                {
-                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice >= minPrice))).AsQueryable();
-                }
-                if (maxPrice.HasValue)
-                {
-                    x = Enumerable.Where<TimesSold>((IEnumerable<TimesSold>)x, (Func<TimesSold, bool>)(u => (bool)(u.SupplierPrice <= maxPrice))).AsQueryable();
-                }
-
-                // count listings processed so far
-                var listings = from o in models.SellerOrderHistory
-                               where o.RptNumber == rptNumber
-                               group o by new { o.Title } into grp
-                               select grp;
-
-                // count listings processed so far - matches
-                var matchedlistings = from c in results
-                                      join o in models.SellerOrderHistory on c.Title equals o.Title
-                                      where o.RptNumber == rptNumber && !o.ListingEnded
-                                      group c by new { c.Title, c.EbayUrl, o.RptNumber, c.ImageUrl } into grp
-                                      select grp;
-
-                // count orders processed so far - matches
-                var orders = from c in results
-                             join o in models.SellerOrderHistory on c.Title equals o.Title
-                             where o.RptNumber == rptNumber && !o.ListingEnded
-                             select o;
-
-                var mv = new ModelViewTimesSold();
-                mv.TimesSoldRpt = x.ToList();
-                mv.ListingsProcessed = listings.Count();
-                mv.TotalOrders = orders.Count();
-                // mv.MatchedListings = matchedlistings.Count();
-
-                msg = "end GetReport ";
-                dsutil.DSUtil.WriteFile(_logfile, msg);
-
-                return Ok(mv);
-            }
-            catch (Exception exc)
-            {
-                string msg = " GetReport " + exc.Message;
-                if (exc.InnerException != null)
-                {
-                    msg += " " + exc.InnerException.Message;
-                    if (exc.InnerException.InnerException != null)
-                    {
-                        msg += " " + exc.InnerException.InnerException.Message;
-                    }
-                }
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
 
         protected void GetScanReport()
         {
-            
+
         }
 
         /// <summary>
@@ -429,7 +314,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetEmailTaken: " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -450,7 +335,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetUsernameTaken: " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, username);
                 return BadRequest(msg);
             }
         }
@@ -473,7 +358,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetTradingAPIUsage: " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
@@ -496,7 +381,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetTokenStatus: " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
@@ -520,7 +405,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = "GetTokenStatus: " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -539,7 +424,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -556,7 +441,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StorePostedListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -584,7 +469,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("CreateListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -625,7 +510,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("CreatePostedListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -668,9 +553,9 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
-                    ebayAPIs.ReviseItem(listing.ListedItemID, 
-                                        qty: listing.Qty, 
-                                        price: Convert.ToDouble(listing.ListingPrice), 
+                    ebayAPIs.ReviseItem(listing.ListedItemID,
+                                        qty: listing.Qty,
+                                        price: Convert.ToDouble(listing.ListingPrice),
                                         title: listing.ListingTitle);
                 }
             }
@@ -759,7 +644,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -778,7 +663,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListings", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -797,7 +682,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetWMDerived", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -817,7 +702,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetItem", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -837,7 +722,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetPostedListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -853,7 +738,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetCategories", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
         }
@@ -865,7 +750,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-               await db.HistoryRemove(rptNumber);
+                await db.HistoryRemove(rptNumber);
                 return Ok();
             }
             catch (Exception exc)

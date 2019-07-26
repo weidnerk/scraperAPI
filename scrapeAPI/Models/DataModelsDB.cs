@@ -90,7 +90,11 @@ namespace scrapeAPI.Models
             }
         }
 
-        // return error string
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns>return error string</returns>
         public async Task<string> UserProfileSaveAsync(UserProfileVM p)
         {
             string ret = string.Empty;
@@ -101,7 +105,6 @@ namespace scrapeAPI.Models
                 {
                     return "user does not exist";
                 }
-
                 var profile = db.GetUserProfile(user.Id);
                 if (profile != null)
                 {
