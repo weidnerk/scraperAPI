@@ -70,7 +70,7 @@ namespace scrapeAPI
         // use this for itemspecifics:
         // https://ebaydts.com/eBayKBDetails?KBid=1647
         //
-        public static string ReviseItem(string listedItemID, int? qty = null, double? price = null, string title = null) 
+        public static string ReviseItem(string listedItemID, int? qty = null, double? price = null, string title = null)
         {
             //create the context
             ApiContext context = new ApiContext();
@@ -152,7 +152,7 @@ namespace scrapeAPI
             string msg = r.Ack.ToString();
             if (r.Errors.Count > 0)
             {
-                foreach(eBay.Service.Core.Soap.ErrorType e in r.Errors)
+                foreach (eBay.Service.Core.Soap.ErrorType e in r.Errors)
                 {
                     msg += " " + e.LongMessage;
                 }
@@ -1046,45 +1046,53 @@ namespace scrapeAPI
             string _logfile = "scrape_log.txt";
             int notSold = 0;
             var listings = new List<Listing>();
-
-            CustomFindSold service = new CustomFindSold();
-            service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
-
-            // don't put actual db code here - need function to return profile object
-            var profile = db.GetUserProfile(user.Id);
-            service.appID = profile.AppID;
-            int currentPageNumber = 1;
-
-            var request = BuildReqest(seller, daysBack);
-            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales for " + seller, user.UserName);
-            var response = ebayAPIs.GetResults(service, request, currentPageNumber);
-            dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales complete", user.UserName);
-
-            if (response.ack == AckValue.Success)
+            try
             {
-                var result = response.searchResult;
-                if (result != null && result.count > 0)
+                CustomFindSold service = new CustomFindSold();
+                service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
+
+                // don't put actual db code here - need function to return profile object
+                var profile = db.GetUserProfile(user.Id);
+                service.appID = profile.AppID;
+                int currentPageNumber = 1;
+
+                var request = BuildReqest(seller, daysBack);
+                dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales for " + seller, user.UserName);
+                var response = ebayAPIs.GetResults(service, request, currentPageNumber);
+                dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales complete", user.UserName);
+
+                if (response.ack == AckValue.Success)
                 {
-                    // store the sales
-                    await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
-
-                    // are there more pages of results?
-                    for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
+                    var result = response.searchResult;
+                    if (result != null && result.count > 0)
                     {
-                        currentPageNumber += 1;
-
-                        response = GetResults(service, request, currentPageNumber);
-                        result = response.searchResult;
+                        // store the sales
                         await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
-                    }
-                }
-                var mv = new ModelView();
-                mv.Listings = listings;
 
-                int b = notSold;
-                return mv;
+                        // are there more pages of results?
+                        for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
+                        {
+                            currentPageNumber += 1;
+
+                            response = GetResults(service, request, currentPageNumber);
+                            result = response.searchResult;
+                            await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
+                        }
+                    }
+                    var mv = new ModelView();
+                    mv.Listings = listings;
+
+                    int b = notSold;
+                    return mv;
+                }
+                return null;
             }
-            return null;
+            catch (Exception exc)
+            {
+                string msg = " ToStart " + exc.Message;
+                dsutil.DSUtil.WriteFile(_logfile, msg, user.UserName);
+                return null;
+            }
         }
 
         /// <summary>
@@ -1103,6 +1111,7 @@ namespace scrapeAPI
             string _logfile = "scrape_log.txt";
             int notSold = 0;
 
+            dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Start", user.UserName);
             UserProfile profile;
             using (var db = new dsmodels.DataModelsDB())
             {
@@ -1178,12 +1187,19 @@ namespace scrapeAPI
                             {
                                 order.SellerPrice = item.TransactionPrice.Value.ToString();
                             }
-                            dsutil.DSUtil.WriteFile(_logfile, string.Format("Seller price: {0}", order.SellerPrice), user.UserName);
+                            // dsutil.DSUtil.WriteFile(_logfile, string.Format("Seller price: {0}", order.SellerPrice), user.UserName);
 
                             order.DateOfPurchase = item.CreatedDate;
+
                             order.EbayUrl = searchItem.viewItemURL;
+                            // dsutil.DSUtil.WriteFile(_logfile, "order.EbayUrl complete", user.UserName);
+
                             order.ImageUrl = searchItem.galleryURL;
+                            dsutil.DSUtil.WriteFile(_logfile, "order.ImageUrl complete", user.UserName);
+
                             var pictures = searchItem.pictureURLLarge;
+                            // dsutil.DSUtil.WriteFile(_logfile, "pictures complete", user.UserName);
+
                             order.PageNumber = pg;
                             order.ItemId = searchItem.itemId;
                             order.SellingState = searchItem.sellingStatus.sellingState;
@@ -1210,9 +1226,11 @@ namespace scrapeAPI
                     {
                         db.OrderHistorySave(orderHistory, rptNumber, false);
                     }
-                    dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave", user.UserName);
+                    dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave complete", user.UserName);
                     listing.Orders = orderHistory;
                     listings.Add(listing);
+
+                    dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Complete", user.UserName);
                 }
                 catch (Exception exc)
                 {
@@ -1250,7 +1268,7 @@ namespace scrapeAPI
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
             string ModTimeToStr = FormateBayTime(ModTimeTo);
-            string ModTimeFromStr = FormateBayTime(ModTimeFrom); 
+            string ModTimeFromStr = FormateBayTime(ModTimeFrom);
 
             //DateTime ModTimeTo = DateTime.Now;
             //DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
