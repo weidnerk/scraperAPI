@@ -666,7 +666,6 @@ namespace scrapeAPI.Controllers
             }
         }
 
-
         [HttpGet]
         [Route("getwmderived")]
         public async Task<IHttpActionResult> GetWMDerived(string url)

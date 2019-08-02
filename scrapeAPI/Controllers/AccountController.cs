@@ -105,7 +105,6 @@ namespace scrapeAPI.Controllers
         public async Task<ManageInfoViewModel> GetManageInfo(string returnUrl, bool generateState = false)
         {
             IdentityUser user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-
             if (user == null)
             {
                 return null;
@@ -142,34 +141,18 @@ namespace scrapeAPI.Controllers
 
         [HttpPost]
         [Route("userprofilesave")]
-        public async Task<IHttpActionResult> UserProfileSave(UserProfileVM profile)
+        public async Task<IHttpActionResult> UserProfileSave(UserProfile profile)
         {
             try
             {
-                await db.UserProfileSaveAsync(profile);
+                var userid = User.Identity.GetUserId();
+                await models.UserProfileSaveAsync(profile, userid);
                 return Ok();
             }
             catch (Exception exc)
             {
                 string msg = " UserProfileSave " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
-            }
-        }
-
-        [HttpPost]
-        [Route("userprofilesave")]
-        public async Task<IHttpActionResult> UserProfileSave(UserProfile profile, string username)
-        {
-            try
-            {
-                await models.UserProfileSaveAsync(profile, username);
-                return Ok();
-            }
-            catch (Exception exc)
-            {
-                string msg = " UserProfileSave " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, username);
+                dsutil.DSUtil.WriteFile(_logfile, msg, User.Identity.GetUserName());
                 return BadRequest(msg);
             }
         }
@@ -195,7 +178,6 @@ namespace scrapeAPI.Controllers
             {
                 return BadRequest("The was a problem changing your password.  Please try again.");
             }
-
             IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword,
                 model.NewPassword);
             
