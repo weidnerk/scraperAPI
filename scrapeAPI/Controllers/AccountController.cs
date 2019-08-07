@@ -141,13 +141,20 @@ namespace scrapeAPI.Controllers
 
         [HttpPost]
         [Route("userprofilesave")]
-        public async Task<IHttpActionResult> UserProfileSave(UserProfile profile)
+        public async Task<IHttpActionResult> UserProfileSave(UserProfileView profile)
         {
             try
             {
                 var userid = User.Identity.GetUserId();
-                await models.UserProfileSaveAsync(profile, userid);
-                return Ok();
+                string ret = await models.UserProfileSaveAsync(profile, userid);
+                if (string.IsNullOrEmpty(ret))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(ret);
+                }
             }
             catch (Exception exc)
             {
@@ -574,6 +581,22 @@ namespace scrapeAPI.Controllers
             }
 
             base.Dispose(disposing);
+        }
+        [HttpDelete]
+        [Route("deleteapikey/{appID}")]
+        [AcceptVerbs("DELETE")]
+        public async Task<IHttpActionResult> DeleteAPIKey(string appID)
+        {
+            try
+            {
+                await models.AppIDRemove(appID);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = exc.Message;
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
         }
 
 

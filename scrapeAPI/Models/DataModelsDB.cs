@@ -76,7 +76,7 @@ namespace scrapeAPI.Models
             return data;
         }
 
-        public UserProfile UserProfileGet(ApplicationUser usr, string appID)
+        public UserProfileView UserProfileGet(ApplicationUser usr, string appID)
         {
             if (!string.IsNullOrEmpty(appID))
             {
@@ -118,7 +118,7 @@ namespace scrapeAPI.Models
                 }
                 else
                 {
-                    var newprofile = new UserProfile();
+                    var newprofile = new UserProfileView();
                     newprofile.AppID = p.AppID;
                     newprofile.CertID = p.CertID;
                     newprofile.DevID = p.DevID;
@@ -126,7 +126,7 @@ namespace scrapeAPI.Models
                     newprofile.UserID = user.Id;
                     newprofile.Firstname = p.Firstname;
                     newprofile.Lastname = p.Lastname;
-                    db.UserProfiles.Add(newprofile);
+                    db.UserProfilesView.Add(newprofile);
                 }
                 await this.SaveChangesAsync();
             }

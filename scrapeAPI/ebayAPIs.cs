@@ -1112,7 +1112,7 @@ namespace scrapeAPI
             int notSold = 0;
 
             dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Start", user.UserName);
-            UserProfile profile;
+            UserProfileView profile;
             using (var db = new dsmodels.DataModelsDB())
             {
                 profile = db.GetUserProfile(user.Id);
