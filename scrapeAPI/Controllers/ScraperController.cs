@@ -753,6 +753,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = exc.Message;
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
