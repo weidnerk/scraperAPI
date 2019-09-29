@@ -1136,7 +1136,7 @@ namespace scrapeAPI
                     }
                 }
 
-                var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID);
+                var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID); // pulling this for ListingStatus
                 //var a = searchItem.itemId;
                 //var b = searchItem.title;
                 //var c = searchItem.listingInfo.listingType;
@@ -1145,6 +1145,7 @@ namespace scrapeAPI
                 //var f = searchItem.galleryURL;
                 //var g = searchItem.sellingStatus;
                 //var h = searchItem.sellingStatus.timeLeft;
+                var isVariation = searchItem.isMultiVariationListing;
 
                 var listing = new Listing();
                 listing.Title = searchItem.title;
@@ -1204,6 +1205,7 @@ namespace scrapeAPI
                             order.ItemId = searchItem.itemId;
                             order.SellingState = searchItem.sellingStatus.sellingState;
                             order.ListingStatus = i.ListingStatus;
+                            order.IsMultiVariationListing = isVariation;
 
                             orderHistory.Add(order);
                         }

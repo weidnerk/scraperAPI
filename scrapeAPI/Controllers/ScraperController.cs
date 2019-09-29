@@ -188,9 +188,9 @@ namespace scrapeAPI.Controllers
         /// <param name="minPrice"></param>
         /// <param name="maxPrice"></param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool activeStatusOnly = false, bool nonVariation = false)
         {
             //bool endedListings = (showNoOrders == "0") ? false : true;
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
@@ -213,6 +213,14 @@ namespace scrapeAPI.Controllers
                     x = x.Where(p => p.SupplierPrice <= maxPrice);
                 }
                 x = x.Where(p => p.SoldQty >= minSold);
+                if (activeStatusOnly)
+                {
+                    x = x.Where(p => p.ListingStatus == "Active");
+                }
+                if (nonVariation)
+                {
+                    x = x.Where(p => !p.IsMultiVariationListing.Value);
+                }
                 x = x.OrderByDescending(p => p.LatestSold);
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
