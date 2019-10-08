@@ -50,6 +50,8 @@ namespace scrapeAPI.Models
         public string ListingStatus { get; set; }
         public decimal? ListingPrice { get; set; }
         public bool? IsMultiVariationListing { get; set; }
+        public string ShippingServiceName { get; set; }
+        public string ShippingServiceCost { get; set; }
     }
 
     /// <summary>

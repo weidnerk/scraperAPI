@@ -620,6 +620,59 @@ namespace scrapeAPI
             var pic = r.PictureDetails.PictureURL;
         }
 
+        /// <summary>
+        /// Get seller's shipping information.
+        /// 10.07.2019 NOTE: While this works, not using it since overkill on every call.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <param name="appid"></param>
+        /// <returns></returns>
+        public static async Task<ShippingCostSummary> GetShippingCosts(string itemId, string appid)
+        {
+            try
+            {
+                var shippingCost = new ShippingCostSummary();
+                Shopping svc = new Shopping();
+                // set the URL and it's parameters
+                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetShippingCosts&responseencoding=XML&appid={0}&siteid=0&version=517&ItemID={1}&DestinationCountryCode=US&DestinationPostalCode=95128&IncludeDetails=true&QuantitySold=1", appid, itemId);
+                string uri = svc.Url;
+                string errMsg;
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    string s = await httpClient.GetStringAsync(uri);
+                    s = s.Replace("\"", "'");
+                    string output = s.Replace(" xmlns='urn:ebay:apis:eBLBaseComponents'", string.Empty);
+
+                    errMsg = GetSingleItemError(output);
+                    if (!string.IsNullOrEmpty(errMsg))
+                    {
+                        throw new Exception(errMsg);
+                    }
+                    XElement root = XElement.Parse(output);
+                    var qryRecords = from record in root.Elements("ShippingCostSummary")
+                                     select record;
+
+                    if (qryRecords.Count() > 0)
+                    {
+                        var r = (from r2 in qryRecords
+                                 select new
+                                 {
+                                     ShippingServiceName = r2.Element("ShippingServiceName"),
+                                     ShippingServiceCost = r2.Element("ShippingServiceCost")
+                                 }).Single();
+                        shippingCost.ShippingServiceName = r.ShippingServiceName.Value;
+                        shippingCost.ShippingServiceCost = r.ShippingServiceCost.Value;
+                        return shippingCost;
+                    }
+                }
+                return null;
+            }
+            catch (Exception exc)
+            {
+                return null;
+            }
+        }
+
         // Purpose of GetSingleItem is to fetch properties such as a listing's description and photos
         // it is used when performing an auto-listing
         public static async Task<Listing> GetSingleItem(string itemId, string appid)
@@ -630,6 +683,8 @@ namespace scrapeAPI
 
             try
             {
+                
+
                 Models.DataModelsDB db = new Models.DataModelsDB();
                 //var profile = db.UserProfiles.Find(user.Id);
 
@@ -697,18 +752,31 @@ namespace scrapeAPI
                                  Quantity = r2.Element("Quantity"),
                                  QuantitySold = r2.Element("QuantitySold"),
                                  ListingStatus = r2.Element("ListingStatus"),
-                                 Seller = r2.Element("Seller").Element("UserID")
+                                 Seller = r2.Element("Seller").Element("UserID"),
+                                 Shipping = r2.Element("ShippingCostSummary").ElementValueNull()
                              }).Single();
 
                     var list = qryRecords.Elements("PictureURL")
                             .Select(element => element.Value)
                             .ToArray();
 
+                    var a = r.Shipping;
+
                     var si = new Listing();
+
+                    /*
+                     * 10.07.2019
+                     * Good to know how to do this but not necessary since can mostly just look up the seller and see what his
+                     * shipping policy is.  Don't need to exhaust API calls on this.
+                    var shippingCost = await GetShippingCosts(itemId, appid);
+                    si.ShippingServiceCost = shippingCost.ShippingServiceCost;
+                    si.ShippingServiceName = shippingCost.ShippingServiceName;
+                    */
+
                     si.PictureUrl = Util.ListToDelimited(list, ';');
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
-                    si.SupplierPrice = Convert.ToDecimal(r.Price.Value);
+                    si.SellerPrice = Convert.ToDecimal(r.Price.Value);
                     si.EbayUrl = r.ListingUrl.Value;
                     si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
                     si.PrimaryCategoryName = r.PrimaryCategoryName;
@@ -1206,6 +1274,9 @@ namespace scrapeAPI
                             order.SellingState = searchItem.sellingStatus.sellingState;
                             order.ListingStatus = i.ListingStatus;
                             order.IsMultiVariationListing = isVariation;
+
+                            // order.ShippingServiceCost = i.ShippingServiceCost;
+                            // order.ShippingServiceName = i.ShippingServiceName;
 
                             orderHistory.Add(order);
                         }

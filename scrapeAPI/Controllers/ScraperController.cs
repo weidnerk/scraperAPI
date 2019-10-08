@@ -638,7 +638,7 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getlisting")]
-        public async Task<IHttpActionResult> GetListing(string itemId)
+        public async Task<IHttpActionResult> GetListing(string userName, string itemId)
         {
             try
             {
@@ -674,19 +674,35 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        //[HttpGet]
+        //[Route("getwmderived")]
+        //public async Task<IHttpActionResult> GetWMDerived(string url)
+        //{
+        //    try
+        //    {
+        //        var w = await wallib.Class1.GetDetail(url);
+        //        decimal derived = wallib.Class1.reprice(w.price, 1.28);
+        //        return Ok(derived);
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        string msg = dsutil.DSUtil.ErrMsg("GetWMDerived", exc);
+        //        dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+        //        return BadRequest(msg);
+        //    }
+        //}
         [HttpGet]
-        [Route("getwmderived")]
-        public async Task<IHttpActionResult> GetWMDerived(string url)
+        [Route("getwmitem")]
+        public async Task<IHttpActionResult> GetWMItem(string userName, string url)
         {
             try
             {
                 var w = await wallib.Class1.GetDetail(url);
-                decimal derived = wallib.Class1.reprice(w.Price, 1.28);
-                return Ok(derived);
+                return Ok(w);
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("GetWMDerived", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetWMItem", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
