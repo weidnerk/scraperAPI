@@ -59,7 +59,7 @@ namespace scrapeAPI
                 item.ConditionID = 1000;    // new
                 item.Country = CountryCodeType.US;
                 item.Currency = CurrencyCodeType.USD;
-                item.DispatchTimeMax = 2;       // pretty sure this is handling time
+                // item.DispatchTimeMax = 2;       // pretty sure this is handling time
 
                 // https://developer.ebay.com/devzone/xml/docs/reference/ebay/types/ListingDurationCodeType.html
                 item.ListingDuration = "Days_30";
@@ -69,6 +69,8 @@ namespace scrapeAPI
                 item.ListingType = ListingTypeCodeType.FixedPriceItem;
                 // Auction
                 //item.ListingType = ListingTypeCodeType.Chinese; 
+
+                /*
                 item.PaymentMethods = new BuyerPaymentMethodCodeTypeCollection
                 {
                     BuyerPaymentMethodCodeType.PayPal
@@ -76,6 +78,7 @@ namespace scrapeAPI
                 item.AutoPay = true;    // require immediate payment
                                         // Default testing paypal email address
                 item.PayPalEmailAddress = "ventures2019@gmail.com";
+                */
 
                 item.PictureDetails = new PictureDetailsType();
                 item.PictureDetails.PictureURL = new StringCollection();
@@ -114,19 +117,41 @@ namespace scrapeAPI
 
                 string returnDescr = "Please return if unstatisfied.";
                 // returnDescr = "30 day returns. Buyer pays for return shipping";
+                var sp = new SellerProfilesType();
+
+                var spp = new SellerPaymentProfileType();
+                spp.PaymentProfileName = "PayPal:Immediate pay";
+
+                var srp = new SellerReturnProfileType();
+                srp.ReturnProfileName = "Returns Accepted,Free,30 Days,Money Back";
+
+                var ssp = new SellerShippingProfileType();
+                ssp.ShippingProfileName = "Flat:Economy Shippi(Free),1 business days";
+
+                sp.SellerPaymentProfile = spp;
+                sp.SellerReturnProfile = srp;
+                sp.SellerShippingProfile = ssp;
+                item.SellerProfiles = sp;
+                // item.SellerProfiles.SellerPaymentProfile = spp;
+                // item.SellerProfiles.SellerReturnProfile = srp;
+                // item.SellerProfiles.SellerShippingProfile = ssp;
+
+                /*
                 item.ReturnPolicy = new ReturnPolicyType
                 {
                     ReturnsAcceptedOption = "ReturnsAccepted",
                     ReturnsWithinOption = "Days_30",
                     //RefundOption = "MoneyBack",
                     //Description = returnDescr,
-                    ShippingCostPaidByOption = "Buyer"
+                    ShippingCostPaidByOption = "Seller"
                     //,
                     //RestockingFeeValue = "Percent_20",
                     //RestockingFeeValueOption = "Percent_20"
                 };
                 item.ShippingDetails = GetShippingDetail();
-                item.DispatchTimeMax = 3;   // aka handling time
+                */
+                // item.DispatchTimeMax = 3;   // aka handling time
+
                 item.Site = SiteCodeType.US;
 
                 request.Item = item;
@@ -161,7 +186,7 @@ namespace scrapeAPI
         protected static ShippingDetailsType GetShippingDetail()
         {
             ShippingDetailsType sd = new ShippingDetailsType();
-
+            
             //sd.ApplyShippingDiscount = true;
             //sd.PaymentInstructions = "eBay .Net SDK test instruction.";
             //sd.ShippingRateType = ShippingRateTypeCodeType.StandardList;
@@ -185,7 +210,6 @@ namespace scrapeAPI
 
             sd.ShippingServiceOptions = new ShippingServiceOptionsTypeCollection(new[] { domesticShipping1 });
             sd.ShippingType = ShippingTypeCodeType.Flat;
-            
 
             return sd;
         }
