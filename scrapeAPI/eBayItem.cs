@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Services.Protocols;
 
 namespace scrapeAPI
 {
@@ -176,9 +177,16 @@ namespace scrapeAPI
                 }
                 return listedItemID;
             }
+            catch (SoapException exc)
+            {
+                string s = exc.Message; 
+                errors.Add(exc.Detail.InnerText);
+                return null;
+            }
             catch (Exception exc)
             {
                 string s = exc.Message;
+                errors.Add(s);
                 return null;
             }
         }

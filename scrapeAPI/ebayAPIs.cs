@@ -683,8 +683,6 @@ namespace scrapeAPI
 
             try
             {
-                
-
                 Models.DataModelsDB db = new Models.DataModelsDB();
                 //var profile = db.UserProfiles.Find(user.Id);
 
@@ -756,6 +754,10 @@ namespace scrapeAPI
                                  Shipping = r2.Element("ShippingCostSummary").ElementValueNull()
                              }).Single();
 
+                    // 10.10.2019 had case where no pictures being returned for a seller's listing - idk
+                    // again, probably has something to do with variation listing?
+                    // https://www.ebay.com/itm/XXL-Folding-Padded-Director-Chair-Heavy-Duty-W-Side-Table-Drink-Holder-500-Lb-/352687221867?var=
+                    //
                     var list = qryRecords.Elements("PictureURL")
                             .Select(element => element.Value)
                             .ToArray();
