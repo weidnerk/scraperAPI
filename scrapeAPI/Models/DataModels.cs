@@ -42,7 +42,7 @@ namespace scrapeAPI.Models
         public string EbayUrl { get; set; }
         public int RptNumber { get; set; }
         public string ImageUrl { get; set; }
-        public decimal SupplierPrice { get; set; }
+        public decimal SellerPrice { get; set; }
         public DateTime? LatestSold { get; set; }
         public string ItemId { get; set; }
         public DateTime? Listed { get; set; }

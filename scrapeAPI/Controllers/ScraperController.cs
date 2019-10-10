@@ -206,11 +206,11 @@ namespace scrapeAPI.Controllers
                 // filter by min and max price
                 if (minPrice.HasValue)
                 {
-                    x = x.Where(p => p.SupplierPrice >= minPrice);
+                    x = x.Where(p => p.SellerPrice >= minPrice);
                 }
                 if (maxPrice.HasValue)
                 {
-                    x = x.Where(p => p.SupplierPrice <= maxPrice);
+                    x = x.Where(p => p.SellerPrice <= maxPrice);
                 }
                 x = x.Where(p => p.SoldQty >= minSold);
                 if (activeStatusOnly)
