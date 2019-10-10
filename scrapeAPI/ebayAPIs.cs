@@ -696,7 +696,7 @@ namespace scrapeAPI
 
                 Shopping svc = new Shopping();
                 // set the URL and it's parameters
-                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", appid, itemId);
+                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,ItemSpecifics,Variations&appid={0}&version=515&ItemID={1}", appid, itemId);
                 // create a new request type
                 GetSingleItemRequestType request = new GetSingleItemRequestType();
                 // put in your own item number
@@ -761,6 +761,12 @@ namespace scrapeAPI
                     var list = qryRecords.Elements("PictureURL")
                             .Select(element => element.Value)
                             .ToArray();
+                    if (list.Count() == 0)
+                    {
+                        list = qryRecords.Elements("Variations").Elements("Pictures").Elements("VariationSpecificPictureSet").Elements("PictureURL")
+                            .Select(element => element.Value)
+                            .ToArray();
+                    }
 
                     var a = r.Shipping;
 
