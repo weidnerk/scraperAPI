@@ -1175,7 +1175,6 @@ namespace scrapeAPI
         /// <returns></returns>
         protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
         {
-            // dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
             int notSold = 0;
 
@@ -1204,112 +1203,120 @@ namespace scrapeAPI
                     }
                 }
 
-                var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID); // pulling this for ListingStatus
-                //var a = searchItem.itemId;
-                //var b = searchItem.title;
-                //var c = searchItem.listingInfo.listingType;
-                //var d = searchItem.viewItemURL;
-                //var e = searchItem.sellingStatus.currentPrice.Value;
-                //var f = searchItem.galleryURL;
-                //var g = searchItem.sellingStatus;
-                //var h = searchItem.sellingStatus.timeLeft;
-                var isVariation = searchItem.isMultiVariationListing;
-
-                var listing = new Listing();
-                listing.Title = searchItem.title;
-
-                // loop through each order
-                DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
-                DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
-                TransactionTypeCollection transactions = null;
-                try
+                // The SearchResult that was passed to this method may have more than result per item number if different variations have sold.
+                // But when pulling Transactions, we pull all per item number so only need to process each item number once.
+                bool exists = listings.Any(item => item.ItemId == searchItem.itemId);
+                if (!exists)
                 {
-                    // We have queried for only sold times, but sometimes this returns nothing, possibly due to date range.
-                    // Or may happen because of this:
-                    // 'This listing was ended by the seller because the item is no longer available.'
+                    var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID); // pulling this for ListingStatus
+                                                                                            //var a = searchItem.itemId;
+                                                                                            //var b = searchItem.title;
+                                                                                            //var c = searchItem.listingInfo.listingType;
+                                                                                            //var d = searchItem.viewItemURL;
+                                                                                            //var e = searchItem.sellingStatus.currentPrice.Value;
+                                                                                            //var f = searchItem.galleryURL;
+                                                                                            //var g = searchItem.sellingStatus;
+                                                                                            //var h = searchItem.sellingStatus.timeLeft;
+                    var isVariation = searchItem.isMultiVariationListing;
 
-                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId, user.UserName);
-                    transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
-                    dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete", user.UserName);
+                    var listing = new Listing();
+                    listing.Title = searchItem.title;
+                    listing.ItemId = searchItem.itemId;
 
-                    var orderHistory = new List<OrderHistory>();
-
-                    // Iterate transactions for an item
-                    foreach (TransactionType item in transactions)
+                    // loop through each order
+                    DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
+                    DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
+                    TransactionTypeCollection transactions = null;
+                    try
                     {
-                        // did it sell?
-                        if (item.MonetaryDetails != null)
-                        {
-                            var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
-                            var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
-                            var order = new OrderHistory();
-                            order.Title = searchItem.title;
-                            order.Qty = item.QuantityPurchased.ToString();
+                        // We have queried for only sold times, but sometimes this returns nothing, possibly due to date range.
+                        // Or may happen because of this:
+                        // 'This listing was ended by the seller because the item is no longer available.'
 
-                            if (item.TransactionPrice == null)
+                        dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId, user.UserName);
+                        transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
+                        dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete", user.UserName);
+
+                        var orderHistory = new List<OrderHistory>();
+
+                        // Iterate transactions for an item
+                        foreach (TransactionType item in transactions)
+                        {
+                            // did it sell?
+                            if (item.MonetaryDetails != null)
                             {
-                                // is this bcs sellerPaidStatus="notpaid"?
-                                order.SellerPrice = "0.0";
-                                dsutil.DSUtil.WriteFile(_logfile, string.Format("StoreTransactions: item.TransactionPrice == null for item: {0}", searchItem.itemId), user.UserName);
+                                var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
+                                var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
+                                var order = new OrderHistory();
+                                order.Title = searchItem.title;
+                                order.Qty = item.QuantityPurchased.ToString();
+
+                                if (item.TransactionPrice == null)
+                                {
+                                    // is this bcs sellerPaidStatus="notpaid"?
+                                    order.SellerPrice = "0.0";
+                                    dsutil.DSUtil.WriteFile(_logfile, string.Format("StoreTransactions: item.TransactionPrice == null for item: {0}", searchItem.itemId), user.UserName);
+                                }
+                                else
+                                {
+                                    order.SellerPrice = item.TransactionPrice.Value.ToString();
+                                }
+                                // dsutil.DSUtil.WriteFile(_logfile, string.Format("Seller price: {0}", order.SellerPrice), user.UserName);
+
+                                order.DateOfPurchase = item.CreatedDate;
+
+                                order.EbayUrl = searchItem.viewItemURL;
+                                // dsutil.DSUtil.WriteFile(_logfile, "order.EbayUrl complete", user.UserName);
+
+                                order.ImageUrl = searchItem.galleryURL;
+                                dsutil.DSUtil.WriteFile(_logfile, "order.ImageUrl complete", user.UserName);
+
+                                var pictures = searchItem.pictureURLLarge;
+                                // dsutil.DSUtil.WriteFile(_logfile, "pictures complete", user.UserName);
+
+                                order.PageNumber = pg;
+                                order.ItemId = searchItem.itemId;
+                                order.SellingState = searchItem.sellingStatus.sellingState;
+                                order.ListingStatus = i.ListingStatus;
+                                order.IsMultiVariationListing = isVariation;
+
+                                // order.ShippingServiceCost = i.ShippingServiceCost;
+                                // order.ShippingServiceName = i.ShippingServiceName;
+
+                                orderHistory.Add(order);
                             }
                             else
                             {
-                                order.SellerPrice = item.TransactionPrice.Value.ToString();
+                                // i don't see this ever being executed which makes sense if querying only sold items
+                                dsutil.DSUtil.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null", user.UserName);
                             }
-                            // dsutil.DSUtil.WriteFile(_logfile, string.Format("Seller price: {0}", order.SellerPrice), user.UserName);
-
-                            order.DateOfPurchase = item.CreatedDate;
-
-                            order.EbayUrl = searchItem.viewItemURL;
-                            // dsutil.DSUtil.WriteFile(_logfile, "order.EbayUrl complete", user.UserName);
-
-                            order.ImageUrl = searchItem.galleryURL;
-                            dsutil.DSUtil.WriteFile(_logfile, "order.ImageUrl complete", user.UserName);
-
-                            var pictures = searchItem.pictureURLLarge;
-                            // dsutil.DSUtil.WriteFile(_logfile, "pictures complete", user.UserName);
-
-                            order.PageNumber = pg;
-                            order.ItemId = searchItem.itemId;
-                            order.SellingState = searchItem.sellingStatus.sellingState;
-                            order.ListingStatus = i.ListingStatus;
-                            order.IsMultiVariationListing = isVariation;
-
-                            // order.ShippingServiceCost = i.ShippingServiceCost;
-                            // order.ShippingServiceName = i.ShippingServiceName;
-
-                            orderHistory.Add(order);
                         }
-                        else
+                        if (transactions.Count == 0)
                         {
-                            // i don't see this ever being executed which makes sense if querying only sold items
-                            dsutil.DSUtil.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null", user.UserName);
+                            // Despite filtering for only sold items, we may still meet this condition (which doesn't make a whole lot of sense)
+                            // in testing, I would see an item like 
+                            // 'Test listing - DO NOT BID OR BUY362254235623'
+                            //
+                            ++notSold;
                         }
-                    }
-                    if (transactions.Count == 0)
-                    {
-                        // Despite filtering for only sold items, we may still meet this condition (which doesn't make a whole lot of sense)
-                        // in testing, I would see an item like 
-                        // 'Test listing - DO NOT BID OR BUY362254235623'
-                        //
-                        ++notSold;
-                    }
 
-                    using (var db = new dsmodels.DataModelsDB())
-                    {
-                        db.OrderHistorySave(orderHistory, rptNumber, false);
-                    }
-                    dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave complete", user.UserName);
-                    listing.Orders = orderHistory;
-                    listings.Add(listing);
+                        using (var db = new dsmodels.DataModelsDB())
+                        {
+                            db.OrderHistorySave(orderHistory, rptNumber, false);
+                        }
+                        dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave complete", user.UserName);
+                        listing.Orders = orderHistory;
+                        listings.Add(listing);
 
-                    dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Complete", user.UserName);
-                }
-                catch (Exception exc)
-                {
-                    string msg = " StoreTransactions " + exc.Message;
-                    dsutil.DSUtil.WriteFile(_logfile, msg, user.UserName);
-                    throw;
+                        dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Complete", user.UserName);
+
+                    }
+                    catch (Exception exc)
+                    {
+                        string msg = " StoreTransactions " + exc.Message;
+                        dsutil.DSUtil.WriteFile(_logfile, msg, user.UserName);
+                        throw;
+                    }
                 }
             }
         }
