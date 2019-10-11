@@ -696,6 +696,9 @@ namespace scrapeAPI
 
                 Shopping svc = new Shopping();
                 // set the URL and it's parameters
+
+                // docs for IncludeSelector
+                // https://developer.ebay.com/devzone/shopping/docs/callref/getsingleitem.html
                 svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Details,Description,ItemSpecifics,Variations&appid={0}&version=515&ItemID={1}", appid, itemId);
                 // create a new request type
                 GetSingleItemRequestType request = new GetSingleItemRequestType();
