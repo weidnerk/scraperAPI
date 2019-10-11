@@ -463,14 +463,16 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var errors = await ListingCreateAsync(itemId);
-                if (errors != null)
+                var output = await ListingCreateAsync(itemId);
+                if (output != null)
                 {
-                    var errStr = Util.ListToDelimited(errors.ToArray(), ';');
+                    var errStr = Util.ListToDelimited(output.ToArray(), ';');
                     return BadRequest(errStr);
                 }
                 else
-                    return Ok();
+                {
+                    return Ok(output);
+                }
             }
             catch (Exception exc)
             {
@@ -528,7 +530,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         protected async Task<List<string>> ListingCreateAsync(string itemId)
         {
-            var errors = new List<string>();
+            var output = new List<string>();
             var listing = await db.ListingGet(itemId);     // item has to be stored before it can be listed
             if (listing != null)
             {
@@ -541,15 +543,16 @@ namespace scrapeAPI.Controllers
                         listing.PrimaryCategoryID,
                         (double)listing.ListingPrice,
                         pictureURLs,
-                        ref errors,
+                        ref output,
                         2);
 
                     // might get warnings and still get a listing item number
-                    if (errors.Count == 0)
+                    if (output.Count == 0)
                     {
                     }
                     if (!string.IsNullOrEmpty(verifyItemID))
                     {
+                        output.Add(verifyItemID);
                         if (!listing.Listed.HasValue)
                         {
                             listing.Listed = DateTime.Now;
@@ -565,7 +568,7 @@ namespace scrapeAPI.Controllers
                                         title: listing.ListingTitle);
                 }
             }
-            return errors;
+            return output;
         }
 
         // itemId is id of the ebay seller's listing
