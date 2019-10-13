@@ -28,7 +28,13 @@ namespace scrapeAPI
         ///     FREE shipping
         ///     buyer pays for return shipping
         /// </summary>
-        public static string VerifyAddItemRequest(string title, string description, string categoryID, double price, List<string> pictureURLs, ref List<string> errors, int qtyToList)
+        public static string VerifyAddItemRequest(string title, 
+            string description, 
+            string categoryID, 
+            double price, 
+            List<string> pictureURLs, 
+            ref List<string> errors, 
+            int qtyToList)
         {
             //errors = null;
             string listedItemID = null;
@@ -170,7 +176,7 @@ namespace scrapeAPI
                 }
                 else
                 {
-                    foreach(ErrorType e in response.Errors)
+                    foreach (ErrorType e in response.Errors)
                     {
                         errors.Add(e.LongMessage);
                     }

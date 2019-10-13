@@ -481,14 +481,14 @@ namespace scrapeAPI.Controllers
             try
             {
                 var output = await ListingCreateAsync(itemId);
-                if (output != null)
+                if (output[0] != "NOERROR")
                 {
                     var errStr = Util.ListToDelimited(output.ToArray(), ';');
                     return BadRequest(errStr);
                 }
                 else
                 {
-                    return Ok(output);
+                    return Ok(output[1]);   // return listing id
                 }
             }
             catch (Exception exc)
@@ -562,13 +562,11 @@ namespace scrapeAPI.Controllers
                         pictureURLs,
                         ref output,
                         2);
+                    // at this point, 'output' will be populated with errors if any occurred
 
-                    // might get warnings and still get a listing item number
-                    if (output.Count == 0)
-                    {
-                    }
                     if (!string.IsNullOrEmpty(verifyItemID))
                     {
+                        output.Add("NOERROR");
                         output.Add(verifyItemID);
                         if (!listing.Listed.HasValue)
                         {
@@ -583,6 +581,8 @@ namespace scrapeAPI.Controllers
                                         qty: listing.Qty,
                                         price: Convert.ToDouble(listing.ListingPrice),
                                         title: listing.ListingTitle);
+                    output.Add("NOERROR");
+                    output.Add(listing.ListedItemID);
                 }
             }
             return output;
