@@ -451,6 +451,23 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        [HttpPost]
+        [Route("storesellerprofile")]
+        public async Task<IHttpActionResult> StoreSellerProfile(SellerProfile sellerProfile)
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                await db.SellerProfileSave(sellerProfile);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
 
         [HttpPost]
         [Route("storepostedlisting")]
@@ -666,6 +683,25 @@ namespace scrapeAPI.Controllers
                 if (listing == null)
                     return NotFound();
                 return Ok(listing);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
+
+        [HttpGet]
+        [Route("getsellerprofile")]
+        public async Task<IHttpActionResult> GetSellerProfile(string userName, string seller)
+        {
+            try
+            {
+                var sellerProfile = await db.SellerProfileGet(seller);
+                if (sellerProfile == null)
+                    return NotFound();
+                return Ok(sellerProfile);
             }
             catch (Exception exc)
             {
