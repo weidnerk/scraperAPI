@@ -458,6 +458,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
+                sellerProfile.UpdatedBy = strCurrentUserId;
                 await db.SellerProfileSave(sellerProfile);
                 return Ok();
             }
