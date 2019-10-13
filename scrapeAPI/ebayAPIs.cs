@@ -774,7 +774,6 @@ namespace scrapeAPI
                     var a = r.Shipping;
 
                     var si = new Listing();
-
                     /*
                      * 10.07.2019
                      * Good to know how to do this but not necessary since can mostly just look up the seller and see what his
@@ -783,7 +782,6 @@ namespace scrapeAPI
                     si.ShippingServiceCost = shippingCost.ShippingServiceCost;
                     si.ShippingServiceName = shippingCost.ShippingServiceName;
                     */
-
                     si.PictureUrl = Util.ListToDelimited(list, ';');
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;

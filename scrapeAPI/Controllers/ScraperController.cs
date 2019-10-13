@@ -434,6 +434,23 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        [HttpPost]
+        [Route("storenote")]
+        public async Task<IHttpActionResult> StoreNote(Listing listing)
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                await db.NoteSave(listing);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
 
         [HttpPost]
         [Route("storepostedlisting")]
@@ -677,23 +694,6 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route("getwmderived")]
-        //public async Task<IHttpActionResult> GetWMDerived(string url)
-        //{
-        //    try
-        //    {
-        //        var w = await wallib.Class1.GetDetail(url);
-        //        decimal derived = wallib.Class1.reprice(w.price, 1.28);
-        //        return Ok(derived);
-        //    }
-        //    catch (Exception exc)
-        //    {
-        //        string msg = dsutil.DSUtil.ErrMsg("GetWMDerived", exc);
-        //        dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-        //        return BadRequest(msg);
-        //    }
-        //}
         [HttpGet]
         [Route("getwmitem")]
         public async Task<IHttpActionResult> GetWMItem(string userName, string url)
