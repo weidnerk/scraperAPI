@@ -782,6 +782,7 @@ namespace scrapeAPI
                     si.ShippingServiceCost = shippingCost.ShippingServiceCost;
                     si.ShippingServiceName = shippingCost.ShippingServiceName;
                     */
+                    si.ItemId = itemId;
                     si.PictureUrl = Util.ListToDelimited(list, ';');
                     si.Title = r.Title.Value;
                     si.Description = r.Description.Value;
