@@ -70,8 +70,9 @@ namespace scrapeAPI
         // use this for itemspecifics:
         // https://ebaydts.com/eBayKBDetails?KBid=1647
         //
-        public static string ReviseItem(string listedItemID, int? qty = null, double? price = null, string title = null)
+        public static List<string> ReviseItem(string listedItemID, int? qty = null, double? price = null, string title = null)
         {
+            var response = new List<string>();
             //create the context
             ApiContext context = new ApiContext();
 
@@ -154,10 +155,11 @@ namespace scrapeAPI
             {
                 foreach (eBay.Service.Core.Soap.ErrorType e in r.Errors)
                 {
-                    msg += " " + e.LongMessage;
+                    // msg += " " + e.LongMessage;
+                    response.Add(e.LongMessage);
                 }
             }
-            return msg;
+            return response;
         }
 
         public static string GetebayDetails()

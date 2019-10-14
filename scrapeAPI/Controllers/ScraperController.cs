@@ -566,6 +566,7 @@ namespace scrapeAPI.Controllers
         protected async Task<List<string>> ListingCreateAsync(string itemId)
         {
             var output = new List<string>();
+            string strCurrentUserId = User.Identity.GetUserId();
             var listing = await db.ListingGet(itemId);     // item has to be stored before it can be listed
             if (listing != null)
             {
@@ -584,27 +585,39 @@ namespace scrapeAPI.Controllers
 
                     if (!string.IsNullOrEmpty(verifyItemID))
                     {
-                        output.Add("NOERROR");
+                        // output.Add("NOERROR");
                         output.Add(verifyItemID);
                         if (!listing.Listed.HasValue)
                         {
                             listing.Listed = DateTime.Now;
                         }
-                        string strCurrentUserId = User.Identity.GetUserId();
-                        await db.UpdateListedItemID(listing, verifyItemID, strCurrentUserId, true);
+                        
+                        var response = FlattenList(output);
+                        await db.UpdateListedItemID(listing, verifyItemID, strCurrentUserId, true, response);
                     }
                 }
                 else
                 {
-                    ebayAPIs.ReviseItem(listing.ListedItemID,
+                    output = ebayAPIs.ReviseItem(listing.ListedItemID,
                                         qty: listing.Qty,
                                         price: Convert.ToDouble(listing.ListingPrice),
                                         title: listing.ListingTitle);
-                    output.Add("NOERROR");
+                    var response = FlattenList(output);
+                    await db.UpdateListedItemID(listing, listing.ListedItemID, strCurrentUserId, true, response, updated: DateTime.Now);
+                    // output.Add("NOERROR");
                     output.Add(listing.ListedItemID);
                 }
             }
             return output;
+        }
+        protected static string FlattenList(List<string> errors)
+        {
+            string output = null;
+            foreach (string s in errors) {
+                output += s + ";";
+            }
+            var r = output.Substring(0, output.Length - 1);
+            return r;
         }
 
         [HttpGet]
