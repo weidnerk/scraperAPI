@@ -591,7 +591,7 @@ namespace scrapeAPI.Controllers
                             listing.Listed = DateTime.Now;
                         }
                         string strCurrentUserId = User.Identity.GetUserId();
-                        await db.UpdateListedItemID(listing, verifyItemID, strCurrentUserId);
+                        await db.UpdateListedItemID(listing, verifyItemID, strCurrentUserId, true);
                     }
                 }
                 else
@@ -606,74 +606,6 @@ namespace scrapeAPI.Controllers
             }
             return output;
         }
-
-        // itemId is id of the ebay seller's listing
-        //protected async Task<List<string>> PostedListingCreateAsync(string itemId)
-        //{
-        //    var errors = new List<string>();
-        //    var listing = await db.GetPostedListing(itemId);
-        //    if (listing != null)
-        //    {
-        //        List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
-        //        string verifyItemID = eBayItem.VerifyAddItemRequest(listing.Title,
-        //            listing.Description,
-        //            listing.PrimaryCategoryID,
-        //            (double)listing.ListingPrice,
-        //            pictureURLs,
-        //            ref errors,
-        //            listing.Qty);
-
-        //        // might get warnings and still get a listing item number
-        //        if (errors.Count == 0)
-        //        {
-        //        }
-        //        if (!string.IsNullOrEmpty(verifyItemID))
-        //        {
-        //            if (!listing.Listed.HasValue)
-        //            {
-        //                listing.Listed = DateTime.Now;
-        //            }
-        //            await db.UpdateListedItemID(listing, verifyItemID);
-        //        }
-        //    }
-        //    return errors;
-        //}
-
-        // return errors
-        //public async Task<List<string>> PostedListingCreateAsync(StagedListing staged)
-        //{
-        //    //dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
-        //    //Models.DataModelsDB models = new Models.DataModelsDB();
-
-        //    var errors = new List<string>();
-        //    var listing = await db.GetPostedListing(staged.SourceID, staged.SupplierItemID);
-        //    if (listing != null)
-        //    {
-        //        List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
-        //        string verifyItemID = eBayItem.VerifyAddItemRequest(listing.Title,
-        //            listing.Description,
-        //            listing.PrimaryCategoryID,
-        //            (double)listing.ListingPrice,
-        //            pictureURLs,
-        //            ref errors,
-        //            listing.Qty);
-
-        //        // might get warnings and still get a listing item number
-        //        if (errors.Count == 0)
-        //        {
-        //        }
-        //        if (!string.IsNullOrEmpty(verifyItemID))
-        //        {
-        //            staged.ListedItemID = verifyItemID;
-        //            if (!listing.Listed.HasValue)
-        //            {
-        //                listing.Listed = DateTime.Now;
-        //            }
-        //            await db.UpdateListedItemID(listing, verifyItemID);
-        //        }
-        //    }
-        //    return errors;
-        //}
 
         [HttpGet]
         [Route("getlisting")]

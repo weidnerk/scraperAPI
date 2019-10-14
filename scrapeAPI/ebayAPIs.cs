@@ -498,6 +498,10 @@ namespace scrapeAPI
                 //the WSDL Version used for this SDK build
                 oContext.Version = "817";
                 GetApiAccessRulesCall oGetApiAccessRulesCall = new GetApiAccessRulesCall(oContext);
+                GetStoreCall oGetStore = new GetStoreCall(oContext);
+                oGetStore.CategoryStructureOnly = true;
+                oGetStore.Execute();
+                var x = oGetStore.Store.Name;
 
                 //' set the Version used in the call
                 oGetApiAccessRulesCall.Version = oContext.Version;
