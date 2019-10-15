@@ -127,13 +127,13 @@ namespace scrapeAPI
                 var sp = new SellerProfilesType();
 
                 var spp = new SellerPaymentProfileType();
-                spp.PaymentProfileName = "PayPal:Immediate pay";
+                spp.PaymentProfileName = "default";
 
                 var srp = new SellerReturnProfileType();
-                srp.ReturnProfileName = "Returns Accepted,Free,30 Days,Money Back";
+                srp.ReturnProfileName = "mw";
 
                 var ssp = new SellerShippingProfileType();
-                ssp.ShippingProfileName = "Flat:Economy Shippi(Free),1 business days";
+                ssp.ShippingProfileName = "mw";
 
                 sp.SellerPaymentProfile = spp;
                 sp.SellerReturnProfile = srp;
