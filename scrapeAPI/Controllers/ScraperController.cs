@@ -499,7 +499,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var output = await ListingCreateAsync(itemId);
-                if (output[0] != "NOERROR")
+                if (ListingNotCreated(output))
                 {
                     var errStr = Util.ListToDelimited(output.ToArray(), ';');
                     return BadRequest(errStr);
@@ -515,6 +515,19 @@ namespace scrapeAPI.Controllers
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
+        }
+
+        protected static bool ListingNotCreated(List<string> response)
+        {
+            const string marker = "Listing not created";
+            foreach (string s in response)
+            {
+                if (s.Contains(marker))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         [HttpGet]
@@ -591,9 +604,12 @@ namespace scrapeAPI.Controllers
                         {
                             listing.Listed = DateTime.Now;
                         }
-                        
                         var response = FlattenList(output);
                         await db.UpdateListedItemID(listing, verifyItemID, strCurrentUserId, true, response);
+                    }
+                    else
+                    {
+                        output.Add("Listing not created.");
                     }
                 }
                 else
