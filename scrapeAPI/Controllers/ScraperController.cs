@@ -598,11 +598,15 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
+                    string response = null;
                     output = ebayAPIs.ReviseItem(listing.ListedItemID,
                                         qty: listing.Qty,
                                         price: Convert.ToDouble(listing.ListingPrice),
                                         title: listing.ListingTitle);
-                    var response = FlattenList(output);
+                    if (output.Count > 0)
+                    {
+                        response = FlattenList(output);
+                    }
                     await db.UpdateListedItemID(listing, listing.ListedItemID, strCurrentUserId, true, response, updated: DateTime.Now);
                     // output.Add("NOERROR");
                     output.Add(listing.ListedItemID);
