@@ -506,7 +506,8 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
-                    return Ok(output[1]);   // return listing id
+                    var str = Util.ListToDelimited(output.ToArray(), ';');
+                    return Ok(str);   // return listing id
                 }
             }
             catch (Exception exc)
@@ -593,7 +594,8 @@ namespace scrapeAPI.Controllers
                         (double)listing.ListingPrice,
                         pictureURLs,
                         ref output,
-                        2);
+                        2,  
+                        listing);
                     // at this point, 'output' will be populated with errors if any occurred
 
                     if (!string.IsNullOrEmpty(verifyItemID))

@@ -777,9 +777,30 @@ namespace scrapeAPI
                             .ToArray();
                     }
 
+                    var specifics = (from r3 in qryRecords.Elements("ItemSpecifics").Elements("NameValueList")
+                              select new
+                              {
+                                  Name = r3.Element("Name").Value,
+                                  Value = r3.Element("Value").Value
+                              }).ToArray();
+
+                    var itemSpecifics = new List<ItemSpecific>();
+                    foreach (var i in specifics)
+                    {
+                        string n = i.Name;
+                        string v = i.Value;
+                        var specific = new ItemSpecific();
+                        specific.SellerItemId = itemId;
+                        specific.ItemName = n;
+                        specific.ItemValue = v;
+                        itemSpecifics.Add(specific);
+                    }
+                    
                     var a = r.Shipping;
 
                     var si = new Listing();
+                    si.ItemSpecifics = itemSpecifics.ToList();
+
                     /*
                      * 10.07.2019
                      * Good to know how to do this but not necessary since can mostly just look up the seller and see what his

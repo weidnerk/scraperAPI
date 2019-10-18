@@ -4,6 +4,7 @@
  * 
  * 
  */
+using dsmodels;
 using eBay.Service.Core.Soap;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,8 @@ namespace scrapeAPI
             double price, 
             List<string> pictureURLs, 
             ref List<string> errors, 
-            int qtyToList)
+            int qtyToList,
+            Listing listing)
         {
             //errors = null;
             string listedItemID = null;
@@ -102,16 +104,27 @@ namespace scrapeAPI
                 StringCollection valueCol1 = new StringCollection();
                 StringCollection valueCol2 = new StringCollection();
 
-                nv1.Name = "Brand";
-                valueCol1.Add("Unbranded");
-                nv1.Value = valueCol1;
+                if (!ItemSpecificExists(listing.ItemSpecifics, "Brand")) { 
+                    nv1.Name = "Brand";
+                    valueCol1.Add("Unbranded");
+                    nv1.Value = valueCol1;
+                    ItemSpecs.Add(nv1);
+                }
+                if (!ItemSpecificExists(listing.ItemSpecifics, "MPN"))
+                {
+                    nv2.Name = "MPN";
+                    valueCol2.Add("Does Not Apply");
+                    nv2.Value = valueCol2;
+                    ItemSpecs.Add(nv2);
+                }
 
-                nv2.Name = "MPN";
-                valueCol2.Add("Does Not Apply");
-                nv2.Value = valueCol2;
+                var revisedItemSpecs = ModifyItemSpecific(listing.ItemSpecifics);
+                foreach (var i in revisedItemSpecs)
+                {
+                    var n = AddItemSpecifics(i);
+                    ItemSpecs.Add(n);
+                }
 
-                ItemSpecs.Add(nv1);
-                ItemSpecs.Add(nv2);
                 item.ItemSpecifics = ItemSpecs;
 
                 var pd = new ProductListingDetailsType();
@@ -197,6 +210,58 @@ namespace scrapeAPI
             }
         }
 
+        protected static eBay.Service.Core.Soap.NameValueListType AddItemSpecifics(ItemSpecific item)
+        {
+            var itemSpecs = new NameValueListTypeCollection();
+            var nv2 = new eBay.Service.Core.Soap.NameValueListType();
+            StringCollection valueCol2 = new StringCollection();
+
+            nv2.Name = item.ItemName;
+            valueCol2.Add(item.ItemValue);
+            nv2.Value = valueCol2;
+
+            return nv2;
+        }
+        protected static List<ItemSpecific> ModifyItemSpecific(List<ItemSpecific> itemSpecifics)
+        {
+            var specifics = new List<ItemSpecific>();
+            foreach(var s in itemSpecifics)
+            {
+                if (!OmitSpecific(s.ItemName))
+                {
+                    specifics.Add(s);
+                }
+            }
+            return specifics;
+        }
+        protected static bool ItemSpecificExists(List<ItemSpecific> itemSpecifics, string itemName)
+        {
+            foreach (var s in itemSpecifics)
+            {
+                if (s.ItemName == itemName)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        protected static bool OmitSpecific(string name)
+        {
+            if (name == "Restocking Fee")
+                return true;
+            if (name == "All returns accepted")
+                return true;
+            if (name == "Item must be returned within")
+                return true;
+            if (name == "Refund will be given as")
+                return true;
+            if (name == "Return shipping will be paid by")
+                return true;
+            if (name == "Return shipping will be paid by")
+                return true;
+
+            return false;
+        }
         protected static ShippingDetailsType GetShippingDetail()
         {
             ShippingDetailsType sd = new ShippingDetailsType();
