@@ -789,5 +789,23 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+
+        [HttpDelete]
+        [Route("deletelistingrecord/{sellerItemId}")]
+        [AcceptVerbs("DELETE")]
+        public async Task<IHttpActionResult> DeleteListingRecord(string sellerItemId)
+        {
+            try
+            {
+                await db.DeleteListingRecord(sellerItemId);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = exc.Message;
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
