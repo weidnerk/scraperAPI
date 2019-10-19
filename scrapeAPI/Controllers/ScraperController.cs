@@ -446,7 +446,24 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("StoreNote", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
+        [HttpPost]
+        [Route("storeoos")]
+        public async Task<IHttpActionResult> StoreOOS(Listing listing)
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                await db.OOSSave(listing);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("StoreOOS", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
