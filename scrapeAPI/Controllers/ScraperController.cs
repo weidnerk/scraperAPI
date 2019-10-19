@@ -824,5 +824,27 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpGet]
+        [Route("dashboard")]
+        public IHttpActionResult GetDashboard()
+        {
+            try
+            {
+                var dashboard = new Dashboard();
+                int OOS = db.Listings.Where(p => p.OOS).Count();
+                dashboard.OOS = OOS;
+
+                int notListed = db.Listings.Where(p => p.Listed == null).Count();
+                dashboard.NotListed = notListed;
+
+                return Ok(dashboard);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetCategories", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
     }
 }
