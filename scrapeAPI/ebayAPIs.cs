@@ -36,7 +36,6 @@ namespace scrapeAPI
 
         public static void EndFixedPriceItem(string itemID)
         {
-
             //create the context
             ApiContext context = new ApiContext();
 
@@ -66,6 +65,30 @@ namespace scrapeAPI
             Console.WriteLine(endFP.ApiResponse.Ack + " Ended ItemID " + endFP.ItemID);
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderid">19-04026-11927</param>
+        public static void GetOrders(string orderid)
+        {
+            ApiContext context = new ApiContext();
+            string token = AppSettingsHelper.Token;
+            context.ApiCredential.eBayToken = token;
+
+            //set the server url
+            string endpoint = AppSettingsHelper.Endpoint;
+            context.SoapApiServerUrl = endpoint;
+
+            GetOrdersCall call = new GetOrdersCall(context);
+            call.DetailLevelList = new DetailLevelCodeTypeCollection();
+            call.DetailLevelList.Add(DetailLevelCodeType.ReturnAll);
+            call.OrderIDList = new StringCollection();
+            call.OrderIDList.Add(orderid);
+            call.Execute();
+            var r = call.ApiResponse.OrderArray;
+            var a = call.ApiResponse.Ack;
+        }
 
         // use this for itemspecifics:
         // https://ebaydts.com/eBayKBDetails?KBid=1647

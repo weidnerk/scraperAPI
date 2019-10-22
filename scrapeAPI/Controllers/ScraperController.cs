@@ -566,6 +566,21 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("setorder")]
+        public IHttpActionResult SetOrder(Listing listing)
+        {
+            try
+            {
+                ebayAPIs.GetOrders("19-04026-11927");
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
+            }
+        }
+
         //[HttpGet]
         //[Route("createpostedlisting")]
         //public async Task<IHttpActionResult> CreatePostedListing(string itemId)
