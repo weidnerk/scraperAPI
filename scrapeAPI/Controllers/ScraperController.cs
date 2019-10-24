@@ -99,6 +99,7 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string userName)
         {
+            string msg = null;
             try
             {
                 // stub to delete a user
@@ -107,11 +108,19 @@ namespace scrapeAPI.Controllers
                 var user = await UserManager.FindByNameAsync(userName);
                 var settings = db.UserSettingsView.Find(user.Id);
 
+                var r = await db.CanRunScan(user.Id, seller);
+                if (!r)
+                {
+                    msg = "Cannot scan seller";
+                    return BadRequest(msg);
+                }
+
                 var sh = new SearchHistory();
                 sh.UserId = user.Id;
                 sh.Seller = seller;
                 sh.DaysBack = daysBack;
                 sh.MinSoldFilter = minSold;
+                sh.StoreID = settings.StoreID;
                 var sh_updated = await db.SearchHistoryAdd(sh);
 
                 int itemCount = ebayAPIs.ItemCount(seller, daysBack, settings);
@@ -123,7 +132,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = " GetNumItemsSold " + exc.Message;
+                msg = " GetNumItemsSold " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
@@ -727,7 +736,10 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var listings = db.GetListings();
+                string strCurrentUserId = User.Identity.GetUserId();
+                var settings = db.UserSettingsView.Find(strCurrentUserId);
+
+                var listings = db.GetListings(settings.StoreID);
                 if (listings == null)
                     return NotFound();
                 return Ok(listings);
