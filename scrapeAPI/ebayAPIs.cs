@@ -34,13 +34,14 @@ namespace scrapeAPI
         dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
         Models.DataModelsDB models = new Models.DataModelsDB();
 
-        public static void EndFixedPriceItem(string itemID)
+        public static void EndFixedPriceItem(UserSettingsView settings, string itemID)
         {
             //create the context
             ApiContext context = new ApiContext();
 
+
             //set the User token
-            string token = AppSettingsHelper.Token;
+            string token = settings.Token;
             context.ApiCredential.eBayToken = token;
 
             //set the server url
@@ -70,10 +71,11 @@ namespace scrapeAPI
         /// 
         /// </summary>
         /// <param name="orderid">19-04026-11927</param>
-        public static void GetOrders(string orderid)
+        public static void GetOrders(UserSettingsView settings, string orderid)
         {
             ApiContext context = new ApiContext();
-            string token = AppSettingsHelper.Token;
+
+            string token = settings.Token;
             context.ApiCredential.eBayToken = token;
 
             //set the server url
@@ -93,14 +95,14 @@ namespace scrapeAPI
         // use this for itemspecifics:
         // https://ebaydts.com/eBayKBDetails?KBid=1647
         //
-        public static List<string> ReviseItem(string listedItemID, int? qty = null, double? price = null, string title = null)
+        public static List<string> ReviseItem(UserSettingsView settings, string listedItemID, int? qty = null, double? price = null, string title = null)
         {
             var response = new List<string>();
             //create the context
             ApiContext context = new ApiContext();
 
             //set the User token
-            string token = AppSettingsHelper.Token;
+            string token = settings.Token;
             context.ApiCredential.eBayToken = token;
 
             //set the server url
@@ -185,13 +187,13 @@ namespace scrapeAPI
             return response;
         }
 
-        public static string GetebayDetails()
+        public static string GetebayDetails(UserSettingsView settings)
         {
             string unavailable = null;
             try
             {
                 ApiContext context = new ApiContext();
-                string token = AppSettingsHelper.Token;
+                string token = settings.Token;
                 context.ApiCredential.eBayToken = token;
                 context.SoapApiServerUrl = "https://api.ebay.com/wsapi";
                 // set the version 
@@ -400,17 +402,18 @@ namespace scrapeAPI
         // https://ebaydts.com/eBayKBDetails?KBid=1937
         //
         // also look at GetOrderTransactions()
-        public static TransactionTypeCollection GetItemTransactions(string itemId, DateTime ModTimeFrom, DateTime ModTimeTo, ApplicationUser user)
+        public static TransactionTypeCollection GetItemTransactions(UserSettingsView settings, string itemId, DateTime ModTimeFrom, DateTime ModTimeTo)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
-            var profile = db.GetUserProfile(user.Id);
+
+            // var profile = db.GetUserProfile(user.Id);
             ApiContext oContext = new ApiContext();
 
             //set the dev,app,cert information
-            oContext.ApiCredential.ApiAccount.Developer = profile.DevID;
-            oContext.ApiCredential.ApiAccount.Application = profile.AppID;
-            oContext.ApiCredential.ApiAccount.Certificate = profile.CertID;
-            oContext.ApiCredential.eBayToken = profile.UserToken;
+            oContext.ApiCredential.ApiAccount.Developer = settings.DevID;
+            oContext.ApiCredential.ApiAccount.Application = settings.AppID;
+            oContext.ApiCredential.ApiAccount.Certificate = settings.CertID;
+            oContext.ApiCredential.eBayToken = settings.Token;
 
             //set the endpoint (sandbox) use https://api.ebay.com/wsapi for production
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
@@ -459,19 +462,20 @@ namespace scrapeAPI
             return r;
         }
 
-        public static ApiAccessRuleTypeCollection GetAPIStatus(ApplicationUser user)
+        public static ApiAccessRuleTypeCollection GetAPIStatus(UserSettingsView settings)
         {
             try
             {
                 dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
-                var profile = db.GetUserProfile(user.Id);
+                // var setting = db.UserSettings.Find(user.Id, 1);
+                // var profile = db.GetUserProfile(user.Id);
                 ApiContext oContext = new ApiContext();
 
                 //set the dev,app,cert information
-                oContext.ApiCredential.ApiAccount.Developer = profile.DevID;
-                oContext.ApiCredential.ApiAccount.Application = profile.AppID;
-                oContext.ApiCredential.ApiAccount.Certificate = profile.CertID;
-                oContext.ApiCredential.eBayToken = profile.UserToken;
+                oContext.ApiCredential.ApiAccount.Developer = settings.DevID;
+                oContext.ApiCredential.ApiAccount.Application = settings.AppID;
+                oContext.ApiCredential.ApiAccount.Certificate = settings.CertID;
+                oContext.ApiCredential.eBayToken = settings.Token;
 
                 oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
 
@@ -501,19 +505,20 @@ namespace scrapeAPI
         }
 
         // note below that GetApiAccessRules returns a collection but first item is CallName, ApplicationAggregate, which returns all
-        public static long GetTradingAPIUsage(ApplicationUser user)
+        public static long GetTradingAPIUsage(UserSettingsView settings)
         {
             try
             {
                 dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
-                var profile = db.GetUserProfile(user.Id);
+                // var setting = db.UserSettings.Find(user.Id, 1);
+                // var profile = db.GetUserProfile(user.Id);
                 ApiContext oContext = new ApiContext();
 
                 //set the dev,app,cert information
-                oContext.ApiCredential.ApiAccount.Developer = profile.DevID;
-                oContext.ApiCredential.ApiAccount.Application = profile.AppID;
-                oContext.ApiCredential.ApiAccount.Certificate = profile.CertID;
-                oContext.ApiCredential.eBayToken = profile.UserToken;
+                oContext.ApiCredential.ApiAccount.Developer = settings.DevID;
+                oContext.ApiCredential.ApiAccount.Application = settings.AppID;
+                oContext.ApiCredential.ApiAccount.Certificate = settings.CertID;
+                oContext.ApiCredential.eBayToken = settings.Token;
 
                 oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
 
@@ -553,19 +558,20 @@ namespace scrapeAPI
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public static TokenStatusTypeCustom GetTokenStatus(ApplicationUser user)
+        public static TokenStatusTypeCustom GetTokenStatus(UserSettingsView settings)
         {
             try
             {
                 dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
-                var profile = db.GetUserProfile(user.Id);
+                // var setting = db.UserSettings.Find(user.Id, 1);
+                // var profile = db.GetUserProfile(user.Id);
                 ApiContext oContext = new ApiContext();
 
                 //set the dev,app,cert information
-                oContext.ApiCredential.ApiAccount.Developer = profile.DevID;
-                oContext.ApiCredential.ApiAccount.Application = profile.AppID;
-                oContext.ApiCredential.ApiAccount.Certificate = profile.CertID;
-                oContext.ApiCredential.eBayToken = profile.UserToken;
+                oContext.ApiCredential.ApiAccount.Developer = settings.DevID;
+                oContext.ApiCredential.ApiAccount.Application = settings.AppID;
+                oContext.ApiCredential.ApiAccount.Certificate = settings.CertID;
+                oContext.ApiCredential.eBayToken = settings.Token;
 
                 oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
 
@@ -877,7 +883,7 @@ namespace scrapeAPI
         // Was being developed when trying to get details of an item number
         // not fully tested
         // ended up with GetSingleItem() instead
-        public static FindItemsAdvancedResponse FindByKeyword(ApplicationUser user)
+        public static FindItemsAdvancedResponse FindByKeyword(UserSettingsView settings)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
 
@@ -885,8 +891,9 @@ namespace scrapeAPI
 
             CustomFindAdvanced service = new CustomFindAdvanced();
             service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
-            var profile = db.GetUserProfile(user.Id);
-            service.appID = profile.AppID;
+            //var profile = db.GetUserProfile(user.Id);
+            //var setting = db.UserSettings.Find(user.Id, 1);
+            service.appID = settings.AppID;
             FindItemsAdvancedRequest request = new FindItemsAdvancedRequest();
             request.keywords = "302704549832";
             //var p = new ProductId();
@@ -1125,7 +1132,7 @@ namespace scrapeAPI
         /// <param name="daysBack"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        public static int ItemCount(string seller, int daysBack, ApplicationUser user)
+        public static int ItemCount(string seller, int daysBack, UserSettingsView settings)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
@@ -1135,8 +1142,7 @@ namespace scrapeAPI
 
             CustomFindSold service = new CustomFindSold();
             service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
-            var profile = db.GetUserProfile(user.Id);
-            service.appID = profile.AppID;
+            service.appID = settings.AppID;
             int currentPageNumber = 1;
 
             var request = BuildReqest(seller, daysBack);    // creates FindCompletedItemsRequest
@@ -1168,7 +1174,7 @@ namespace scrapeAPI
         /// <param name="user"></param>
         /// <param name="rptNumber"></param>
         /// <returns></returns>
-        public static async Task<ModelView> ToStart(string seller, int daysBack, ApplicationUser user, int rptNumber)
+        public static async Task<ModelView> ToStart(string seller, int daysBack, UserSettingsView settings, int rptNumber)
         {
             dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
             string _logfile = "scrape_log.txt";
@@ -1180,14 +1186,16 @@ namespace scrapeAPI
                 service.Url = "http://svcs.ebay.com/services/search/FindingService/v1";
 
                 // don't put actual db code here - need function to return profile object
-                var profile = db.GetUserProfile(user.Id);
-                service.appID = profile.AppID;
+                // var profile = db.GetUserProfile(user.Id);
+                // var settings = db.GetUserSetting(user.Id);
+
+                service.appID = settings.AppID;
                 int currentPageNumber = 1;
 
                 var request = BuildReqest(seller, daysBack);
-                dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales for " + seller, user.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales for " + seller, settings.UserName);
                 var response = ebayAPIs.GetResults(service, request, currentPageNumber);
-                dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales complete", user.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, "Retrieve sales complete", settings.UserName);
 
                 if (response.ack == AckValue.Success)
                 {
@@ -1195,7 +1203,7 @@ namespace scrapeAPI
                     if (result != null && result.count > 0)
                     {
                         // store the sales
-                        await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
+                        await StoreTransactions(result, daysBack, settings, rptNumber, listings, currentPageNumber);
 
                         // are there more pages of results?
                         for (var i = response.paginationOutput.pageNumber; i < response.paginationOutput.totalPages; i++)
@@ -1204,7 +1212,7 @@ namespace scrapeAPI
 
                             response = GetResults(service, request, currentPageNumber);
                             result = response.searchResult;
-                            await StoreTransactions(result, daysBack, user, rptNumber, listings, currentPageNumber);
+                            await StoreTransactions(result, daysBack, settings, rptNumber, listings, currentPageNumber);
                         }
                     }
                     var mv = new ModelView();
@@ -1218,7 +1226,7 @@ namespace scrapeAPI
             catch (Exception exc)
             {
                 string msg = " ToStart " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, user.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return null;
             }
         }
@@ -1233,17 +1241,13 @@ namespace scrapeAPI
         /// <param name="listings"></param>
         /// <param name="pg"></param>
         /// <returns></returns>
-        protected static async Task StoreTransactions(SearchResult result, int daysBack, ApplicationUser user, int rptNumber, List<Listing> listings, int pg)
+        protected static async Task StoreTransactions(SearchResult result, int daysBack, UserSettingsView settings, int rptNumber, List<Listing> listings, int pg)
         {
             string _logfile = "scrape_log.txt";
             int notSold = 0;
 
-            dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Start", user.UserName);
-            UserProfileView profile;
-            using (var db = new dsmodels.DataModelsDB())
-            {
-                profile = db.GetUserProfile(user.Id);
-            }
+            dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Start", settings.UserName);
+            UserSettingsView profile;
 
             // Iterate completed items
             foreach (SearchItem searchItem in result.item)
@@ -1268,7 +1272,7 @@ namespace scrapeAPI
                 bool exists = listings.Any(item => item.ItemId == searchItem.itemId);
                 if (!exists)
                 {
-                    var i = await ebayAPIs.GetSingleItem(searchItem.itemId, profile.AppID); // pulling this for ListingStatus
+                    var i = await ebayAPIs.GetSingleItem(searchItem.itemId, settings.AppID); // pulling this for ListingStatus
                                                                                             //var a = searchItem.itemId;
                                                                                             //var b = searchItem.title;
                                                                                             //var c = searchItem.listingInfo.listingType;
@@ -1293,9 +1297,9 @@ namespace scrapeAPI
                         // Or may happen because of this:
                         // 'This listing was ended by the seller because the item is no longer available.'
 
-                        dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId, user.UserName);
-                        transactions = ebayAPIs.GetItemTransactions(searchItem.itemId, ModTimeFrom, ModTimeTo, user);
-                        dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete", user.UserName);
+                        dsutil.DSUtil.WriteFile(_logfile, "Get transactions for " + searchItem.itemId, settings.UserName);
+                        transactions = ebayAPIs.GetItemTransactions(settings, searchItem.itemId, ModTimeFrom, ModTimeTo);
+                        dsutil.DSUtil.WriteFile(_logfile, "Get transactions complete", settings.UserName);
 
                         var orderHistory = new List<OrderHistory>();
 
@@ -1315,7 +1319,7 @@ namespace scrapeAPI
                                 {
                                     // is this bcs sellerPaidStatus="notpaid"?
                                     order.SellerPrice = "0.0";
-                                    dsutil.DSUtil.WriteFile(_logfile, string.Format("StoreTransactions: item.TransactionPrice == null for item: {0}", searchItem.itemId), user.UserName);
+                                    dsutil.DSUtil.WriteFile(_logfile, string.Format("StoreTransactions: item.TransactionPrice == null for item: {0}", searchItem.itemId), settings.UserName);
                                 }
                                 else
                                 {
@@ -1329,7 +1333,7 @@ namespace scrapeAPI
                                 // dsutil.DSUtil.WriteFile(_logfile, "order.EbayUrl complete", user.UserName);
 
                                 order.ImageUrl = searchItem.galleryURL;
-                                dsutil.DSUtil.WriteFile(_logfile, "order.ImageUrl complete", user.UserName);
+                                dsutil.DSUtil.WriteFile(_logfile, "order.ImageUrl complete", settings.UserName);
 
                                 var pictures = searchItem.pictureURLLarge;
                                 // dsutil.DSUtil.WriteFile(_logfile, "pictures complete", user.UserName);
@@ -1348,7 +1352,7 @@ namespace scrapeAPI
                             else
                             {
                                 // i don't see this ever being executed which makes sense if querying only sold items
-                                dsutil.DSUtil.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null", user.UserName);
+                                dsutil.DSUtil.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null", settings.UserName);
                             }
                         }
                         if (transactions.Count == 0)
@@ -1364,17 +1368,17 @@ namespace scrapeAPI
                         {
                             db.OrderHistorySave(orderHistory, rptNumber, false);
                         }
-                        dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave complete", user.UserName);
+                        dsutil.DSUtil.WriteFile(_logfile, "OrderHistorySave complete", settings.UserName);
                         listing.Orders = orderHistory;
                         listings.Add(listing);
 
-                        dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Complete", user.UserName);
+                        dsutil.DSUtil.WriteFile(_logfile, "StoreTransactions Complete", settings.UserName);
 
                     }
                     catch (Exception exc)
                     {
                         string msg = " StoreTransactions " + exc.Message;
-                        dsutil.DSUtil.WriteFile(_logfile, msg, user.UserName);
+                        dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                         throw;
                     }
                 }

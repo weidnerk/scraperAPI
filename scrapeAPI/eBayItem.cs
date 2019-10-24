@@ -29,7 +29,8 @@ namespace scrapeAPI
         ///     FREE shipping
         ///     buyer pays for return shipping
         /// </summary>
-        public static string VerifyAddItemRequest(string title, 
+        public static string VerifyAddItemRequest(UserSettingsView settings,
+            string title, 
             string description, 
             string categoryID, 
             double price, 
@@ -42,7 +43,7 @@ namespace scrapeAPI
             string listedItemID = null;
             try
             {
-                eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("VerifyAddItem");
+                eBayAPIInterfaceService service = EbayCalls.eBayServiceCall(settings, "VerifyAddItem");
 
                 VerifyAddItemRequestType request = new VerifyAddItemRequestType();
                 request.Version = "949";
@@ -185,7 +186,7 @@ namespace scrapeAPI
                     Console.WriteLine("=====================================");
                     Console.WriteLine("Add Item Verified");
                     Console.WriteLine("=====================================");
-                    listedItemID = AddItemRequest(item, ref errors);
+                    listedItemID = AddItemRequest(settings, item, ref errors);
                 }
                 else
                 {
@@ -297,9 +298,9 @@ namespace scrapeAPI
         /// Add item to eBay. Once verified.
         /// </summary>
         /// <param name="item">Accepts ItemType object from VerifyAddItem method.</param>
-        public static string AddItemRequest(ItemType item, ref List<string> errors)
+        public static string AddItemRequest(UserSettingsView settings, ItemType item, ref List<string> errors)
         {
-            eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("AddItem");
+            eBayAPIInterfaceService service = EbayCalls.eBayServiceCall(settings, "AddItem");
 
             AddItemRequestType request = new AddItemRequestType();
             request.Version = "949";
@@ -322,9 +323,9 @@ namespace scrapeAPI
         /// Retrieve item details.
         /// </summary>
         /// <param name="ItemID">eBay Item ID</param>
-        public static void GetItemRequest(string ItemID)
+        public static void GetItemRequest(UserSettingsView settings, string ItemID)
         {
-            eBayAPIInterfaceService service = EbayCalls.eBayServiceCall("GetItem");
+            eBayAPIInterfaceService service = EbayCalls.eBayServiceCall(settings, "GetItem");
 
             GetItemRequestType request = new GetItemRequestType();
             request.Version = "949";

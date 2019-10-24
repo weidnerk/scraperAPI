@@ -1,4 +1,5 @@
-﻿using eBay.Service.Core.Soap;
+﻿using dsmodels;
+using eBay.Service.Core.Soap;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +9,21 @@ namespace scrapeAPI
 {
     public class EbayCalls
     {
-        public static eBayAPIInterfaceService eBayServiceCall(string CallName)
+        static dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+
+        public static StoreProfile GetStoreProfile(int storeID)
         {
-            //string endpoint = "https://api.sandbox.ebay.com/wsapi";
+            var r = db.StoreProfiles.Where(p => p.ID == storeID).First();
+            return r;
+        }
+
+        public static eBayAPIInterfaceService eBayServiceCall(UserSettingsView settings, string CallName)
+        {
             string endpoint = AppSettingsHelper.Endpoint;
             string siteId = "0";
-            string appId = AppSettingsHelper.AppID;     // use your app ID
-            string devId = AppSettingsHelper.DevID;     // use your dev ID
-            string certId = AppSettingsHelper.CertID;   // use your cert ID
+            string appId = settings.AppID;
+            string devId = settings.DevID;
+            string certId = settings.CertID;
             string version = "965";
             // Build the request URL
             string requestURL = endpoint
@@ -30,7 +38,7 @@ namespace scrapeAPI
             service.Url = requestURL;
             // Set credentials
             service.RequesterCredentials = new CustomSecurityHeaderType();
-            service.RequesterCredentials.eBayAuthToken = AppSettingsHelper.Token;    // use your token
+            service.RequesterCredentials.eBayAuthToken = settings.Token;
             service.RequesterCredentials.Credentials = new UserIdPasswordType();
             service.RequesterCredentials.Credentials.AppId = appId;
             service.RequesterCredentials.Credentials.DevId = devId;

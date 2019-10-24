@@ -76,11 +76,11 @@ namespace scrapeAPI.Models
             return data;
         }
 
-        public UserProfileView UserProfileGet(ApplicationUser usr, string appID)
+        public UserProfile UserProfileGet(ApplicationUser usr, string appID)
         {
             if (!string.IsNullOrEmpty(appID))
             {
-                var profile = db.GetUserProfile(usr.Id, appID);
+                var profile = db.GetUserProfile(usr.Id);
                 return profile;
             }
             else
@@ -88,6 +88,11 @@ namespace scrapeAPI.Models
                 var profile = db.GetUserProfile(usr.Id);
                 return profile;
             }
+        }
+        public UserSettingsView UserSettingsGet(ApplicationUser usr)
+        {
+            var userSettings = db.GetUserSettings(usr.Id);
+            return userSettings;
         }
 
         /// <summary>
@@ -108,25 +113,25 @@ namespace scrapeAPI.Models
                 var profile = db.GetUserProfile(user.Id);
                 if (profile != null)
                 {
-                    profile.AppID = p.AppID;
-                    profile.CertID = p.CertID;
-                    profile.DevID = p.DevID;
-                    profile.UserToken = p.UserToken;
+                    //profile.AppID = p.AppID;
+                    //profile.CertID = p.CertID;
+                    //profile.DevID = p.DevID;
+                    //profile.UserToken = p.UserToken;
                     Entry(profile).Property(x => x.Firstname).IsModified = false;
                     Entry(profile).Property(x => x.Lastname).IsModified = false;
                     this.Entry(profile).State = EntityState.Modified;
                 }
                 else
                 {
-                    var newprofile = new UserProfileView();
+                    var newprofile = new UserSettingsView();
                     newprofile.AppID = p.AppID;
                     newprofile.CertID = p.CertID;
                     newprofile.DevID = p.DevID;
-                    newprofile.UserToken = p.UserToken;
+                    newprofile.Token = p.UserToken;
                     newprofile.UserID = user.Id;
-                    newprofile.Firstname = p.Firstname;
-                    newprofile.Lastname = p.Lastname;
-                    db.UserProfilesView.Add(newprofile);
+                    //newprofile.Firstname = p.Firstname;
+                    //newprofile.Lastname = p.Lastname;
+                    //db.UserProfilesView.Add(newprofile);
                 }
                 await this.SaveChangesAsync();
             }

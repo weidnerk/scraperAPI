@@ -74,8 +74,8 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-
-                var response = ebayAPIs.FindByKeyword(user);
+                var settings = db.UserSettingsView.Find(user.Id);
+                var response = ebayAPIs.FindByKeyword(settings);
                 return Ok(response);
             }
             catch (Exception exc)
@@ -105,6 +105,7 @@ namespace scrapeAPI.Controllers
                 //AccountController.DeleteUsr("ventures2021@gmail.com");
                 //AccountController.DeleteUsr("aaronmweidner@gmail.com");
                 var user = await UserManager.FindByNameAsync(userName);
+                var settings = db.UserSettingsView.Find(user.Id);
 
                 var sh = new SearchHistory();
                 sh.UserId = user.Id;
@@ -113,7 +114,7 @@ namespace scrapeAPI.Controllers
                 sh.MinSoldFilter = minSold;
                 var sh_updated = await db.SearchHistoryAdd(sh);
 
-                int itemCount = ebayAPIs.ItemCount(seller, daysBack, user);
+                int itemCount = ebayAPIs.ItemCount(seller, daysBack, settings);
                 var mv = new ModelView();
                 mv.ItemCount = itemCount;
                 mv.ReportNumber = sh_updated.Id;
@@ -146,10 +147,12 @@ namespace scrapeAPI.Controllers
             {
                 string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
                 dsutil.DSUtil.WriteFile(_logfile, header, userName);
-                var user = await UserManager.FindByNameAsync(userName);
-                ebayAPIs.GetAPIStatus(user);
 
-                var mv = await ebayAPIs.ToStart(seller, daysBack, user, reportNumber);   // scan the seller
+                var user = await UserManager.FindByNameAsync(userName);
+                var settings = db.UserSettingsView.Find(user.Id);
+                ebayAPIs.GetAPIStatus(settings);
+
+                var mv = await ebayAPIs.ToStart(seller, daysBack, settings, reportNumber);   // scan the seller
 
                 var sh = db.SearchHistory.Where(p => p.Id == reportNumber).FirstOrDefault();
                 sh.Running = false;
@@ -353,11 +356,12 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
+                var settings = db.UserSettingsView.Find(user.Id);
                 if (user == null)
                     return Ok(false);
                 else
                 {
-                    var i = ebayAPIs.GetTradingAPIUsage(user);
+                    var i = ebayAPIs.GetTradingAPIUsage(settings);
                     return Ok(i);
                 }
             }
@@ -376,11 +380,12 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
+                var settings = db.UserSettingsView.Find(user.Id);
                 if (user == null)
                     return Ok(false);
                 else
                 {
-                    var i = ebayAPIs.GetTokenStatus(user);
+                    var i = ebayAPIs.GetTokenStatus(settings);
                     return Ok(i);
                 }
             }
@@ -403,8 +408,8 @@ namespace scrapeAPI.Controllers
                     return Ok(false);
                 else
                 {
-                    var profile = db.GetUserProfile(user.Id);
-                    var i = await ebayAPIs.GetSingleItem(itemId, profile.AppID);
+                    var settings = db.UserSettingsView.Find(user.Id);
+                    var i = await ebayAPIs.GetSingleItem(itemId, settings.AppID);
                     return Ok(i);
                 }
             }
@@ -515,7 +520,9 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var output = await ListingCreateAsync(itemId);
+                string strCurrentUserId = User.Identity.GetUserId();
+                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                var output = await ListingCreateAsync(settings, itemId);
                 if (ListingNotCreated(output))
                 {
                     var errStr = Util.ListToDelimited(output.ToArray(), ';');
@@ -550,12 +557,12 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("removelisting")]
-        public async Task<IHttpActionResult> RemoveListing(string ebayItemId)
+        public async Task<IHttpActionResult> RemoveListing(UserSettingsView settings, string ebayItemId)
         {
             try
             {
                 var item = db.Listings.Single(r => r.ListedItemID == ebayItemId);
-                ebayAPIs.EndFixedPriceItem(item.ListedItemID);
+                ebayAPIs.EndFixedPriceItem(settings, item.ListedItemID);
 
                 await db.UpdateRemovedDate(item);
                 return Ok();
@@ -572,7 +579,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                ebayAPIs.GetOrders("19-04026-11927");
+                // ebayAPIs.GetOrders("19-04026-11927");
                 return Ok();
             }
             catch (Exception exc)
@@ -609,10 +616,10 @@ namespace scrapeAPI.Controllers
         /// </summary>
         /// <param name="itemId">ebay seller listing id</param>
         /// <returns></returns>
-        protected async Task<List<string>> ListingCreateAsync(string itemId)
+        protected async Task<List<string>> ListingCreateAsync(UserSettingsView settings, string itemId)
         {
             var output = new List<string>();
-            string strCurrentUserId = User.Identity.GetUserId();
+            
             var listing = await db.ListingGet(itemId);     // item has to be stored before it can be listed
             if (listing != null)
             {
@@ -620,7 +627,7 @@ namespace scrapeAPI.Controllers
                 if (listing.Listed == null)
                 {
                     List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
-                    string verifyItemID = eBayItem.VerifyAddItemRequest(listing.ListingTitle,
+                    string verifyItemID = eBayItem.VerifyAddItemRequest(settings, listing.ListingTitle,
                         listing.Description,
                         listing.PrimaryCategoryID,
                         (double)listing.ListingPrice,
@@ -639,7 +646,7 @@ namespace scrapeAPI.Controllers
                             listing.Listed = DateTime.Now;
                         }
                         var response = FlattenList(output);
-                        await db.UpdateListedItemID(listing, verifyItemID, strCurrentUserId, true, response);
+                        await db.UpdateListedItemID(listing, verifyItemID, settings.UserID, true, response);
                     }
                     else
                     {
@@ -649,7 +656,7 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     string response = null;
-                    output = ebayAPIs.ReviseItem(listing.ListedItemID,
+                    output = ebayAPIs.ReviseItem(settings, listing.ListedItemID,
                                         qty: listing.Qty,
                                         price: Convert.ToDouble(listing.ListingPrice),
                                         title: listing.ListingTitle);
@@ -657,7 +664,7 @@ namespace scrapeAPI.Controllers
                     {
                         response = FlattenList(output);
                     }
-                    await db.UpdateListedItemID(listing, listing.ListedItemID, strCurrentUserId, true, response, updated: DateTime.Now);
+                    await db.UpdateListedItemID(listing, listing.ListedItemID, settings.UserID, true, response, updated: DateTime.Now);
                     // output.Add("NOERROR");
                     output.Add(listing.ListedItemID);
                 }

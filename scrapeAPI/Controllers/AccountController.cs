@@ -141,7 +141,7 @@ namespace scrapeAPI.Controllers
 
         [HttpPost]
         [Route("userprofilesave")]
-        public async Task<IHttpActionResult> UserProfileSave(UserProfileView profile)
+        public async Task<IHttpActionResult> UserProfileSave(UserSettingsView profile)
         {
             try
             {
@@ -170,6 +170,19 @@ namespace scrapeAPI.Controllers
         {
             var user = await UserManager.FindByNameAsync(userName);
             var p = db.UserProfileGet(user, appID);
+            if (p == null)
+                return NotFound();
+            else
+                return Ok(p);
+        }
+
+        [HttpGet]
+        [Route("usersettingsget")]
+        public async Task<IHttpActionResult> UserSettingsGet(string userName)
+        {
+            var user = await UserManager.FindByNameAsync(userName);
+            var p = db.UserSettingsGet(user);
+            // dsutil.DSUtil.WriteFile(_logfile, "UserSettingsGet ", user.UserName);
             if (p == null)
                 return NotFound();
             else
