@@ -428,6 +428,8 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
+                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                listing.StoreID = settings.StoreID;
                 listing.Qty = 1;
                 await db.ListingSave(listing);
                 return Ok();
