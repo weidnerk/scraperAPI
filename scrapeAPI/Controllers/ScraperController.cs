@@ -650,8 +650,8 @@ namespace scrapeAPI.Controllers
 
                     if (!string.IsNullOrEmpty(verifyItemID))
                     {
-                        // output.Add("NOERROR");
-                        output.Add(verifyItemID);
+                        output.Insert(0, verifyItemID);
+                        output.Insert(0, "Listed: YES");
                         if (!listing.Listed.HasValue)
                         {
                             listing.Listed = DateTime.Now;
@@ -676,8 +676,7 @@ namespace scrapeAPI.Controllers
                         response = FlattenList(output);
                     }
                     await db.UpdateListedItemID(listing, listing.ListedItemID, settings.UserID, true, response, updated: DateTime.Now);
-                    // output.Add("NOERROR");
-                    output.Add(listing.ListedItemID);
+                    output.Insert(0, listing.ListedItemID);
                 }
             }
             return output;
