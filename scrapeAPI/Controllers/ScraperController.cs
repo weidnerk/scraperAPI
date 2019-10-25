@@ -108,7 +108,7 @@ namespace scrapeAPI.Controllers
                 var user = await UserManager.FindByNameAsync(userName);
                 var settings = db.UserSettingsView.Find(user.Id);
 
-                var r = await db.CanRunScan(user.Id, seller);
+                var r = db.CanRunScan(user.Id, seller);
                 if (!r)
                 {
                     msg = "Cannot scan seller";
