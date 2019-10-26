@@ -492,6 +492,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 sellerProfile.UpdatedBy = strCurrentUserId;
+                sellerProfile.UserID = strCurrentUserId;
                 await db.SellerProfileSave(sellerProfile);
                 return Ok();
             }
@@ -651,7 +652,7 @@ namespace scrapeAPI.Controllers
                     if (!string.IsNullOrEmpty(verifyItemID))
                     {
                         output.Insert(0, verifyItemID);
-                        output.Insert(0, "Listed: YES");
+                        output.Insert(0, "Listed: YES - check listing's images and description");
                         if (!listing.Listed.HasValue)
                         {
                             listing.Listed = DateTime.Now;
