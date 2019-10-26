@@ -204,6 +204,9 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool activeStatusOnly = false, bool nonVariation = false)
         {
+            string strCurrentUserId = User.Identity.GetUserId();
+            var settings = db.UserSettingsView.Find(strCurrentUserId);
+
             //bool endedListings = (showNoOrders == "0") ? false : true;
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
@@ -213,7 +216,7 @@ namespace scrapeAPI.Controllers
                 string msg = "start GetReport ";
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
 
-                var x = models.GetScanData(rptNumber, ModTimeFrom);
+                var x = models.GetScanData(rptNumber, ModTimeFrom, settings.StoreID);
 
                 // filter by min and max price
                 if (minPrice.HasValue)

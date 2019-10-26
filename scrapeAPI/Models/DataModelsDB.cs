@@ -66,12 +66,13 @@ namespace scrapeAPI.Models
             return null;
         }
 
-        public IQueryable<TimesSold> GetScanData(int rptNumber, DateTime dateFrom)
+        public IQueryable<TimesSold> GetScanData(int rptNumber, DateTime dateFrom, int storeID)
         {
             var data = Database.SqlQuery<TimesSold>(
-                "exec sp_GetScanReport @rptNumber, @dateFrom",
+                "exec sp_GetScanReport @rptNumber, @dateFrom, @storeID",
                 new SqlParameter("rptNumber", rptNumber),
-                new SqlParameter("dateFrom", dateFrom)
+                new SqlParameter("dateFrom", dateFrom),
+                new SqlParameter("storeID", storeID)
                 ).AsQueryable();
             return data;
         }
