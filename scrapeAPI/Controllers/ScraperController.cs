@@ -890,11 +890,14 @@ namespace scrapeAPI.Controllers
         {
             try
             {
+                string strCurrentUserId = User.Identity.GetUserId();
+                var settings = db.UserSettingsView.Find(strCurrentUserId);
+
                 var dashboard = new Dashboard();
-                int OOS = db.Listings.Where(p => p.OOS).Count();
+                int OOS = db.Listings.Where(p => p.OOS && p.StoreID == settings.StoreID).Count();
                 dashboard.OOS = OOS;
 
-                int notListed = db.Listings.Where(p => p.Listed == null).Count();
+                int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == settings.StoreID).Count();
                 dashboard.NotListed = notListed;
 
                 return Ok(dashboard);

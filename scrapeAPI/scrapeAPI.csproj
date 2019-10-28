@@ -242,7 +242,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ScraperController.cs" />
-    <Compile Include="Controllers\ScraperLegacyController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="CustomFindingService.cs" />
     <Compile Include="ebayAPIs.cs" />
