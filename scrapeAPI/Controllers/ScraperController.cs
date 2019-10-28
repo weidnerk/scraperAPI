@@ -455,17 +455,38 @@ namespace scrapeAPI.Controllers
         }
         [HttpPost]
         [Route("storenote")]
-        public async Task<IHttpActionResult> StoreNote(Listing listing)
+        public async Task<IHttpActionResult> StoreNote(ListingNote note)
         {
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                await db.NoteSave(listing);
+                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                note.UserID = strCurrentUserId;
+                note.StoreID = settings.StoreID;
+                await db.NoteSave(note);
                 return Ok();
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StoreNote", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
+        [HttpGet]
+        [Route("itemnotes")]
+        public async Task<IHttpActionResult> GetItemNotes(string itemID)
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                var notes = await db.ItemNotes(itemID, settings.StoreID);
+                return Ok(notes);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetItemNotes", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
