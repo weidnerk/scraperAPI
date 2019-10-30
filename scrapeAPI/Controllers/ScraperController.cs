@@ -200,14 +200,13 @@ namespace scrapeAPI.Controllers
         /// <param name="minPrice"></param>
         /// <param name="maxPrice"></param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool activeStatusOnly = false, bool nonVariation = false)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             var settings = db.UserSettingsView.Find(strCurrentUserId);
 
-            //bool endedListings = (showNoOrders == "0") ? false : true;
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
 
@@ -215,8 +214,9 @@ namespace scrapeAPI.Controllers
             {
                 string msg = "start GetReport ";
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                itemID = (itemID == "null") ? null : itemID;
 
-                var x = models.GetScanData(rptNumber, ModTimeFrom, settings.StoreID);
+                var x = models.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
 
                 // filter by min and max price
                 if (minPrice.HasValue)
@@ -228,13 +228,19 @@ namespace scrapeAPI.Controllers
                     x = x.Where(p => p.SellerPrice <= maxPrice);
                 }
                 x = x.Where(p => p.SoldQty >= minSold);
-                if (activeStatusOnly)
+                if (activeStatusOnly.HasValue)
                 {
-                    x = x.Where(p => p.ListingStatus == "Active");
+                    if (activeStatusOnly.Value)
+                    {
+                        x = x.Where(p => p.ListingStatus == "Active");
+                    }
                 }
-                if (nonVariation)
+                if (nonVariation.HasValue)
                 {
-                    x = x.Where(p => !p.IsMultiVariationListing.Value);
+                    if (nonVariation.Value)
+                    {
+                        x = x.Where(p => !p.IsMultiVariationListing.Value);
+                    }
                 }
                 x = x.OrderByDescending(p => p.LatestSold);
                 var mv = new ModelViewTimesSold();
