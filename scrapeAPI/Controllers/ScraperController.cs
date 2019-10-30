@@ -34,6 +34,8 @@ namespace scrapeAPI.Controllers
         const string _filename = "order.csv";
         readonly string _logfile = "scrape_log.txt";
 
+        const int _qtyToList = 2;
+
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
         {
@@ -448,7 +450,7 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 var settings = db.UserSettingsView.Find(strCurrentUserId);
                 listing.StoreID = settings.StoreID;
-                listing.Qty = 1;
+                listing.Qty = _qtyToList;
                 await db.ListingSave(listing);
                 return Ok();
             }
@@ -675,7 +677,7 @@ namespace scrapeAPI.Controllers
                         (double)listing.ListingPrice,
                         pictureURLs,
                         ref output,
-                        2,  
+                        _qtyToList,  
                         listing);
                     // at this point, 'output' will be populated with errors if any occurred
 
