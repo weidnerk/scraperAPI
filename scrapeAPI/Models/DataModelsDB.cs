@@ -66,7 +66,7 @@ namespace scrapeAPI.Models
             return null;
         }
 
-        public IQueryable<TimesSold> GetScanData(int rptNumber, DateTime dateFrom, int storeID, string itemID = null)
+        public IQueryable<TimesSold> GetScanData(int rptNumber, DateTime dateFrom, int storeID, string itemID)
         {
             var p = new SqlParameter();
             p.ParameterName = "itemID";

@@ -196,11 +196,14 @@ namespace scrapeAPI.Controllers
         /// Get stored scan.
         /// This may be called on a timer to keep feeding results.
         /// </summary>
-        /// <param name="rptNumber"></param>
+        /// <param name="rptNumber">Pass 0 if passing itemID</param>
         /// <param name="minSold"></param>
         /// <param name="daysBack"></param>
         /// <param name="minPrice"></param>
         /// <param name="maxPrice"></param>
+        /// <param name="activeStatusOnly"></param>
+        /// <param name="nonVariation"></param>
+        /// <param name="itemID">Pass null if passing rptNumber</param>
         /// <returns></returns>
         [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}")]
         [HttpGet]
