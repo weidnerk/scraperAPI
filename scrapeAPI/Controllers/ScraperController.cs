@@ -635,29 +635,6 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route("createpostedlisting")]
-        //public async Task<IHttpActionResult> CreatePostedListing(string itemId)
-        //{
-        //    try
-        //    {
-        //        var errors = await PostedListingCreateAsync(itemId);
-        //        if (errors.Count == 0)
-        //            return Ok();
-        //        else
-        //        {
-        //            var errStr = Util.ListToDelimited(errors.ToArray(), ';');
-        //            return BadRequest(errStr);
-        //        }
-        //    }
-        //    catch (Exception exc)
-        //    {
-        //        string msg = dsutil.DSUtil.ErrMsg("CreatePostedListing", exc);
-        //        dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-        //        return BadRequest(msg);
-        //    }
-        //}
-
         /// <summary>
         /// 
         /// </summary>
@@ -703,10 +680,12 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     string response = null;
-                    output = ebayAPIs.ReviseItem(settings, listing.ListedItemID,
+                    output = ebayAPIs.ReviseItem(settings, 
+                                        listing.ListedItemID,
                                         qty: listing.Qty,
                                         price: Convert.ToDouble(listing.ListingPrice),
-                                        title: listing.ListingTitle);
+                                        title: listing.ListingTitle,
+                                        description: listing.Description);
                     if (output.Count > 0)
                     {
                         response = FlattenList(output);

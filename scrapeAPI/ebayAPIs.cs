@@ -95,7 +95,12 @@ namespace scrapeAPI
         // use this for itemspecifics:
         // https://ebaydts.com/eBayKBDetails?KBid=1647
         //
-        public static List<string> ReviseItem(UserSettingsView settings, string listedItemID, int? qty = null, double? price = null, string title = null)
+        public static List<string> ReviseItem(UserSettingsView settings, 
+            string listedItemID, 
+            int? qty = null, 
+            double? price = null, 
+            string title = null, 
+            string description = null)
         {
             var response = new List<string>();
             //create the context
@@ -138,6 +143,10 @@ namespace scrapeAPI
             if (!string.IsNullOrEmpty(title))
             {
                 item.Title = title;
+            }
+            if (!string.IsNullOrEmpty(description))
+            {
+                item.Description = description;
             }
             /*
             item.ItemSpecifics = new NameValueListTypeCollection();
