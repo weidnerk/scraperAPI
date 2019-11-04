@@ -454,7 +454,7 @@ namespace scrapeAPI.Controllers
                 var settings = db.UserSettingsView.Find(strCurrentUserId);
                 listing.StoreID = settings.StoreID;
                 listing.Qty = _qtyToList;
-                await db.ListingSave(listing);
+                await db.ListingSave(listing, strCurrentUserId);
                 return Ok();
             }
             catch (Exception exc)
@@ -539,22 +539,22 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("storepostedlisting")]
-        public async Task<IHttpActionResult> StorePostedListing(Listing listing)
-        {
-            try
-            {
-                await db.PostedListingSaveAsync(listing);
-                return Ok();
-            }
-            catch (Exception exc)
-            {
-                string msg = dsutil.DSUtil.ErrMsg("StorePostedListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
-            }
-        }
+        //[HttpPost]
+        //[Route("storepostedlisting")]
+        //public async Task<IHttpActionResult> StorePostedListing(Listing listing)
+        //{
+        //    try
+        //    {
+        //        await db.PostedListingSaveAsync(listing);
+        //        return Ok();
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        string msg = dsutil.DSUtil.ErrMsg("StorePostedListing", exc);
+        //        dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+        //        return BadRequest(msg);
+        //    }
+        //}
 
         /// <summary>
         /// 
