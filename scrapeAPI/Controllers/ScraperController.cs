@@ -664,7 +664,7 @@ namespace scrapeAPI.Controllers
                     if (!string.IsNullOrEmpty(verifyItemID))
                     {
                         output.Insert(0, verifyItemID);
-                        output.Insert(0, "Listed: YES - check listing's images and description");
+                        output.Insert(0, "Listed: YES");
                         if (!listing.Listed.HasValue)
                         {
                             listing.Listed = DateTime.Now;
