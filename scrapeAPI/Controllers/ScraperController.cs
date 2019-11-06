@@ -23,6 +23,8 @@ using System.Web.Http.Results;
 using dsmodels;
 using Microsoft.AspNet.Identity;
 using System.Data.Entity.SqlServer;
+using eBay.Service.Core.Soap;
+
 namespace scrapeAPI.Controllers
 {
     [Authorize]
@@ -894,7 +896,30 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("GetCategories", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetDashboard", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
+        [HttpGet]
+        [Route("storeanalysis")]
+        public IHttpActionResult StoreAnalysis()
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                var settings = db.UserSettingsView.Find(strCurrentUserId);
+
+                var analysis = new StoreAnalysis();
+
+                var storeItems = new ItemTypeCollection();
+                analysis.DBIsMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
+
+                return Ok(analysis);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("StoreAnalysis", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }

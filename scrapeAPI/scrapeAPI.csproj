@@ -265,6 +265,7 @@
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Results\ChallengeResult.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="StoreCheck.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Web References\com.ebay.developer1\Reference.cs">
       <AutoGen>True</AutoGen>

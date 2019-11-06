@@ -256,7 +256,7 @@ namespace scrapeAPI
         // a variety of this is to use findCompletedItems
         //
         // I don't know how to filter this by completed items
-        public static ItemTypeCollection GetSellerList(string seller, out string errMsg)
+        public static ItemTypeCollection GetSellerList(UserSettingsView settings, out string errMsg)
         {
             // TODO: Add code to start application here
             //
@@ -265,12 +265,12 @@ namespace scrapeAPI
             ApiContext oContext = new ApiContext();
 
             // set the dev,app,cert information
-            oContext.ApiCredential.ApiAccount.Application = ConfigurationManager.AppSettings["AppID"];
-            oContext.ApiCredential.ApiAccount.Developer = ConfigurationManager.AppSettings["DevID"];
-            oContext.ApiCredential.ApiAccount.Certificate = ConfigurationManager.AppSettings["CertID"];
+            oContext.ApiCredential.ApiAccount.Application = settings.AppID;
+            oContext.ApiCredential.ApiAccount.Developer = settings.DevID;
+            oContext.ApiCredential.ApiAccount.Certificate = settings.CertID;
 
             // set the AuthToken
-            oContext.ApiCredential.eBayToken = ConfigurationManager.AppSettings["Token"];
+            oContext.ApiCredential.eBayToken = settings.Token;
 
             oContext.SoapApiServerUrl = "https://api.ebay.com/wsapi";
 
@@ -335,7 +335,7 @@ namespace scrapeAPI
 
             // ask for all items that are ending in the future (active items)
             oGetSellerListCall.EndTimeFilter = new TimeFilter(DateTime.Now, DateTime.Now.AddMonths(3));
-            oGetSellerListCall.UserID = seller;
+            oGetSellerListCall.UserID = settings.StoreName;
 
             // return items that end soonest first
             oGetSellerListCall.Sort = 2;
@@ -368,45 +368,45 @@ namespace scrapeAPI
             return oItems;
         }
 
-        public static void GetSellerListPrint(string seller)
-        {
-            var oItems = GetSellerList(seller, out string errMsg);
-            if (oItems == null)
-            {
-                Console.WriteLine(errMsg);
-                return;
-            }
+        //public static void GetSellerListPrint(string seller)
+        //{
+        //    var oItems = GetSellerList(seller, out string errMsg);
+        //    if (oItems == null)
+        //    {
+        //        Console.WriteLine(errMsg);
+        //        return;
+        //    }
 
-            int cnt = 0;
-            // output some of the data
-            foreach (ItemType oItem in oItems)
-            {
-                //if (oItem.SellingStatus.QuantitySold > 0)
-                //{
+        //    int cnt = 0;
+        //    // output some of the data
+        //    foreach (ItemType oItem in oItems)
+        //    {
+        //        //if (oItem.SellingStatus.QuantitySold > 0)
+        //        //{
 
-                Console.WriteLine("ItemID: " + oItem.ItemID);
-                Console.WriteLine("Title: " + oItem.Title);
-                Console.WriteLine("Item type: " + oItem.ListingType.ToString());
-                Console.WriteLine("Listing status: " + oItem.SellingStatus.ListingStatus);
-                Console.WriteLine("Qty sold: " + oItem.SellingStatus.QuantitySold);
-                if (0 < oItem.SellingStatus.BidCount)
-                {
-                    // The HighBidder element is valid only if there is at least 1 bid
-                    Console.WriteLine("High Bidder is " + oItem.SellingStatus.HighBidder.UserID);
-                }
-                Console.WriteLine("Current Price is " + oItem.SellingStatus.CurrentPrice.currencyID.ToString() + " " + oItem.SellingStatus.CurrentPrice.Value.ToString());
-                Console.WriteLine("End Time is " + oItem.ListingDetails.EndTime.ToLongDateString() + " " + oItem.ListingDetails.EndTime.ToLongTimeString());
-                //}
-                Console.WriteLine("count: " + (++cnt));
-                Console.WriteLine("");
+        //        Console.WriteLine("ItemID: " + oItem.ItemID);
+        //        Console.WriteLine("Title: " + oItem.Title);
+        //        Console.WriteLine("Item type: " + oItem.ListingType.ToString());
+        //        Console.WriteLine("Listing status: " + oItem.SellingStatus.ListingStatus);
+        //        Console.WriteLine("Qty sold: " + oItem.SellingStatus.QuantitySold);
+        //        if (0 < oItem.SellingStatus.BidCount)
+        //        {
+        //            // The HighBidder element is valid only if there is at least 1 bid
+        //            Console.WriteLine("High Bidder is " + oItem.SellingStatus.HighBidder.UserID);
+        //        }
+        //        Console.WriteLine("Current Price is " + oItem.SellingStatus.CurrentPrice.currencyID.ToString() + " " + oItem.SellingStatus.CurrentPrice.Value.ToString());
+        //        Console.WriteLine("End Time is " + oItem.ListingDetails.EndTime.ToLongDateString() + " " + oItem.ListingDetails.EndTime.ToLongTimeString());
+        //        //}
+        //        Console.WriteLine("count: " + (++cnt));
+        //        Console.WriteLine("");
 
-                // the data that is accessible through the item object
-                // for different GranularityLevel and DetailLevel choices
-                // can be found at the following URL:
-                // http://developer.ebay.com/DevZone/SOAP/docs/WebHelp/GetSellerListCall-GetSellerList_Best_Practices.html
-            }
-            Console.WriteLine("Done");
-        }
+        //        // the data that is accessible through the item object
+        //        // for different GranularityLevel and DetailLevel choices
+        //        // can be found at the following URL:
+        //        // http://developer.ebay.com/DevZone/SOAP/docs/WebHelp/GetSellerListCall-GetSellerList_Best_Practices.html
+        //    }
+        //    Console.WriteLine("Done");
+        //}
 
         // https://ebaydts.com/eBayKBDetails?KBid=1937
         //
