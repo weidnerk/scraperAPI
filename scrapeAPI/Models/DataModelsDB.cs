@@ -28,7 +28,7 @@ namespace scrapeAPI.Models
 
         public DbSet<OrderHistory> OrderHistory { get; set; }
         public DbSet<SellerOrderHistory> SellerOrderHistory { get; set; }
-        public DbSet<SearchHistory> SearchHistory { get; set; }
+        public DbSet<SearchHistoryView> SearchHistoryView { get; set; }
         public DbSet<SearchReport> SearchResults { get; set; }
         private ApplicationUserManager _userManager;
 

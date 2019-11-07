@@ -59,7 +59,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var sh = models.SearchHistory.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated);
+                var sh = models.SearchHistoryView.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated);
                 return Ok(sh);
             }
             catch (Exception exc)
