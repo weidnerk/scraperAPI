@@ -102,12 +102,7 @@ namespace scrapeAPI.Models
                 return profile;
             }
         }
-        public UserSettingsView UserSettingsGet(ApplicationUser usr)
-        {
-            var userSettings = db.GetUserSettings(usr.Id);
-            return userSettings;
-        }
-
+ 
         /// <summary>
         /// 
         /// </summary>

@@ -1,5 +1,4 @@
 ﻿using dsmodels;
-using scrapeAPI.com.ebay.developer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -41,7 +40,7 @@ namespace scrapeAPI.Models
         public int SoldQty { get; set; }
         public string EbayUrl { get; set; }
         public int RptNumber { get; set; }
-        public string ImageUrl { get; set; }
+        //public string ImageUrl { get; set; }
         public decimal SellerPrice { get; set; }
         public DateTime? LatestSold { get; set; }
         public string ItemId { get; set; }
@@ -54,19 +53,7 @@ namespace scrapeAPI.Models
         public string ShippingServiceCost { get; set; }
     }
 
-    /// <summary>
-    /// Used when doing scan.
-    /// </summary>
-    public class ModelView
-    {
-        public List<Listing> Listings { get; set; }
-        // public int MatchedListings { get; set; }
-        public int TotalOrders { get; set; }
-        public double ElapsedSeconds { get; set; }
-        public int PercentTotalItemsProcesssed { get; set; }
-        public int ReportNumber { get; set; }
-        public int ItemCount { get; set; }
-    }
+
 
     public class SearchReport
     {
@@ -81,7 +68,7 @@ namespace scrapeAPI.Models
         public int CategoryId { get; set; }
         //public DateTime DateOfPurchase { get; set; }
         public int EbayImgCount { get; set; }
-        public string PictureUrl { get; set; }
+        public string PictureUrl { get; set; }  // array of listing's images (whether coming from seller or supplier)
         public string EbayUrl { get; set; }
         [Key]
         [Column(Order = 3)]
@@ -116,10 +103,10 @@ namespace scrapeAPI.Models
         public string ListedItemID { get; set; }
     }
 
-    public class SearchItemCustom
-    {
-        public SearchItem searchItem { get; set; }
-        public int PageNumber { get; set; }
-    }
+    //public class SearchItemCustom
+    //{
+    //    public SearchItem searchItem { get; set; }
+    //    public int PageNumber { get; set; }
+    //}
 
 }

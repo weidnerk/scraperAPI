@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace scrapeAPI.Results
+namespace Utility.Results
 {
     public class ChallengeResult : IHttpActionResult
     {

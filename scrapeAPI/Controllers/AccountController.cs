@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -29,7 +30,7 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
 using scrapeAPI.Models;
 using scrapeAPI.Providers;
-using scrapeAPI.Results;
+using Utility.Results;
 
 namespace scrapeAPI.Controllers
 {
@@ -181,12 +182,13 @@ namespace scrapeAPI.Controllers
         public async Task<IHttpActionResult> UserSettingsGet(string userName)
         {
             var user = await UserManager.FindByNameAsync(userName);
-            var p = db.UserSettingsGet(user);
+            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+            var settings = models.GetUserSettings(connStr, user.Id);
             // dsutil.DSUtil.WriteFile(_logfile, "UserSettingsGet ", user.UserName);
-            if (p == null)
+            if (settings == null)
                 return NotFound();
             else
-                return Ok(p);
+                return Ok(settings);
         }
 
         // POST api/Account/ChangePassword
@@ -595,6 +597,8 @@ namespace scrapeAPI.Controllers
 
             base.Dispose(disposing);
         }
+
+        /*
         [HttpDelete]
         [Route("deleteapikey/{appID}")]
         [AcceptVerbs("DELETE")]
@@ -611,7 +615,7 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-
+        */
 
         #region Helpers
 

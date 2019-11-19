@@ -54,6 +54,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files (x86)\eBay\eBay .NET SDK v1027 Release\eBay.Service.dll</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.11.16.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.16\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.7\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -242,11 +245,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ScraperController.cs" />
-    <Compile Include="Controllers\ValuesController.cs" />
-    <Compile Include="CustomFindingService.cs" />
-    <Compile Include="ebayAPIs.cs" />
-    <Compile Include="eBayItem.cs" />
-    <Compile Include="ExtMethods.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -254,7 +252,6 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\DataModels.cs" />
     <Compile Include="Models\DataModelsDB.cs" />
-    <Compile Include="EbayCalls.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -265,18 +262,6 @@
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Results\ChallengeResult.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="StoreCheck.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="Web References\com.ebay.developer1\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.map</DependentUpon>
-    </Compile>
-    <Compile Include="Web References\com.ebay.developer\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.map</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
@@ -341,79 +326,6 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Web References\com.ebay.developer\FindCompletedItemsResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\FindItemsAdvancedResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\FindItemsByCategoryResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\FindItemsByImageResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\FindItemsByKeywordsResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\FindItemsByProductResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\FindItemsForFavoriteSearchResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\FindItemsIneBayStoresResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\FindHalfProductsResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\FindProductsResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\FindReviewsAndGuidesResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\GetCategoryInfoResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\GeteBayTimeResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\GetItemStatusResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\GetMultipleItemsResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\GetShippingCostsResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\GetSingleItemResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\GetUserProfileResponseType.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer1\Reference.map">
-      <Generator>MSDiscoCodeGenerator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </Content>
-    <None Include="Web References\com.ebay.developer1\shoppingservice.wsdl" />
-    <None Include="Web References\com.ebay.developer\FindService.wsdl" />
-    <Content Include="Web References\com.ebay.developer\GetHistogramsResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\GetSearchKeywordsRecommendationResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <Content Include="Web References\com.ebay.developer\GetVersionResponse.datasource">
-      <DependentUpon>Reference.map</DependentUpon>
-    </Content>
-    <None Include="Web References\com.ebay.developer\Reference.map">
-      <Generator>MSDiscoCodeGenerator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -438,30 +350,6 @@
     <WebReferences Include="Web References\" />
   </ItemGroup>
   <ItemGroup>
-    <WebReferenceUrl Include="http://developer.ebay.com/webservices/983/shoppingservice.wsdl">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\com.ebay.developer1\</RelPath>
-      <UpdateFromURL>http://developer.ebay.com/webservices/983/shoppingservice.wsdl</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>scrapeAPI_com_ebay_developer1_Shopping</CachedSettingsPropName>
-    </WebReferenceUrl>
-    <WebReferenceUrl Include="http://developer.ebay.com/webservices/Finding/latest/FindingService.wsdl">
-      <UrlBehavior>Dynamic</UrlBehavior>
-      <RelPath>Web References\com.ebay.developer\</RelPath>
-      <UpdateFromURL>http://developer.ebay.com/webservices/Finding/latest/FindingService.wsdl</UpdateFromURL>
-      <ServiceLocationURL>
-      </ServiceLocationURL>
-      <CachedDynamicPropName>
-      </CachedDynamicPropName>
-      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
-      <CachedSettingsPropName>scrapeAPI_com_ebay_developer_FindingService</CachedSettingsPropName>
-    </WebReferenceUrl>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\dsmodels\dsmodels\dsmodels.csproj">
       <Project>{a34f18f9-50a8-4648-87a9-70743b810e71}</Project>
       <Name>dsmodels</Name>
@@ -469,6 +357,10 @@
     <ProjectReference Include="..\..\dsutil\dsutil.csproj">
       <Project>{7fa17f92-860b-4367-ab69-a3a417a29a79}</Project>
       <Name>dsutil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\eBayUtility\eBayUtility\eBayUtility.csproj">
+      <Project>{7aba8bc4-5b6e-4a74-8a14-56fb96abbdaf}</Project>
+      <Name>eBayUtility</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\wallib\wallib\wallib.csproj">
       <Project>{cd20dfe3-8d85-435a-a129-9319bc47a348}</Project>

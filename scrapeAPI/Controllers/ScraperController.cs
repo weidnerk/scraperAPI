@@ -24,6 +24,9 @@ using dsmodels;
 using Microsoft.AspNet.Identity;
 using System.Data.Entity.SqlServer;
 using eBay.Service.Core.Soap;
+using eBayUtility;
+using System.Configuration;
+using Utility;
 
 namespace scrapeAPI.Controllers
 {
@@ -70,26 +73,7 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        // Unused after developing GetSingleItem()
-        [Route("prodbyid")]
-        [HttpGet]
-        public async Task<IHttpActionResult> GetProdById(string userName)
-        {
-            try
-            {
-                var user = await UserManager.FindByNameAsync(userName);
-                var settings = db.UserSettingsView.Find(user.Id);
-                var response = ebayAPIs.FindByKeyword(settings);
-                return Ok(response);
-            }
-            catch (Exception exc)
-            {
-                string msg = " GetProdById " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
-            }
-        }
-
+        /*
         /// <summary>
         /// Store the search result in SearchHistory and use FindingService to get a count.
         /// </summary>
@@ -127,12 +111,13 @@ namespace scrapeAPI.Controllers
                 sh.StoreID = settings.StoreID;
                 var sh_updated = await db.SearchHistoryAdd(sh);
 
-                int itemCount = ebayAPIs.ItemCount(seller, daysBack, settings);
-                var mv = new ModelView();
-                mv.ItemCount = itemCount;
-                mv.ReportNumber = sh_updated.Id;
+                //int itemCount = ebayAPIs.ItemCount(seller, daysBack, settings);
+                //var mv = new ModelView();
+                //mv.ItemCount = itemCount;
+                //mv.ReportNumber = sh_updated.Id;
 
-                return Ok(mv);
+                //return Ok(mv);
+                return Ok();
             }
             catch (Exception exc)
             {
@@ -141,7 +126,9 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        */
 
+        /*
         /// <summary>
         /// Init scan of seller.
         /// </summary>
@@ -158,15 +145,15 @@ namespace scrapeAPI.Controllers
         {
             try
             {
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
                 dsutil.DSUtil.WriteFile(_logfile, header, userName);
 
                 var user = await UserManager.FindByNameAsync(userName);
-                var settings = db.UserSettingsView.Find(user.Id);
+                var settings = db.GetUserSettings(connStr, user.Id);
                 ebayAPIs.GetAPIStatus(settings);
 
-                var mv = await ebayAPIs.ToStart(seller, daysBack, settings, reportNumber);   // scan the seller
-
+                await eBayUtility.FetchSeller(settings, seller, 2);
                 var sh = db.SearchHistory.Where(p => p.Id == reportNumber).FirstOrDefault();
                 sh.Running = false;
                 await db.SearchHistoryUpdate(sh);
@@ -180,12 +167,13 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        */
 
         [Route("cancelscan/{rptNumber}")]
         [HttpGet]
         public async Task<IHttpActionResult> CancelScan(int rptNumber)
         {
-            var f = db.SearchHistory.Where(p => p.Id == rptNumber).FirstOrDefault();
+            var f = db.SearchHistory.Where(p => p.ID == rptNumber).FirstOrDefault();
             if (f != null)
             {
                 f.Running = false;
@@ -212,7 +200,9 @@ namespace scrapeAPI.Controllers
         public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID)
         {
             string strCurrentUserId = User.Identity.GetUserId();
-            var settings = db.UserSettingsView.Find(strCurrentUserId);
+            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
 
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
@@ -220,7 +210,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 string msg = "start GetReport ";
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                //dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 itemID = (itemID == "null") ? null : itemID;
 
                 var x = models.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
@@ -257,7 +247,7 @@ namespace scrapeAPI.Controllers
                 mv.ItemCount = mv.TimesSoldRpt.Count;
 
                 msg = "end GetReport ";
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                //dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
 
                 return Ok(mv);
             }
@@ -277,10 +267,6 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        protected void GetScanReport()
-        {
-
-        }
 
         /// <summary>
         /// get source and ebay images 
@@ -304,11 +290,12 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = Util.GetErrMsg(exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetImages", exc);
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg));
             }
         }
 
+        /*
         /// <summary>
         /// 
         /// </summary>
@@ -327,10 +314,12 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = Util.GetErrMsg(exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetAppIds", exc);
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg));
             }
         }
+        */
+
         [AllowAnonymous]
         [HttpGet]
         [Route("emailtaken")]
@@ -381,7 +370,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var settings = db.UserSettingsView.Find(user.Id);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, user.Id);
+
                 if (user == null)
                     return Ok(false);
                 else
@@ -405,7 +396,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var settings = db.UserSettingsView.Find(user.Id);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, user.Id);
+
                 if (user == null)
                     return Ok(false);
                 else
@@ -433,7 +426,9 @@ namespace scrapeAPI.Controllers
                     return Ok(false);
                 else
                 {
-                    var settings = db.UserSettingsView.Find(user.Id);
+                    string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                    var settings = db.GetUserSettings(connStr, user.Id);
+
                     var i = await ebayAPIs.GetSingleItem(itemId, settings.AppID);
                     return Ok(i);
                 }
@@ -453,7 +448,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
                 listing.StoreID = settings.StoreID;
                 listing.Qty = _qtyToList;
                 await db.ListingSave(listing, strCurrentUserId);
@@ -473,7 +470,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
                 note.UserID = strCurrentUserId;
                 note.StoreID = settings.StoreID;
                 await db.NoteSave(note);
@@ -493,7 +492,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
                 var notes = await db.ItemNotes(itemID, settings.StoreID);
                 return Ok(notes);
             }
@@ -541,23 +542,6 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("storepostedlisting")]
-        //public async Task<IHttpActionResult> StorePostedListing(Listing listing)
-        //{
-        //    try
-        //    {
-        //        await db.PostedListingSaveAsync(listing);
-        //        return Ok();
-        //    }
-        //    catch (Exception exc)
-        //    {
-        //        string msg = dsutil.DSUtil.ErrMsg("StorePostedListing", exc);
-        //        dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-        //        return BadRequest(msg);
-        //    }
-        //}
-
         /// <summary>
         /// 
         /// </summary>
@@ -570,16 +554,18 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                var settings = db.UserSettingsView.Find(strCurrentUserId);
-                var output = await ListingCreateAsync(settings, itemId);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
+                var output = await eBayItem.ListingCreateAsync(settings, itemId);
                 if (ListingNotCreated(output))
                 {
-                    var errStr = Util.ListToDelimited(output.ToArray(), ';');
+                    var errStr = dsutil.DSUtil.ListToDelimited(output.ToArray(), ';');
                     return BadRequest(errStr);
                 }
                 else
                 {
-                    var str = Util.ListToDelimited(output.ToArray(), ';');
+                    var str = dsutil.DSUtil.ListToDelimited(output.ToArray(), ';');
                     return Ok(str);   // return listing id
                 }
             }
@@ -611,7 +597,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var item = db.Listings.Single(r => r.ListedItemID == ebayItemId);
-                ebayAPIs.EndFixedPriceItem(settings, item.ListedItemID);
+                Utility.eBayItem.EndFixedPriceItem(settings, item.ListedItemID);
 
                 await db.UpdateRemovedDate(item);
                 return Ok();
@@ -635,77 +621,6 @@ namespace scrapeAPI.Controllers
             {
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="itemId">ebay seller listing id</param>
-        /// <returns></returns>
-        protected async Task<List<string>> ListingCreateAsync(UserSettingsView settings, string itemId)
-        {
-            var output = new List<string>();
-            
-            var listing = await db.ListingGet(itemId);     // item has to be stored before it can be listed
-            if (listing != null)
-            {
-                // if item is listed already, then revise
-                if (listing.Listed == null)
-                {
-                    List<string> pictureURLs = Util.DelimitedToList(listing.PictureUrl, ';');
-                    string verifyItemID = eBayItem.VerifyAddItemRequest(settings, listing.ListingTitle,
-                        listing.Description,
-                        listing.PrimaryCategoryID,
-                        (double)listing.ListingPrice,
-                        pictureURLs,
-                        ref output,
-                        _qtyToList,  
-                        listing);
-                    // at this point, 'output' will be populated with errors if any occurred
-
-                    if (!string.IsNullOrEmpty(verifyItemID))
-                    {
-                        output.Insert(0, verifyItemID);
-                        output.Insert(0, "Listed: YES");
-                        if (!listing.Listed.HasValue)
-                        {
-                            listing.Listed = DateTime.Now;
-                        }
-                        var response = FlattenList(output);
-                        await db.UpdateListedItemID(listing, verifyItemID, settings.UserID, true, response);
-                    }
-                    else
-                    {
-                        output.Add("Listing not created.");
-                    }
-                }
-                else
-                {
-                    string response = null;
-                    output = ebayAPIs.ReviseItem(settings, 
-                                        listing.ListedItemID,
-                                        qty: listing.Qty,
-                                        price: Convert.ToDouble(listing.ListingPrice),
-                                        title: listing.ListingTitle,
-                                        description: listing.Description);
-                    if (output.Count > 0)
-                    {
-                        response = FlattenList(output);
-                    }
-                    await db.UpdateListedItemID(listing, listing.ListedItemID, settings.UserID, true, response, updated: DateTime.Now);
-                    output.Insert(0, listing.ListedItemID);
-                }
-            }
-            return output;
-        }
-        protected static string FlattenList(List<string> errors)
-        {
-            string output = null;
-            foreach (string s in errors) {
-                output += s + ";";
-            }
-            var r = output.Substring(0, output.Length - 1);
-            return r;
         }
 
         [HttpGet]
@@ -753,7 +668,8 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
                 var listings = db.GetListings(settings.StoreID);
                 if (listings == null)
@@ -883,7 +799,8 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
                 var dashboard = new Dashboard();
                 int OOS = db.Listings.Where(p => p.OOS && p.StoreID == settings.StoreID).Count();
@@ -908,7 +825,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                var settings = db.UserSettingsView.Find(strCurrentUserId);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
 
                 var analysis = new StoreAnalysis();
 
