@@ -67,8 +67,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = " GetSearchHistory " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
+                string msg = dsutil.DSUtil.ErrMsg("GetSearchHistory", exc);
                 return BadRequest(msg);
             }
         }
@@ -173,13 +172,25 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> CancelScan(int rptNumber)
         {
-            var f = db.SearchHistory.Where(p => p.ID == rptNumber).FirstOrDefault();
-            if (f != null)
+            string strCurrentUserId = User.Identity.GetUserId();
+            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
+            try
             {
-                f.Running = false;
-                await db.SearchHistoryUpdate(f);
+                var f = db.SearchHistory.Where(p => p.ID == rptNumber).FirstOrDefault();
+                if (f != null)
+                {
+                    f.Running = false;
+                    await db.SearchHistoryUpdate(f);
+                }
+                return Ok();
             }
-            return Ok();
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("CancelScan", exc);
+                return BadRequest(msg);
+            }
         }
 
         /// <summary>
@@ -203,14 +214,11 @@ namespace scrapeAPI.Controllers
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
             var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
-
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
 
             try
             {
-                string msg = "start GetReport ";
-                //dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 itemID = (itemID == "null") ? null : itemID;
 
                 var x = models.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
@@ -246,23 +254,11 @@ namespace scrapeAPI.Controllers
                 mv.TotalOrders = 0;
                 mv.ItemCount = mv.TimesSoldRpt.Count;
 
-                msg = "end GetReport ";
-                //dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-
                 return Ok(mv);
             }
             catch (Exception exc)
             {
-                string msg = " GetReport " + exc.Message;
-                if (exc.InnerException != null)
-                {
-                    msg += " " + exc.InnerException.Message;
-                    if (exc.InnerException.InnerException != null)
-                    {
-                        msg += " " + exc.InnerException.InnerException.Message;
-                    }
-                }
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                string msg = dsutil.DSUtil.ErrMsg("GetReport", exc);
                 return BadRequest(msg);
             }
         }
@@ -336,8 +332,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = "GetEmailTaken: " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                string msg = dsutil.DSUtil.ErrMsg("GetEmailTaken", exc);
                 return BadRequest(msg);
             }
         }
@@ -551,11 +546,12 @@ namespace scrapeAPI.Controllers
         [Route("createlisting")]
         public async Task<IHttpActionResult> CreateListing(string itemId)
         {
+            var settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettings(connStr, strCurrentUserId);
 
                 var output = await eBayItem.ListingCreateAsync(settings, itemId);
                 if (ListingNotCreated(output))
@@ -572,7 +568,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("CreateListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
         }
@@ -604,6 +600,8 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
+                string msg = dsutil.DSUtil.ErrMsg("RemoveListing", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
             }
         }
@@ -637,7 +635,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
@@ -656,7 +654,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
@@ -665,11 +663,12 @@ namespace scrapeAPI.Controllers
         [Route("getlistings")]
         public IHttpActionResult GetListings()
         {
+            var settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettings(connStr, strCurrentUserId);
 
                 var listings = db.GetListings(settings.StoreID);
                 if (listings == null)
@@ -679,7 +678,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListings", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
         }
@@ -696,7 +695,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetWMItem", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
                 return BadRequest(msg);
             }
         }
@@ -762,15 +761,20 @@ namespace scrapeAPI.Controllers
         [AcceptVerbs("DELETE")]
         public async Task<IHttpActionResult> DeleteScan(int rptNumber)
         {
+            var settings = new UserSettingsView();
             try
             {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettings(connStr, strCurrentUserId);
+
                 await db.HistoryRemove(rptNumber);
                 return Ok();
             }
             catch (Exception exc)
             {
                 string msg = exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
@@ -780,15 +784,20 @@ namespace scrapeAPI.Controllers
         [AcceptVerbs("DELETE")]
         public async Task<IHttpActionResult> DeleteListingRecord(string sellerItemId)
         {
+            var settings = new UserSettingsView();
             try
             {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettings(connStr, strCurrentUserId);
+
                 await db.DeleteListingRecord(sellerItemId);
                 return Ok();
             }
             catch (Exception exc)
             {
                 string msg = exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
@@ -796,11 +805,12 @@ namespace scrapeAPI.Controllers
         [Route("dashboard")]
         public IHttpActionResult GetDashboard()
         {
+            var settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettings(connStr, strCurrentUserId);
 
                 var dashboard = new Dashboard();
                 int OOS = db.Listings.Where(p => p.OOS && p.StoreID == settings.StoreID).Count();
@@ -814,7 +824,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetDashboard", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
         }
@@ -822,12 +832,12 @@ namespace scrapeAPI.Controllers
         [Route("storeanalysis")]
         public IHttpActionResult StoreAnalysis()
         {
+            var settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, strCurrentUserId);
-
+                settings = db.GetUserSettings(connStr, strCurrentUserId);
 
                 var analysis = new StoreAnalysis();
 
@@ -839,7 +849,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StoreAnalysis", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
         }
