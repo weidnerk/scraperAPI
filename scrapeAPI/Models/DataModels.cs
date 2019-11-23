@@ -51,6 +51,7 @@ namespace scrapeAPI.Models
         public bool? IsMultiVariationListing { get; set; }
         public string ShippingServiceName { get; set; }
         public string ShippingServiceCost { get; set; }
+        public string UPC { get; set; }
     }
 
 
