@@ -52,6 +52,7 @@ namespace scrapeAPI.Models
         public string ShippingServiceName { get; set; }
         public string ShippingServiceCost { get; set; }
         public string UPC { get; set; }
+        public string MPN { get; set; }
     }
 
 
