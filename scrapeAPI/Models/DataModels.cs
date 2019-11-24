@@ -43,7 +43,7 @@ namespace scrapeAPI.Models
         //public string ImageUrl { get; set; }
         public decimal Price { get; set; }  // last sold price
         public DateTime? LatestSold { get; set; }
-        public string ItemId { get; set; }
+        public string ItemID { get; set; }
         public DateTime? Listed { get; set; }
         public string SellingState { get; set; }
         public string ListingStatus { get; set; }

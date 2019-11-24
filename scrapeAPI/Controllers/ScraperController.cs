@@ -689,7 +689,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var w = await wallib.Class1.GetDetail(url);
+                var w = await wallib.wmUtility.GetDetail(url);
                 return Ok(w);
             }
             catch (Exception exc)
@@ -849,6 +849,25 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StoreAnalysis", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return BadRequest(msg);
+            }
+        }
+
+        [HttpGet]
+        [Route("walmartsearchprodid")]
+        public IHttpActionResult WalmartSearchProdID(string search)
+        {
+            var settings = new UserSettingsView();
+            try
+            {
+                var response = wallib.wmUtility.SearchProdID(search);
+
+                return Ok(response);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("MatchWalmart", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
