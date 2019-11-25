@@ -26,9 +26,7 @@ namespace scrapeAPI.Models
         {
         }
 
-        public DbSet<OrderHistory> OrderHistory { get; set; }
-        public DbSet<SellerOrderHistory> SellerOrderHistory { get; set; }
-        public DbSet<SearchHistoryView> SearchHistoryView { get; set; }
+        //public DbSet<SearchHistoryView> SearchHistoryView { get; set; }
         public DbSet<SearchReport> SearchResults { get; set; }
         private ApplicationUserManager _userManager;
 
@@ -41,53 +39,6 @@ namespace scrapeAPI.Models
             }
         }
 
-        public List<SearchReport> GetSearchReport(int categoryId)
-        {
-            int sourceId = db.SourceIDFromCategory(categoryId);
-            if (sourceId == 2)
-            {
-                List<SearchReport> data =
-                    Database.SqlQuery<SearchReport>(
-                    "select * from dbo.fnWalPriceCompare(@categoryId)",
-                    new SqlParameter("@categoryId", categoryId))
-                .ToList();
-                return data;
-            }
-
-            if (sourceId == 1)
-            {
-                List<SearchReport> data =
-                Database.SqlQuery<SearchReport>(
-                "select * from dbo.fnPriceCompare(@categoryId)",
-                new SqlParameter("@categoryId", categoryId))
-                .ToList();
-                return data;
-            }
-            return null;
-        }
-
-        public IQueryable<TimesSold> GetScanData(int rptNumber, DateTime dateFrom, int storeID, string itemID)
-        {
-            var p = new SqlParameter();
-            p.ParameterName = "itemID";
-            if (!string.IsNullOrEmpty(itemID))
-            {
-                p.Value = itemID;
-            }
-            else
-            {
-                p.Value = DBNull.Value;
-            }
-
-            var data = Database.SqlQuery<TimesSold>(
-                "exec sp_GetScanReport @rptNumber, @dateFrom, @storeID, @itemID",
-                new SqlParameter("rptNumber", rptNumber),
-                new SqlParameter("dateFrom", dateFrom),
-                new SqlParameter("storeID", storeID),
-                p
-                ).AsQueryable();
-            return data;
-        }
 
         public UserProfile UserProfileGet(ApplicationUser usr, string appID)
         {

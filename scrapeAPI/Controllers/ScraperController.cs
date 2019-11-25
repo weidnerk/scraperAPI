@@ -62,7 +62,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var sh = models.SearchHistoryView.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated);
+                var sh = db.SearchHistoryView.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated);
                 return Ok(sh);
             }
             catch (Exception exc)
@@ -221,7 +221,7 @@ namespace scrapeAPI.Controllers
             {
                 itemID = (itemID == "null") ? null : itemID;
 
-                var x = models.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
+                var x = db.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
 
                 // filter by min and max price
                 if (minPrice.HasValue)
@@ -263,6 +263,17 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [Route("fillmatch/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}")]
+        [HttpGet]
+        public IHttpActionResult FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID)
+        {
+            string strCurrentUserId = User.Identity.GetUserId();
+            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
+            var mv = FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, nonVariation, itemID);
+            return Ok(mv);
+        }
 
         /// <summary>
         /// get source and ebay images 
@@ -275,7 +286,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var p = models.GetSearchReport(categoryId).OrderBy(x => x.SourceItemNo).ToList();
+                var p = db.GetSearchReport(categoryId).OrderBy(x => x.SourceItemNo).ToList();
 
                 foreach (SearchReport rec in p)
                 {
@@ -707,7 +718,7 @@ namespace scrapeAPI.Controllers
             {
                 decimal price = Convert.ToDecimal(ebayPrice);
                 decimal shippingAmount = Convert.ToDecimal(shippingAmt);
-                var item = models.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId && r.ShippingAmount == shippingAmount);
+                var item = db.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId && r.ShippingAmount == shippingAmount);
                 if (item == null)
                     return NotFound();
                 return Ok(item);

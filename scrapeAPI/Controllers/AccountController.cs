@@ -510,6 +510,7 @@ namespace scrapeAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+            /*
             var user = new ApplicationUser() { UserName = model.Username, Email = model.Email };
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -522,7 +523,7 @@ namespace scrapeAPI.Controllers
             p.Lastname = model.Lastname;
             p.userName = model.Username;
             await db.UserProfileSaveAsync(p);
-
+            */
             return Ok();
         }
 
