@@ -265,13 +265,13 @@ namespace scrapeAPI.Controllers
 
         [Route("fillmatch/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}")]
         [HttpGet]
-        public IHttpActionResult FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID)
+        public async Task<IHttpActionResult> FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
             var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
-            var mv = FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, nonVariation, itemID);
+            var mv = await FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, nonVariation, itemID);
             return Ok(mv);
         }
 

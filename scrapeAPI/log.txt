@@ -1,0 +1,2 @@
+11/26/2019 11:42:31 AM admin UpdateOrderHistory The 'SoldAndShippedBySupplier' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Boolean'. 
+11/26/2019 11:42:34 AM admin UpdateOrderHistory The 'SoldAndShippedBySupplier' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Boolean'. 
