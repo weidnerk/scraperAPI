@@ -206,9 +206,9 @@ namespace scrapeAPI.Controllers
         /// <param name="nonVariation"></param>
         /// <param name="itemID">Pass null if passing rptNumber</param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}/{filter}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID, bool filter)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -246,6 +246,10 @@ namespace scrapeAPI.Controllers
                     {
                         x = x.Where(p => !p.IsMultiVariationListing.Value);
                     }
+                }
+                if (filter)
+                {
+                    x = x.Where(p => p.WMCount == 1);
                 }
                 x = x.OrderByDescending(p => p.LatestSold);
                 var mv = new ModelViewTimesSold();

@@ -1,2 +1,14 @@
 11/26/2019 11:42:31 AM admin UpdateOrderHistory The 'SoldAndShippedBySupplier' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Boolean'. 
 11/26/2019 11:42:34 AM admin UpdateOrderHistory The 'SoldAndShippedBySupplier' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Boolean'. 
+11/26/2019 5:50:38 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:41 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:43 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:47 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:50 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:52 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:54 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:56 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:50:59 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:51:00 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:51:01 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+11/26/2019 5:51:03 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
