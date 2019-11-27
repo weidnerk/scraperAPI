@@ -249,7 +249,7 @@ namespace scrapeAPI.Controllers
                 }
                 if (filter)
                 {
-                    x = x.Where(p => p.WMCount == 1);
+                    x = x.Where(p => p.WMCount == 1 && (p.SoldAndShippedBySupplier ?? false));
                 }
                 x = x.OrderByDescending(p => p.LatestSold);
                 var mv = new ModelViewTimesSold();
