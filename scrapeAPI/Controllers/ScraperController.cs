@@ -209,7 +209,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}/{filter}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID, bool filter)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID, int filter)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -249,34 +249,37 @@ namespace scrapeAPI.Controllers
                 }
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
-                if (filter)
+                if (filter > 0)
                 {
                     mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => p.WMCount == 1 && (p.SoldAndShippedBySupplier ?? false)).ToList();
-
-                    var idList = new List<int>();
-                    var toExclude = new string[] { "UNBRANDED", "DOES NOT APPLY"};
-                    int i = 0;
-                    foreach (var item in mv.TimesSoldRpt)
+                    if (filter == 2)
                     {
-                        if (!string.IsNullOrEmpty(item.SellerBrand))
+                        var idList = new List<int>();
+                        var toExclude = new string[] { "UNBRANDED", "DOES NOT APPLY" };
+                        int i = 0;
+                        foreach (var item in mv.TimesSoldRpt)
                         {
-                            if (!toExclude.Contains(item.SellerBrand.ToUpper()))
+                            if (!string.IsNullOrEmpty(item.SellerBrand))
                             {
-                                if (item.SupplierBrand != null)
+                                if (!toExclude.Contains(item.SellerBrand.ToUpper()))
                                 {
-                                    if (item.SellerBrand.ToUpper() != item.SupplierBrand.ToUpper())
+                                    if (item.SupplierBrand != null)
                                     {
-                                        idList.Add(i++);
+                                        if (item.SellerBrand.ToUpper() != item.SupplierBrand.ToUpper())
+                                        {
+                                            idList.Add(i);
+                                        }
                                     }
                                 }
                             }
+                            ++i;
                         }
-                    }
-                    if (idList.Count > 0)
-                    {
-                        foreach (int item in idList)
+                        if (idList.Count > 0)
                         {
-                            mv.TimesSoldRpt.RemoveAt(item);
+                            for (int j = idList.Count - 1; j >= 0; j--)
+                            {
+                                mv.TimesSoldRpt.RemoveAt(idList[j]);
+                            }
                         }
                     }
                 }
