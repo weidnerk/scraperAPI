@@ -27,6 +27,7 @@ using eBay.Service.Core.Soap;
 using eBayUtility;
 using System.Configuration;
 using Utility;
+using System.Data.Entity;
 
 namespace scrapeAPI.Controllers
 {
@@ -222,7 +223,6 @@ namespace scrapeAPI.Controllers
                 itemID = (itemID == "null") ? null : itemID;
 
                 var x = db.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
-
                 // filter by min and max price
                 if (minPrice.HasValue)
                 {
@@ -254,6 +254,11 @@ namespace scrapeAPI.Controllers
                 x = x.OrderByDescending(p => p.LatestSold);
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
+                foreach (var item in mv.TimesSoldRpt.Where(w => w.WMPrice.HasValue))
+                {
+                    item.SellerProfit = item.Price - item.WMPrice;
+                }
+                
                 mv.ListingsProcessed = 0;
                 mv.TotalOrders = 0;
                 mv.ItemCount = mv.TimesSoldRpt.Count;
