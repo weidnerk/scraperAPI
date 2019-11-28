@@ -247,16 +247,54 @@ namespace scrapeAPI.Controllers
                         x = x.Where(p => !p.IsMultiVariationListing.Value);
                     }
                 }
-                if (filter)
-                {
-                    x = x.Where(p => p.WMCount == 1 && (p.SoldAndShippedBySupplier ?? false));
-                }
-                x = x.OrderByDescending(p => p.LatestSold);
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
+                if (filter)
+                {
+                    mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => p.WMCount == 1 && (p.SoldAndShippedBySupplier ?? false)).ToList();
+
+                    var idList = new List<int>();
+                    var toExclude = new string[] { "UNBRANDED", "DOES NOT APPLY"};
+                    int i = 0;
+                    foreach (var item in mv.TimesSoldRpt)
+                    {
+                        if (!string.IsNullOrEmpty(item.SellerBrand))
+                        {
+                            if (!toExclude.Contains(item.SellerBrand.ToUpper()))
+                            {
+                                if (item.SupplierBrand != null)
+                                {
+                                    if (item.SellerBrand.ToUpper() != item.SupplierBrand.ToUpper())
+                                    {
+                                        idList.Add(i++);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (idList.Count > 0)
+                    {
+                        foreach (int item in idList)
+                        {
+                            mv.TimesSoldRpt.RemoveAt(item);
+                        }
+                    }
+                }
+                mv.TimesSoldRpt.OrderByDescending(p => p.LatestSold);
+                
                 foreach (var item in mv.TimesSoldRpt.Where(w => w.WMPrice.HasValue))
                 {
-                    item.SellerProfit = item.Price - item.WMPrice;
+                    if (item.WMPrice > 0)
+                    {
+                        if (item.WMPrice < 35.0m)
+                        {
+                            item.SellerProfit = item.Price - (item.WMPrice + 5.99m);
+                        }
+                        else
+                        {
+                            item.SellerProfit = item.Price - item.WMPrice;
+                        }
+                    }
                 }
                 
                 mv.ListingsProcessed = 0;
