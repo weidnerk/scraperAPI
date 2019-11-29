@@ -286,6 +286,10 @@ namespace scrapeAPI.Controllers
                             }
                         }
                     }
+                    if (filter >= 4)
+                    {
+                        mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => !db.IsVERO(p.SupplierBrand)).ToList();
+                    }
                 }
                 mv.TimesSoldRpt.OrderByDescending(p => p.LatestSold);
                 
