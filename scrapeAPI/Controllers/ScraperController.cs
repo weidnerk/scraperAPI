@@ -252,7 +252,11 @@ namespace scrapeAPI.Controllers
                 if (filter > 0)
                 {
                     mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => p.WMCount == 1 && (p.SoldAndShippedBySupplier ?? false)).ToList();
-                    if (filter == 2)
+                    if (filter >= 2)
+                    {
+                        mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => (!p.WMIsVariation ?? false)).ToList();
+                    }
+                    if (filter >= 3)
                     {
                         var idList = new List<int>();
                         var toExclude = new string[] { "UNBRANDED", "DOES NOT APPLY" };
