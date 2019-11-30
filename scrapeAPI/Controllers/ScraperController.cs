@@ -291,7 +291,7 @@ namespace scrapeAPI.Controllers
                         mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => !db.IsVERO(p.SupplierBrand)).ToList();
                     }
                 }
-                mv.TimesSoldRpt.OrderByDescending(p => p.LatestSold);
+                
                 
                 foreach (var item in mv.TimesSoldRpt.Where(w => w.WMPrice.HasValue))
                 {
@@ -307,7 +307,7 @@ namespace scrapeAPI.Controllers
                         }
                     }
                 }
-                
+                mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LatestSold).ToList();
                 mv.ListingsProcessed = 0;
                 mv.TotalOrders = 0;
                 mv.ItemCount = mv.TimesSoldRpt.Count;
