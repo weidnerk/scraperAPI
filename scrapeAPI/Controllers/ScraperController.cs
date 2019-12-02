@@ -194,6 +194,19 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [Route("updatetolist")]
+        [HttpPost]
+        public async Task<IHttpActionResult> OrderHistoryUpdateToList(OrderHistory oh)
+        {
+            string strCurrentUserId = User.Identity.GetUserId();
+            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+
+            await db.OrderHistorySaveToList(oh);
+
+            return Ok();
+        }
+
         /// <summary>
         /// Get stored scan.
         /// This may be called on a timer to keep feeding results.
@@ -329,7 +342,7 @@ namespace scrapeAPI.Controllers
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
             var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
-            var mv = await FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, nonVariation, itemID);
+            var mv = await FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, nonVariation, itemID, 5);
             return Ok(mv);
         }
 
