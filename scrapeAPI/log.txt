@@ -12,3 +12,35 @@
 11/26/2019 5:51:00 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
 11/26/2019 5:51:01 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
 11/26/2019 5:51:03 PM admin UpdateOrderHistory The 'WMPrice' property on 'OrderHistory' could not be set to a 'null' value. You must set this property to a non-null value of type 'System.Decimal'. 
+12/3/2019 9:10:02 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:05 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:07 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:10 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:13 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:15 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:18 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:21 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:24 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:25 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:29 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:32 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:35 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:38 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:10:43 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.
+12/3/2019 9:22:32 AM admin UpdateOrderHistory An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. String or binary data would be truncated.
+The statement has been terminated.

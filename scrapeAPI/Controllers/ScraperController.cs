@@ -63,7 +63,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var sh = db.SearchHistoryView.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated);
+                var sh = db.SearchHistoryView.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated).ToList();
                 return Ok(sh);
             }
             catch (Exception exc)
@@ -518,6 +518,30 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        [HttpGet]
+        [Route("storetolisting/{userName}/{rptNumber}")]
+        public async Task<IHttpActionResult> StoreToListing(string userName, int rptNumber)
+        {
+            try
+            {
+                var user = await UserManager.FindByNameAsync(userName);
+                if (user == null)
+                    return Ok(false);
+                else
+                {
+                    string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                    var settings = db.GetUserSettings(connStr, user.Id);
+                    await db.StoreToListing(settings, rptNumber);
+                    return Ok();
+                }
+            }
+            catch (Exception exc)
+            {
+                string msg = "StoreToListing: " + exc.Message;
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
 
         [HttpPost]
         [Route("storelisting")]
@@ -531,7 +555,7 @@ namespace scrapeAPI.Controllers
 
                 listing.StoreID = settings.StoreID;
                 listing.Qty = _qtyToList;
-                await db.ListingSave(listing, strCurrentUserId);
+                await db.ListingSaveAsync(listing, strCurrentUserId);
                 return Ok();
             }
             catch (Exception exc)
