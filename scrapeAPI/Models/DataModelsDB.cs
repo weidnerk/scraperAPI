@@ -27,7 +27,6 @@ namespace scrapeAPI.Models
         }
 
         //public DbSet<SearchHistoryView> SearchHistoryView { get; set; }
-        public DbSet<SearchReport> SearchResults { get; set; }
         private ApplicationUserManager _userManager;
 
         public ApplicationUserManager UserManager

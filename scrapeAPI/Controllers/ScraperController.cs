@@ -73,101 +73,6 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        /*
-        /// <summary>
-        /// Store the search result in SearchHistory and use FindingService to get a count.
-        /// </summary>
-        /// <param name="seller"></param>
-        /// <param name="daysBack"></param>
-        /// <param name="resultsPerPg"></param>
-        /// <param name="minSold"></param>
-        /// <param name="userName"></param>
-        /// <returns></returns>
-        [Route("numitemssold")]
-        [HttpGet]
-        public async Task<IHttpActionResult> GetNumItemsSold(string seller, int daysBack, int resultsPerPg, int minSold, string userName)
-        {
-            string msg = null;
-            try
-            {
-                // stub to delete a user
-                //AccountController.DeleteUsr("ventures2021@gmail.com");
-                //AccountController.DeleteUsr("aaronmweidner@gmail.com");
-                var user = await UserManager.FindByNameAsync(userName);
-                var settings = db.UserSettingsView.Find(user.Id);
-
-                var r = db.CanRunScan(user.Id, seller);
-                if (!r)
-                {
-                    msg = "Cannot scan seller";
-                    return BadRequest(msg);
-                }
-
-                var sh = new SearchHistory();
-                sh.UserId = user.Id;
-                sh.Seller = seller;
-                sh.DaysBack = daysBack;
-                sh.MinSoldFilter = minSold;
-                sh.StoreID = settings.StoreID;
-                var sh_updated = await db.SearchHistoryAdd(sh);
-
-                //int itemCount = ebayAPIs.ItemCount(seller, daysBack, settings);
-                //var mv = new ModelView();
-                //mv.ItemCount = itemCount;
-                //mv.ReportNumber = sh_updated.Id;
-
-                //return Ok(mv);
-                return Ok();
-            }
-            catch (Exception exc)
-            {
-                msg = " GetNumItemsSold " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
-            }
-        }
-        */
-
-        /*
-        /// <summary>
-        /// Init scan of seller.
-        /// </summary>
-        /// <param name="seller"></param>
-        /// <param name="daysBack"></param>
-        /// <param name="resultsPerPg"></param>
-        /// <param name="minSold"></param>
-        /// <param name="userName"></param>
-        /// <param name="reportNumber"></param>
-        /// <returns></returns>
-        [Route("getsellersold")]
-        [HttpGet]
-        public async Task<IHttpActionResult> FetchSeller(string seller, int daysBack, int resultsPerPg, int minSold, string userName, int reportNumber)
-        {
-            try
-            {
-                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                string header = string.Format("Seller: {0} daysBack: {1} resultsPerPg: {2}", seller, daysBack, resultsPerPg);
-                dsutil.DSUtil.WriteFile(_logfile, header, userName);
-
-                var user = await UserManager.FindByNameAsync(userName);
-                var settings = db.GetUserSettings(connStr, user.Id);
-                ebayAPIs.GetAPIStatus(settings);
-
-                await eBayUtility.FetchSeller(settings, seller, 2);
-                var sh = db.SearchHistory.Where(p => p.Id == reportNumber).FirstOrDefault();
-                sh.Running = false;
-                await db.SearchHistoryUpdate(sh);
-
-                return Ok(mv);
-            }
-            catch (Exception exc)
-            {
-                string msg = " FetchSeller " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
-            }
-        }
-        */
 
         [Route("cancelscan/{rptNumber}")]
         [HttpGet]
@@ -347,57 +252,6 @@ namespace scrapeAPI.Controllers
             return Ok(mv);
         }
 
-        /// <summary>
-        /// get source and ebay images 
-        /// </summary>
-        /// <param name="categoryId"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("compareimages")]
-        public IHttpActionResult GetImages(int categoryId)
-        {
-            try
-            {
-                var p = db.GetSearchReport(categoryId).OrderBy(x => x.SourceItemNo).ToList();
-
-                foreach (SearchReport rec in p)
-                {
-                    var i = dsutil.DSUtil.DelimitedToList(rec.SourceImgUrl, ';');
-                    rec.EbayImgCount = i.Count();
-                }
-                return Ok(p);
-            }
-            catch (Exception exc)
-            {
-                string msg = dsutil.DSUtil.ErrMsg("GetImages", exc);
-                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg));
-            }
-        }
-
-        /*
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("getappids")]
-        public async Task<IHttpActionResult> GetAppIds(string username)
-        {
-            try
-            {
-                var user = await UserManager.FindByNameAsync(username);
-                var p = db.GetAppIDs(user.Id);
-
-                return Ok(p);
-            }
-            catch (Exception exc)
-            {
-                string msg = dsutil.DSUtil.ErrMsg("GetAppIds", exc);
-                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, msg));
-            }
-        }
-        */
 
         [AllowAnonymous]
         [HttpGet]
@@ -806,26 +660,7 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
-        [HttpGet]
-        [Route("getitem")]
-        public IHttpActionResult GetItem(string ebayItemId, string ebayPrice, int categoryId, string shippingAmt)
-        {
-            try
-            {
-                decimal price = Convert.ToDecimal(ebayPrice);
-                decimal shippingAmount = Convert.ToDecimal(shippingAmt);
-                var item = db.GetSearchReport(categoryId).Single(r => r.EbayItemId == ebayItemId && r.EbaySellerPrice == price && r.CategoryId == categoryId && r.ShippingAmount == shippingAmount);
-                if (item == null)
-                    return NotFound();
-                return Ok(item);
-            }
-            catch (Exception exc)
-            {
-                string msg = dsutil.DSUtil.ErrMsg("GetItem", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
-            }
-        }
+
 
         [HttpGet]
         [Route("getpostedlisting")]
