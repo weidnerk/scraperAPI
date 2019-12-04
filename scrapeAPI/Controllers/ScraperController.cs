@@ -349,7 +349,7 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getsellerlisting")]
-        public async Task<IHttpActionResult> GetSellerListing(string userName, string itemId)
+        public async Task<IHttpActionResult> GetSellerListing(string userName, string itemID)
         {
             try
             {
@@ -361,7 +361,7 @@ namespace scrapeAPI.Controllers
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                     var settings = db.GetUserSettings(connStr, user.Id);
 
-                    var i = await ebayAPIs.GetSingleItem(itemId, settings.AppID);
+                    var i = await ebayAPIs.GetSingleItem(settings, itemID);
                     return Ok(i);
                 }
             }
@@ -385,7 +385,7 @@ namespace scrapeAPI.Controllers
                 {
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                     var settings = db.GetUserSettings(connStr, user.Id);
-                    await db.StoreToListing(settings, rptNumber);
+                    await eBayUtility.FetchSeller.StoreToListing(settings, rptNumber);
                     return Ok();
                 }
             }
