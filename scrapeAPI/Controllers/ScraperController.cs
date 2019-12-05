@@ -141,7 +141,6 @@ namespace scrapeAPI.Controllers
                 itemID = (itemID == "null") ? null : itemID;
 
                 var x = db.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
-                // filter by min and max price
                 if (minPrice.HasValue)
                 {
                     x = x.Where(p => p.Price >= minPrice);
@@ -158,21 +157,21 @@ namespace scrapeAPI.Controllers
                         x = x.Where(p => p.ListingStatus == "Active");
                     }
                 }
-                if (nonVariation.HasValue)
-                {
-                    if (nonVariation.Value)
-                    {
-                        x = x.Where(p => !p.IsMultiVariationListing.Value);
-                    }
-                }
+                //if (nonVariation.HasValue)
+                //{
+                //    if (nonVariation.Value)
+                //    {
+                //        x = x.Where(p => !p.IsSupplierVariation.Value);
+                //    }
+                //}
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
                 if (filter > 0)
                 {
-                    mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => p.WMCount == 1 && (p.SoldAndShippedBySupplier ?? false)).ToList();
+                    mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => p.MatchCount == 1 && (p.SoldAndShippedBySupplier ?? false)).ToList();
                     if (filter >= 2)
                     {
-                        mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => (!p.WMIsVariation ?? false)).ToList();
+                        mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => (!p.IsSupplierVariation ?? false)).ToList();
                     }
                     if (filter >= 3)
                     {
@@ -211,17 +210,17 @@ namespace scrapeAPI.Controllers
                 }
                 
                 
-                foreach (var item in mv.TimesSoldRpt.Where(w => w.WMPrice.HasValue))
+                foreach (var item in mv.TimesSoldRpt.Where(w => w.SupplierPrice.HasValue))
                 {
-                    if (item.WMPrice > 0)
+                    if (item.SupplierPrice > 0)
                     {
-                        if (item.WMPrice < 35.0m)
+                        if (item.SupplierPrice < 35.0m)
                         {
-                            item.SellerProfit = item.Price - (item.WMPrice + 5.99m);
+                            item.SellerProfit = item.Price - (item.SupplierPrice + 5.99m);
                         }
                         else
                         {
-                            item.SellerProfit = item.Price - item.WMPrice;
+                            item.SellerProfit = item.Price - item.SupplierPrice;
                         }
                     }
                 }
