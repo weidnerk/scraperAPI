@@ -51,7 +51,7 @@ namespace scrapeAPI.Controllers
         dsmodels.DataModelsDB models = new dsmodels.DataModelsDB();
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
-        const string _logfile = "scrape_log.txt";
+        const string _logfile = "log.txt";
 
         public AccountController()
         {

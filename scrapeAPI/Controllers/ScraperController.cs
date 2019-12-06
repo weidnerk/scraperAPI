@@ -38,7 +38,7 @@ namespace scrapeAPI.Controllers
         Models.DataModelsDB models = new Models.DataModelsDB();
 
         const string _filename = "order.csv";
-        readonly string _logfile = "scrape_log.txt";
+        readonly string _logfile = "log.txt";
 
         const int _qtyToList = 2;
 
