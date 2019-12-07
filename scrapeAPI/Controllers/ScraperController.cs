@@ -122,12 +122,12 @@ namespace scrapeAPI.Controllers
         /// <param name="minPrice"></param>
         /// <param name="maxPrice"></param>
         /// <param name="activeStatusOnly"></param>
-        /// <param name="nonVariation"></param>
+        /// <param name="isSellerVariation"></param>
         /// <param name="itemID">Pass null if passing rptNumber</param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}/{filter}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID, int filter)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -157,13 +157,13 @@ namespace scrapeAPI.Controllers
                         x = x.Where(p => p.ListingStatus == "Active");
                     }
                 }
-                //if (nonVariation.HasValue)
-                //{
-                //    if (nonVariation.Value)
-                //    {
-                //        x = x.Where(p => !p.IsSupplierVariation.Value);
-                //    }
-                //}
+                if (isSellerVariation.HasValue)
+                {
+                    if (isSellerVariation.Value)
+                    {
+                        x = x.Where(p => !p.IsSellerVariation ?? false);
+                    }
+                }
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
                 if (filter > 0)
