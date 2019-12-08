@@ -88,7 +88,7 @@ namespace scrapeAPI.Controllers
                 if (f != null)
                 {
                     f.Running = false;
-                    await db.SearchHistoryUpdate(f);
+                    await db.SearchHistoryUpdate(f, new string[] { "Running" });
                 }
                 return Ok();
             }
@@ -239,15 +239,21 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [Route("fillmatch/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{nonVariation}/{itemID}")]
+        [Route("fillmatch/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}")]
         [HttpGet]
-        public async Task<IHttpActionResult> FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? nonVariation, string itemID)
+        public async Task<IHttpActionResult> FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
             var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
-            var mv = await FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, nonVariation, itemID, 5);
+            var sh = new SearchHistory();
+            sh.ID = rptNumber;
+            sh.CalculateMatch = DateTime.Now;
+            //await db.SearchHistoryUpdate(sh, new string[] { "CalculateMatch" });
+            await db.SearchHistoryUpdate(sh, "CalculateMatch");
+
+            var mv = await FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, 5);
             return Ok(mv);
         }
 
