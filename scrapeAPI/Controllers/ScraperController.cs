@@ -239,24 +239,37 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [Route("fillmatch/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}")]
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rptNumber">Pass rptNumber to run single seller</param>
+        /// <param name="minSold"></param>
+        /// <param name="daysBack"></param>
+        /// <param name="minPrice"></param>
+        /// <param name="maxPrice"></param>
+        /// <param name="activeStatusOnly"></param>
+        /// <param name="isSellerVariation"></param>
+        /// <param name="itemID"></param>
+        /// <param name="storeID">Pass store id to run all sellers in store</param>
+        /// <returns>Need to determine what is best return value</returns>
+        [Route("fillmatch/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{storeID}")]
         [HttpGet]
-        public async Task<IHttpActionResult> FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID)
+        public async Task<IHttpActionResult> FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int storeID)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
             var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
-            var sh = new SearchHistory();
-            sh.ID = rptNumber;
-            sh.CalculateMatch = DateTime.Now;
-            //await db.SearchHistoryUpdate(sh, new string[] { "CalculateMatch" });
-            await db.SearchHistoryUpdate(sh, "CalculateMatch");
-
-            var mv = await FetchSeller.FillMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, 5);
-            return Ok(mv);
+            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, 5, settings.StoreID);
+            if (string.IsNullOrEmpty(ret))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(ret);
+            }
         }
-
 
         [AllowAnonymous]
         [HttpGet]
