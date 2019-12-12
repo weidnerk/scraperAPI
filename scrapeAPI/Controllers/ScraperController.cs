@@ -88,7 +88,7 @@ namespace scrapeAPI.Controllers
                 if (f != null)
                 {
                     f.Running = false;
-                    await db.SearchHistoryUpdate(f, new string[] { "Running" });
+                    await db.SearchHistoryUpdate_Running(f);
                 }
                 return Ok();
             }
@@ -260,7 +260,7 @@ namespace scrapeAPI.Controllers
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
             var settings = db.GetUserSettings(connStr, strCurrentUserId);
 
-            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, 5, settings.StoreID);
+            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, 5, 0);
             if (string.IsNullOrEmpty(ret))
             {
                 return Ok();
@@ -832,5 +832,23 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        [HttpGet]
+        [Route("logerrorcount")]
+        public IHttpActionResult GetLogErrorCount(string filename)
+        {
+            try
+            {
+                string path = AppDomain.CurrentDomain.BaseDirectory;
+                string fullpath = path + filename;
+                int match = dsutil.DSUtil.FindError(fullpath, "ERROR");
+                return Ok(match);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetLogErrorCount", exc);
+                return BadRequest(msg);
+            }
+        }
+
     }
 }
