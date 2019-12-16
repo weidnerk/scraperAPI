@@ -225,7 +225,7 @@ namespace scrapeAPI.Controllers
                     }
                 }
                 mv.TimesSoldRpt.ToList().ForEach(c => c.IsVero = db.IsVERO(c.SupplierBrand));
-                mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LatestSold).ToList();
+                mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LastSold).ToList();
                 mv.ListingsProcessed = 0;
                 mv.TotalOrders = 0;
                 mv.ItemCount = mv.TimesSoldRpt.Count;
