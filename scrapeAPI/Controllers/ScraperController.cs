@@ -125,9 +125,9 @@ namespace scrapeAPI.Controllers
         /// <param name="isSellerVariation"></param>
         /// <param name="itemID">Pass null if passing rptNumber</param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}/{allSellers}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter, bool allSellers)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -140,7 +140,8 @@ namespace scrapeAPI.Controllers
             {
                 itemID = (itemID == "null") ? null : itemID;
 
-                var x = db.GetScanData(rptNumber, ModTimeFrom, settings.StoreID, itemID: itemID);
+                IQueryable<TimesSold> x = null;
+                x = db.GetSalesData(rptNumber, ModTimeFrom, settings.StoreID, itemID);
                 if (minPrice.HasValue)
                 {
                     x = x.Where(p => p.Price >= minPrice);
