@@ -209,7 +209,19 @@ namespace scrapeAPI.Controllers
                         mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => !db.IsVERO(p.SupplierBrand)).ToList();
                     }
                 }
-                
+
+                foreach (var item in mv.TimesSoldRpt.Where(w => w.SupplierPrice.HasValue))
+                {
+                    if (item.SupplierPrice > 0)
+                    {
+                        if (item.ProposePrice.HasValue)
+                        {
+                            var r = Math.Abs((item.Price - item.ProposePrice.Value)) / item.ProposePrice;
+                            item.PriceDelta = Math.Round(r.Value * 100m, 2);
+                        }
+                    }
+                }
+
                 mv.TimesSoldRpt.ToList().ForEach(c => c.IsVero = db.IsVERO(c.SupplierBrand));
                 //mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LastSold).ToList();
                 mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.SellerUPC).ThenBy(p => p.SellerMPN).ToList();
@@ -222,6 +234,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetReport", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
         }
@@ -275,6 +288,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetEmailTaken", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "admin");
                 return BadRequest(msg);
             }
         }
