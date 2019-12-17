@@ -210,21 +210,6 @@ namespace scrapeAPI.Controllers
                     }
                 }
                 
-                
-                foreach (var item in mv.TimesSoldRpt.Where(w => w.SupplierPrice.HasValue))
-                {
-                    if (item.SupplierPrice > 0)
-                    {
-                        if (item.SupplierPrice < 35.0m)
-                        {
-                            item.SellerProfit = item.Price - (item.SupplierPrice + 5.99m);
-                        }
-                        else
-                        {
-                            item.SellerProfit = item.Price - item.SupplierPrice;
-                        }
-                    }
-                }
                 mv.TimesSoldRpt.ToList().ForEach(c => c.IsVero = db.IsVERO(c.SupplierBrand));
                 //mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LastSold).ToList();
                 mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.SellerUPC).ThenBy(p => p.SellerMPN).ToList();
