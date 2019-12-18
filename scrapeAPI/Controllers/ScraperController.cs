@@ -216,7 +216,7 @@ namespace scrapeAPI.Controllers
                     {
                         if (item.ProposePrice.HasValue)
                         {
-                            var r = Math.Abs((item.Price - item.ProposePrice.Value)) / item.ProposePrice;
+                            var r = (item.EbaySellerPrice - item.ProposePrice.Value) / item.ProposePrice;
                             item.PriceDelta = Math.Round(r.Value * 100m, 2);
                         }
                     }
