@@ -387,7 +387,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = "GetTokenStatus: " + exc.Message;
+                string msg = "GetSellerListing: " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
@@ -610,7 +610,9 @@ namespace scrapeAPI.Controllers
             {
                 var listing = await db.ListingGet(itemId);
                 if (listing == null)
+                {
                     return NotFound();
+                }
                 return Ok(listing);
             }
             catch (Exception exc)
