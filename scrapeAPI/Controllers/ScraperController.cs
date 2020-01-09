@@ -752,7 +752,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettings(connStr, strCurrentUserId);
 
-                await db.HistoryRemove(rptNumber);
+                await db.HistoryRemove(connStr, rptNumber);
                 return Ok();
             }
             catch (Exception exc)
