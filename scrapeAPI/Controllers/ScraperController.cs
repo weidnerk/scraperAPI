@@ -413,9 +413,15 @@ namespace scrapeAPI.Controllers
             }
         }
         [HttpGet]
-        [Route("storetolisting/{userName}/{rptNumber}")]
-        public async Task<IHttpActionResult> StoreToListing(string userName, int rptNumber)
+        [Route("storetolisting")]
+        public async Task<IHttpActionResult> StoreToListing(string userName)
         {
+            /*
+             * 01.14.2020 Seemingly out of the blue I started getting:
+             * "Access to XMLHttpRequest at has been blocked by CORS policy"
+             * search google and see things about enabling CORS.
+             * But I just changed the param form passing from Angular to a querystring and now seems to work.
+             */
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
