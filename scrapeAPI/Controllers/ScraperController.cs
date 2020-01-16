@@ -87,7 +87,7 @@ namespace scrapeAPI.Controllers
                 if (f != null)
                 {
                     f.Running = false;
-                    await db.SearchHistoryUpdate(f, "Running");
+                    db.SearchHistoryUpdate(f, "Running");
                 }
                 return Ok();
             }
