@@ -87,7 +87,7 @@ namespace scrapeAPI.Controllers
                 if (f != null)
                 {
                     f.Running = false;
-                    await db.SearchHistoryUpdate_Running(f);
+                    await db.SearchHistoryUpdate(f, "Running");
                 }
                 return Ok();
             }
@@ -443,6 +443,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Note we are hard-coding how many available items through '_qtyToList'
+        /// </summary>
+        /// <param name="listing"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("storelisting")]
         public async Task<IHttpActionResult> StoreListing(Listing listing)
@@ -455,7 +460,15 @@ namespace scrapeAPI.Controllers
 
                 listing.StoreID = settings.StoreID;
                 listing.Qty = _qtyToList;
-                await db.ListingSaveAsync(listing, strCurrentUserId);
+                await db.ListingSaveAsync(listing, strCurrentUserId,
+                        "SupplierItem.SupplierPrice",
+                        "ListingPrice",
+                        "ListingTitle",
+                        "Description",
+                        "Qty",
+                        "Profit",
+                        "ProfitMargin",
+                        "UpdatedBy");
                 return Ok();
             }
             catch (Exception exc)
@@ -531,9 +544,13 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
+                sellerProfile.Updated = DateTime.Now;
                 sellerProfile.UpdatedBy = strCurrentUserId;
                 sellerProfile.UserID = strCurrentUserId;
-                await db.SellerProfileSave(sellerProfile);
+                await db.SellerProfileSave(sellerProfile,
+                    "Note",
+                    "Updated",
+                    "UpdatedBy");
                 return Ok();
             }
             catch (Exception exc)
