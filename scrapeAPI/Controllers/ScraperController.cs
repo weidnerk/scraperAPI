@@ -431,8 +431,8 @@ namespace scrapeAPI.Controllers
                 {
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                     var settings = db.GetUserSettings(connStr, user.Id);
-                    await eBayUtility.FetchSeller.StoreToListing(settings);
-                    return Ok();
+                    string ret = await eBayUtility.FetchSeller.StoreToListing(settings);
+                    return Ok(ret);
                 }
             }
             catch (Exception exc)
