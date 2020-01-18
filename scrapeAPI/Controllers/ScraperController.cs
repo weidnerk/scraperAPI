@@ -647,11 +647,11 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getlisting")]
-        public async Task<IHttpActionResult> GetListing(string userName, string itemId)
+        public IHttpActionResult GetListing(string userName, string itemID)
         {
             try
             {
-                var listing = await db.ListingGet(itemId);
+                var listing = db.ListingGet(itemID);
                 if (listing == null)
                 {
                     return NotFound();

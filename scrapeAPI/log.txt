@@ -1,6 +1,0 @@
-1/17/2020 2:27:06 PM admin StoreToListing ERROR An error occurred while executing the command definition. See the inner exception for details. Invalid column name 'OrderHistory_ItemID'.
-Invalid column name 'OrderHistory_ItemID'.
-Invalid column name 'OrderHistory_ItemID'.
-1/17/2020 2:50:42 PM admin StoreToListing ERROR A specified Include path is not valid. The EntityType 'dsmodels.OrderHistory' does not declare a navigation property with the name 'OrderHistoryItemSpecific'.
-1/17/2020 2:54:05 PM admin DeleteListingRecord ERROR An error occurred while updating the entries. See the inner exception for details. An error occurred while updating the entries. See the inner exception for details. The DELETE statement conflicted with the REFERENCE constraint "FK_SellerListingItemSpecific_SellerListing". The conflict occurred in database "SQL2016_1004776_opw", table "dbo.SellerListingItemSpecific", column 'SellerItemID'.
-The statement has been terminated.
