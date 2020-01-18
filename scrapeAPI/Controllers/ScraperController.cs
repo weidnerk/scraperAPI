@@ -75,7 +75,7 @@ namespace scrapeAPI.Controllers
 
         [Route("cancelscan/{rptNumber}")]
         [HttpGet]
-        public async Task<IHttpActionResult> CancelScan(int rptNumber)
+        public IHttpActionResult CancelScan(int rptNumber)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
