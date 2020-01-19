@@ -686,8 +686,8 @@ namespace scrapeAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getlistings")]
-        public IHttpActionResult GetListings()
+        [Route("getlistings/{storeID}")]
+        public IHttpActionResult GetListings(int storeID)
         {
             var settings = new UserSettingsView();
             try
@@ -696,7 +696,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var listings = db.GetListings(settings.StoreID);
+                var listings = db.GetListings(storeID);
                 if (listings == null)
                     return NotFound();
                 return Ok(listings);
