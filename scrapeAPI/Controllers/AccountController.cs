@@ -140,31 +140,6 @@ namespace scrapeAPI.Controllers
             };
         }
 
-        [HttpPost]
-        [Route("userprofilesave")]
-        public async Task<IHttpActionResult> UserProfileSave(UserSettingsView profile)
-        {
-            try
-            {
-                var userid = User.Identity.GetUserId();
-                string ret = await models.UserProfileSaveAsync(profile, userid);
-                if (string.IsNullOrEmpty(ret))
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest(ret);
-                }
-            }
-            catch (Exception exc)
-            {
-                string msg = " UserProfileSave " + exc.Message;
-                dsutil.DSUtil.WriteFile(_logfile, msg, User.Identity.GetUserName());
-                return BadRequest(msg);
-            }
-        }
-
         [HttpGet]
         [Route("userprofileget")]
         public async Task<IHttpActionResult> UserProfileGet(string userName, string appID)
@@ -178,12 +153,12 @@ namespace scrapeAPI.Controllers
         }
 
         [HttpGet]
-        [Route("usersettingsget")]
-        public async Task<IHttpActionResult> UserSettingsGet(string userName)
+        [Route("usersettingsviewget")]
+        public async Task<IHttpActionResult> UserSettingsViewGet(string userName)
         {
             var user = await UserManager.FindByNameAsync(userName);
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = models.GetUserSettings(connStr, user.Id);
+            var settings = models.GetUserSettingsView(connStr, user.Id);
             // dsutil.DSUtil.WriteFile(_logfile, "UserSettingsGet ", user.UserName);
             if (settings == null)
                 return NotFound();

@@ -53,64 +53,6 @@ namespace scrapeAPI.Models
             }
         }
  
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="p"></param>
-        /// <returns>return error string</returns>
-        public async Task<string> UserProfileSaveAsync(UserProfileVM p)
-        {
-            string ret = string.Empty;
-            try
-            {
-                var user = await UserManager.FindByNameAsync(p.userName);
-                if (user == null)
-                {
-                    return "user does not exist";
-                }
-                var profile = db.GetUserProfile(user.Id);
-                if (profile != null)
-                {
-                    //profile.AppID = p.AppID;
-                    //profile.CertID = p.CertID;
-                    //profile.DevID = p.DevID;
-                    //profile.UserToken = p.UserToken;
-                    Entry(profile).Property(x => x.Firstname).IsModified = false;
-                    Entry(profile).Property(x => x.Lastname).IsModified = false;
-                    this.Entry(profile).State = EntityState.Modified;
-                }
-                else
-                {
-                    var newprofile = new UserSettingsView();
-                    newprofile.AppID = p.AppID;
-                    newprofile.CertID = p.CertID;
-                    newprofile.DevID = p.DevID;
-                    newprofile.Token = p.UserToken;
-                    newprofile.UserID = user.Id;
-                    //newprofile.Firstname = p.Firstname;
-                    //newprofile.Lastname = p.Lastname;
-                    //db.UserProfilesView.Add(newprofile);
-                }
-                await this.SaveChangesAsync();
-            }
-            catch (DbEntityValidationException e)
-            {
-                foreach (var eve in e.EntityValidationErrors)
-                {
-                    ret = string.Format("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:\n", eve.Entry.Entity.GetType().Name, eve.Entry.State);
-                    foreach (var ve in eve.ValidationErrors)
-                    {
-                        ret += string.Format("- Property: \"{0}\", Error: \"{1}\"\n", ve.PropertyName, ve.ErrorMessage);
-                    }
-                }
-            }
-            catch (Exception exc)
-            {
-                ret = exc.Message;
-            }
-            return ret;
-        }
-
         public async Task<bool> GetEmailTaken(string email)
         {
             bool taken = true;

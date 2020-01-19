@@ -79,7 +79,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             try
             {
@@ -104,7 +104,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             try
             {
@@ -125,7 +125,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             await db.OrderHistorySaveToList(oh);
 
@@ -151,7 +151,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
@@ -279,7 +279,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettings(connStr, strCurrentUserId);
+            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, 5, 0);
             if (string.IsNullOrEmpty(ret))
@@ -343,7 +343,7 @@ namespace scrapeAPI.Controllers
             {
                 var user = await UserManager.FindByNameAsync(userName);
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, user.Id);
+                var settings = db.GetUserSettingsView(connStr, user.Id);
 
                 if (user == null)
                     return Ok(false);
@@ -369,7 +369,7 @@ namespace scrapeAPI.Controllers
             {
                 var user = await UserManager.FindByNameAsync(userName);
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, user.Id);
+                var settings = db.GetUserSettingsView(connStr, user.Id);
 
                 if (user == null)
                     return Ok(false);
@@ -399,7 +399,7 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                    var settings = db.GetUserSettings(connStr, user.Id);
+                    var settings = db.GetUserSettingsView(connStr, user.Id);
 
                     var i = await ebayAPIs.GetSingleItem(settings, itemID);
                     return Ok(i);
@@ -430,7 +430,7 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                    var settings = db.GetUserSettings(connStr, user.Id);
+                    var settings = db.GetUserSettingsView(connStr, user.Id);
                     string ret = await eBayUtility.FetchSeller.StoreToListing(settings);
                     return Ok(ret);
                 }
@@ -456,7 +456,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 listing.StoreID = settings.StoreID;
                 listing.Qty = _qtyToList;
@@ -486,7 +486,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 note.UserID = strCurrentUserId;
                 note.StoreID = settings.StoreID;
@@ -508,7 +508,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettings(connStr, strCurrentUserId);
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var notes = await db.ItemNotes(itemID, settings.StoreID);
                 return Ok(notes);
@@ -575,7 +575,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var output = await eBayItem.ListingCreateAsync(settings, itemId);
                 if (ListingNotCreated(output))
@@ -662,7 +662,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -681,7 +681,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -694,7 +694,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var listings = db.GetListings(settings.StoreID);
                 if (listings == null)
@@ -705,7 +705,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListings", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -722,7 +722,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetWMItem", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -743,7 +743,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetPostedListing", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -759,7 +759,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetCategories", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -773,7 +773,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 await db.HistoryRemove(connStr, rptNumber);
                 return Ok();
@@ -796,7 +796,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 await db.DeleteListingRecord(sellerItemId);
                 return Ok();
@@ -817,7 +817,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var dashboard = new Dashboard();
                 int OOS = db.Listings.Where(p => p.OOS && p.StoreID == settings.StoreID).Count();
@@ -832,7 +832,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetDashboard", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
         [HttpGet]
@@ -844,7 +844,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettings(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var analysis = new StoreAnalysis();
 
@@ -857,7 +857,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("StoreAnalysis", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -876,7 +876,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("MatchWalmart", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
         [HttpGet]
@@ -893,9 +893,31 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetLogErrorCount", exc);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpGet]
+        [Route("getuserstores")]
+        public IHttpActionResult GetUserStores()
+        {
+            var settings = new UserSettingsView();
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
+                var userStores = db.GetUserStores(settings);
+                if (userStores == null)
+                    return NotFound();
+                return Ok(userStores);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetUserStores", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
