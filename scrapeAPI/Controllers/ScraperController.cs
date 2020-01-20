@@ -144,10 +144,11 @@ namespace scrapeAPI.Controllers
         /// <param name="activeStatusOnly"></param>
         /// <param name="isSellerVariation"></param>
         /// <param name="itemID">Pass null if passing rptNumber</param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}/{allSellers}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}/{storeID}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter, bool allSellers)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter, int storeID)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -161,7 +162,7 @@ namespace scrapeAPI.Controllers
                 itemID = (itemID == "null") ? null : itemID;
 
                 IQueryable<TimesSold> x = null;
-                x = db.GetSalesData(rptNumber, ModTimeFrom, settings.StoreID, itemID);
+                x = db.GetSalesData(rptNumber, ModTimeFrom, storeID, itemID);
                 if (minPrice.HasValue)
                 {
                     x = x.Where(p => p.Price >= minPrice);
@@ -414,7 +415,7 @@ namespace scrapeAPI.Controllers
         }
         [HttpGet]
         [Route("storetolisting")]
-        public async Task<IHttpActionResult> StoreToListing(string userName)
+        public async Task<IHttpActionResult> StoreToListing(string userName, int storeID)
         {
             /*
              * 01.14.2020 Seemingly out of the blue I started getting:
@@ -431,7 +432,7 @@ namespace scrapeAPI.Controllers
                 {
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                     var settings = db.GetUserSettingsView(connStr, user.Id);
-                    string ret = await eBayUtility.FetchSeller.StoreToListing(settings);
+                    string ret = await eBayUtility.FetchSeller.StoreToListing(settings, storeID);
                     return Ok(ret);
                 }
             }
