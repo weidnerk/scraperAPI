@@ -63,7 +63,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var sh = db.SearchHistoryView.Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated).ToList();
+                var sh = db.SearchHistoryView.AsNoTracking().Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated).ToList();
                 return Ok(sh);
             }
             catch (Exception exc)
@@ -451,7 +451,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("storelisting")]
-        public async Task<IHttpActionResult> StoreListing(Listing listing)
+        public async Task<IHttpActionResult> StoreListing(ListingDTO dto)
         {
             try
             {
@@ -459,17 +459,10 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                listing.StoreID = settings.StoreID;
-                listing.Qty = _qtyToList;
-                await db.ListingSaveAsync(listing, strCurrentUserId,
-                        "SupplierItem.SupplierPrice",
-                        "ListingPrice",
-                        "ListingTitle",
-                        "Description",
-                        "Qty",
-                        "Profit",
-                        "ProfitMargin",
-                        "UpdatedBy");
+                //listing.StoreID = settings.StoreID;
+                dto.Listing.Qty = _qtyToList;
+                await db.ListingSaveAsync(dto.Listing, strCurrentUserId,
+                dto.FieldNames);
                 return Ok();
             }
             catch (Exception exc)
@@ -569,7 +562,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("createlisting")]
-        public async Task<IHttpActionResult> CreateListing(string itemId)
+        public async Task<IHttpActionResult> CreateListing(string itemId, int storeID)
         {
             var settings = new UserSettingsView();
             try
@@ -578,7 +571,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var output = await eBayItem.ListingCreateAsync(settings, itemId);
+                var output = await eBayItem.ListingCreateAsync(settings, itemId, storeID);
                 if (ListingNotCreated(output))
                 {
                     var errStr = dsutil.DSUtil.ListToDelimited(output.ToArray(), ';');
@@ -648,11 +641,11 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getlisting")]
-        public IHttpActionResult GetListing(string userName, string itemID)
+        public IHttpActionResult GetListing(string userName, string itemID, int storeID)
         {
             try
             {
-                var listing = db.ListingGet(itemID);
+                var listing = db.ListingGet(itemID, storeID);
                 if (listing == null)
                 {
                     return NotFound();
@@ -788,9 +781,9 @@ namespace scrapeAPI.Controllers
         }
 
         [HttpDelete]
-        [Route("deletelistingrecord/{sellerItemId}")]
+        [Route("deletelistingrecord/{sellerItemId}/{storeID}")]
         [AcceptVerbs("DELETE")]
-        public async Task<IHttpActionResult> DeleteListingRecord(string sellerItemId)
+        public async Task<IHttpActionResult> DeleteListingRecord(string sellerItemId, int storeID)
         {
             var settings = new UserSettingsView();
             try
@@ -799,7 +792,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                await db.DeleteListingRecord(sellerItemId);
+                await db.DeleteListingRecord(sellerItemId, storeID);
                 return Ok();
             }
             catch (Exception exc)
