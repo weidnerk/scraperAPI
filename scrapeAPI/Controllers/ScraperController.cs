@@ -79,7 +79,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+            //var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             try
             {
@@ -104,7 +104,6 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             try
             {
@@ -114,7 +113,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("CalculateWMPrice", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return BadRequest(msg);
             }
         }
@@ -125,7 +124,6 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             await db.OrderHistorySaveToList(oh);
 
@@ -152,7 +150,6 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
@@ -256,7 +253,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetReport", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return BadRequest(msg);
             }
         }
@@ -457,7 +454,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                //var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 //listing.StoreID = settings.StoreID;
                 dto.Listing.Qty = _qtyToList;
@@ -473,17 +470,36 @@ namespace scrapeAPI.Controllers
             }
         }
         [HttpPost]
+        [Route("usersettingssave")]
+        public async Task<IHttpActionResult> UserSettingsSave(UserSettingsDTO dto)
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                dto.UserSettings.UserID = strCurrentUserId;
+                dto.UserSettings.ApplicationID = 1;
+                await db.UserSettingsSave(dto.UserSettings, dto.FieldNames);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("UserSettingsSave", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
+        [HttpPost]
         [Route("storenote")]
-        public async Task<IHttpActionResult> StoreNote(ListingNote note)
+        public async Task<IHttpActionResult> StoreNote(ListingNote note, int storeID)
         {
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                //var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 note.UserID = strCurrentUserId;
-                note.StoreID = settings.StoreID;
+                note.StoreID = storeID;
                 await db.NoteSave(note);
                 return Ok();
             }
