@@ -531,13 +531,17 @@ namespace scrapeAPI.Controllers
             }
         }
         [HttpPost]
-        [Route("storeoos")]
-        public async Task<IHttpActionResult> StoreOOS(Listing listing)
+        [Route("makeoos")]
+        public async Task<IHttpActionResult> MakeOOS(Listing listing)
         {
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                await db.OOSSave(listing);
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                var response = Utility.eBayItem.ReviseItem(settings, listing.ListedItemID, qty: 0);
+                await db.ListingSaveAsync(listing, strCurrentUserId, "Qty");
                 return Ok();
             }
             catch (Exception exc)
@@ -830,7 +834,8 @@ namespace scrapeAPI.Controllers
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var dashboard = new Dashboard();
-                int OOS = db.Listings.Where(p => p.OOS && p.StoreID == settings.StoreID).Count();
+                //int OOS = db.Listings.Where(p => p.OOS && p.StoreID == settings.StoreID).Count();
+                int OOS = 0;
                 dashboard.OOS = OOS;
 
                 int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == settings.StoreID).Count();

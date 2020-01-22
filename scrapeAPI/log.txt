@@ -1,0 +1,6 @@
+1/22/2020 12:51:04 PM  GetListings ERROR An error occurred while executing the command definition. See the inner exception for details. Invalid column name 'OOS'.
+Could not use view or function 'dbo.vwListing' because of binding errors.
+1/22/2020 12:52:28 PM  GetListings ERROR An error occurred while executing the command definition. See the inner exception for details. Invalid column name 'OOS'.
+1/22/2020 12:53:34 PM  GetListings ERROR An error occurred while executing the command definition. See the inner exception for details. Invalid column name 'OOS'.
+1/22/2020 12:53:42 PM  GetListings ERROR An error occurred while executing the command definition. See the inner exception for details. Invalid column name 'OOS'.
+1/22/2020 12:53:56 PM  GetListings ERROR An error occurred while executing the command definition. See the inner exception for details. Invalid column name 'OOS'.
