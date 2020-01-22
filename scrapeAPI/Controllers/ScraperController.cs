@@ -454,10 +454,6 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                //var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-
-                //listing.StoreID = settings.StoreID;
-                dto.Listing.Qty = _qtyToList;
                 await db.ListingSaveAsync(dto.Listing, strCurrentUserId,
                 dto.FieldNames);
                 return Ok();
@@ -526,27 +522,6 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetItemNotes", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
-            }
-        }
-        [HttpPost]
-        [Route("makeoos")]
-        public async Task<IHttpActionResult> MakeOOS(Listing listing)
-        {
-            try
-            {
-                string strCurrentUserId = User.Identity.GetUserId();
-                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-
-                var response = Utility.eBayItem.ReviseItem(settings, listing.ListedItemID, qty: 0);
-                await db.ListingSaveAsync(listing, strCurrentUserId, "Qty");
-                return Ok();
-            }
-            catch (Exception exc)
-            {
-                string msg = dsutil.DSUtil.ErrMsg("StoreOOS", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
