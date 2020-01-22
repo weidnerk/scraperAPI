@@ -553,11 +553,11 @@ namespace scrapeAPI.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="itemId">ebay seller listing id</param>
+        /// <param name="itemID">ebay seller listing id</param>
         /// <returns></returns>
         [HttpGet]
         [Route("createlisting")]
-        public async Task<IHttpActionResult> CreateListing(string itemId, int storeID)
+        public async Task<IHttpActionResult> CreateListing(string itemID, int storeID)
         {
             var settings = new UserSettingsView();
             try
@@ -566,7 +566,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var output = await eBayItem.ListingCreateAsync(settings, itemId, storeID);
+                var output = await eBayItem.ListingCreateAsync(settings, itemID, storeID);
                 if (ListingNotCreated(output))
                 {
                     var errStr = dsutil.DSUtil.ListToDelimited(output.ToArray(), ';');
