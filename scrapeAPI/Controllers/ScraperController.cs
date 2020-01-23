@@ -485,19 +485,19 @@ namespace scrapeAPI.Controllers
             }
         }
         [HttpPost]
-        [Route("updatetolist")]
-        public async Task<IHttpActionResult> UpdateToListSave(UpdateToListDTO dto)
+        [Route("updatetolisting")]
+        public async Task<IHttpActionResult> UpdateToListingSave(UpdateToListingDTO dto)
         {
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                dto.UpdateToList.UserID = strCurrentUserId;
-                await db.UpdateToListSave(dto.UpdateToList, dto.FieldNames);
+                dto.UpdateToListing.UserID = strCurrentUserId;
+                await db.UpdateToListingSave(dto.UpdateToListing, dto.FieldNames);
                 return Ok();
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("StoreToListingSave", exc);
+                string msg = dsutil.DSUtil.ErrMsg("UpdateToListingSave", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
