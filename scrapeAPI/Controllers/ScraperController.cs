@@ -118,17 +118,17 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [Route("updatetolist")]
-        [HttpPost]
-        public async Task<IHttpActionResult> OrderHistoryUpdateToList(OrderHistory oh)
-        {
-            string strCurrentUserId = User.Identity.GetUserId();
-            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+        //[Route("updatetolist")]
+        //[HttpPost]
+        //public async Task<IHttpActionResult> OrderHistoryUpdateToList(OrderHistory oh)
+        //{
+        //    string strCurrentUserId = User.Identity.GetUserId();
+        //    string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
 
-            await db.OrderHistorySaveToList(oh);
+        //    await db.OrderHistorySaveToList(oh);
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         /// <summary>
         /// Get stored scan.
@@ -480,6 +480,24 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("UserSettingsSave", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
+        [HttpPost]
+        [Route("updatetolist")]
+        public async Task<IHttpActionResult> UpdateToListSave(UpdateToListDTO dto)
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                dto.UpdateToList.UserID = strCurrentUserId;
+                await db.UpdateToListSave(dto.UpdateToList, dto.FieldNames);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("StoreToListingSave", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
                 return BadRequest(msg);
             }
