@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 
 scrape_log.txt
+/scrapeAPI/log.txt

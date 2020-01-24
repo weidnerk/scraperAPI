@@ -63,7 +63,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var sh = db.SearchHistoryView.AsNoTracking().Where(p => p.UserId == user.Id).OrderByDescending(x => x.Updated).ToList();
+                var sh = db.SearchHistoryView.AsNoTracking().OrderByDescending(x => x.Updated).ToList();
                 return Ok(sh);
             }
             catch (Exception exc)
