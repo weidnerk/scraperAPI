@@ -651,6 +651,20 @@ namespace scrapeAPI.Controllers
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
             }
         }
+        [HttpGet]
+        [Route("getwmorder")]
+        public async Task<IHttpActionResult> GetWMOrder(string orderURL)
+        {
+            try
+            {
+                await wallib.wmUtility.GetOrder(orderURL);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
+            }
+        }
 
         [HttpGet]
         [Route("getlisting")]
