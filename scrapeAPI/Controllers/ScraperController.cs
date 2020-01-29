@@ -617,21 +617,33 @@ namespace scrapeAPI.Controllers
         }
 
         [HttpGet]
-        [Route("removelisting")]
-        public async Task<IHttpActionResult> RemoveListing(UserSettingsView settings, string ebayItemId)
+        [Route("endlisting")]
+        public async Task<IHttpActionResult> EndListing(string listedItemID)
         {
+            string strCurrentUserId = User.Identity.GetUserId();
             try
             {
-                var item = db.Listings.Single(r => r.ListedItemID == ebayItemId);
-                Utility.eBayItem.EndFixedPriceItem(settings, item.ListedItemID);
+                var listing = db.ListingGet(listedItemID);
+                bool salesExist = db.SalesExists(listedItemID);
+                if (!salesExist)
+                {
+                    // can delete from db - what's the point of keeping track of what did not sell?
+                    await db.DeleteListingRecordAsync(listing.ItemID, listing.StoreID);
+                }
+                else
+                {
+                    listing.Ended = DateTime.Now;
+                    listing.EndedBy = strCurrentUserId;
+                    await db.ListingSaveAsync(listing, strCurrentUserId, "Ended", "EndedBy");
+                }
+                string ret = Utility.eBayItem.EndFixedPriceItem(listing);
 
-                await db.UpdateRemovedDate(item);
-                return Ok();
+                return Ok(ret);
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("RemoveListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
             }
         }
@@ -824,7 +836,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                await db.DeleteListingRecord(sellerItemId, storeID);
+                await db.DeleteListingRecordAsync(sellerItemId, storeID);
                 return Ok();
             }
             catch (Exception exc)
