@@ -454,8 +454,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                await db.ListingSaveAsync(dto.Listing, strCurrentUserId,
-                dto.FieldNames);
+                await db.ListingSaveAsync(dto.Listing, strCurrentUserId, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
@@ -474,7 +473,7 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 dto.UserSettings.UserID = strCurrentUserId;
                 dto.UserSettings.ApplicationID = 1;
-                await db.UserSettingsSave(dto.UserSettings, dto.FieldNames);
+                await db.UserSettingsSave(dto.UserSettings, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
@@ -492,7 +491,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 dto.UpdateToListing.UserID = strCurrentUserId;
-                await db.UpdateToListingSave(dto.UpdateToListing, dto.FieldNames);
+                await db.UpdateToListingSave(dto.UpdateToListing, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
@@ -710,12 +709,18 @@ namespace scrapeAPI.Controllers
         [Route("getlistings/{storeID}")]
         public IHttpActionResult GetListings(int storeID)
         {
+            
+            // eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
             var settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                // In both calls here, referring to RCA home theatre sold on 12/4/2019
+                //eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
+                // eBayUtility.ebayAPIs.ProcessTransactions(settings, "223707436249", new DateTime(2019, 12, 1), new DateTime(2019, 12, 15));
 
                 var listings = db.GetListings(storeID);
                 if (listings == null)
@@ -750,7 +755,7 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getpostedlisting")]
-        public IHttpActionResult GetPostedListing(string ebayItemId)
+        public IHttpActionResult GetPostedListing_unused(string ebayItemId)
         {
             try
             {
@@ -941,5 +946,36 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpPost]
+        [Route("salesorderupdate")]
+        public async Task<IHttpActionResult> SalesOrderSave(SalesOrderDTO dto)
+        {
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                //dto.UpdateToListing.UserID = strCurrentUserId;
+                var exists = db.SalesOrderExists(dto.SalesOrder.SupplierOrderNumber);
+                if (!exists)
+                {
+                    string msg = null;
+                    var eBayOrder = eBayUtility.ebayAPIs.GetOrders(dto.SalesOrder.eBayOrderNumber, 1, out msg);
+                    dto.SalesOrder.BuyerHandle = eBayOrder.BuyerHandle;
+                    dto.SalesOrder.Buyer = eBayOrder.Buyer;
+                    dto.SalesOrder.DatePurchased = eBayOrder.DatePurchased;
+                    dto.FieldNames.Add("CustomerName");
+                    dto.FieldNames.Add("CustomerHandle");
+                    dto.FieldNames.Add("DatePurchased");
+                }
+                await db.SalesOrderSaveAsync(dto.SalesOrder, dto.FieldNames.ToArray());
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("SalesOrderSave", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                return BadRequest(msg);
+            }
+        }
+
     }
 }
