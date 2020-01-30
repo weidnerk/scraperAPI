@@ -836,7 +836,11 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                await db.DeleteListingRecordAsync(sellerItemId, storeID);
+                string ret = await db.DeleteListingRecordAsync(sellerItemId, storeID);
+                if (!string.IsNullOrEmpty(ret))
+                {
+                    return BadRequest(ret);
+                }
                 return Ok();
             }
             catch (Exception exc)
