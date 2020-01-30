@@ -603,6 +603,29 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("createvariationlisting")]
+        public IHttpActionResult CreateVariationListing()
+        {
+            var settings = new UserSettingsView();
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                var output = eBayItem.AddFPItemWithVariations(1);
+               
+                return Ok(output);   // return listing id
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("CreateListing", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return BadRequest(msg);
+            }
+        }
+
         protected static bool ListingNotCreated(List<string> response)
         {
             const string marker = "Listing not created";
