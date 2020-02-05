@@ -605,8 +605,9 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("createvariationlisting")]
-        public IHttpActionResult CreateVariationListing()
+        public async Task<IHttpActionResult> CreateVariationListing()
         {
+            string output = null;
             var settings = new UserSettingsView();
             try
             {
@@ -614,8 +615,21 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var output = eBayItem.AddFPItemWithVariations(1);
-               
+                // for testing, get some variation listing for item specifics
+                // https://www.ebay.com/itm/Low-Profile-Microwave-Oven-RV-Dorm-Mini-Small-Best-Compact-Kitchen-Countertop-/133041437329?var=0
+                //var sellerListing = await ebayAPIs.GetSingleItem(settings, "133041437329");
+                //output = eBayItem.AddFPItemWithVariations_microwave(1, sellerListing);
+
+                // https://www.ebay.com/itm/The-Pioneer-Woman-Cowboy-Rustic-Cutlery-14-Piece-Kitchen-Tools-Multiple-Colors/132929127680?epid=3021775004&hash=item1ef3318500:m:mxO3U5ZeMusEzRnLL58bpkw
+                //var sellerListing = await ebayAPIs.GetSingleItem(settings, "132929127680");
+                //output = eBayItem.AddFPItemWithVariations_cutlery(1, sellerListing);
+
+                // https://www.ebay.com/itm/Rachel-Ray-Cookware-Set-Nonstick-Enamel-Marine-Blue-Non-Stick-Enamel-Pots-Pans/133245568450?hash=item1f060e05c2:m:miqH_90tUTRCqI2Zd3KZfTQ
+                var sellerListing = await ebayAPIs.GetSingleItem(settings, "133245568450");
+                output = eBayItemVariation.AddFPItemWithVariations_potspans(1, sellerListing);
+
+                // eBayItem.ReviseFixedPriceItem("223892293783", "Color", "White");
+
                 return Ok(output);   // return listing id
             }
             catch (Exception exc)
