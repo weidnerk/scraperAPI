@@ -38,7 +38,8 @@ namespace scrapeAPI.Controllers
         Models.DataModelsDB models = new Models.DataModelsDB();
 
         const string _filename = "order.csv";
-        readonly string _logfile = "log.txt";
+        const string _logfile = "log.txt";
+        const double _pctProfit = 5;
 
         const int _qtyToList = 2;
 
@@ -98,16 +99,16 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [Route("calculatewmpx/{supplierPrice}/{pctProfit}")]
+        [Route("calculatewmpx")]
         [HttpGet]
-        public IHttpActionResult CalculateWMPrice(decimal supplierPrice, double pctProfit)
+        public IHttpActionResult CalculateWMPrice(decimal supplierPrice)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
 
             try
             {
-                var px = Utility.eBayItem.wmNewPrice(supplierPrice, pctProfit);
+                var px = Utility.eBayItem.wmNewPrice(supplierPrice, _pctProfit);
                 return Ok(px);
             }
             catch (Exception exc)
