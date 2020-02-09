@@ -1007,18 +1007,30 @@ namespace scrapeAPI.Controllers
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
-                //dto.UpdateToListing.UserID = strCurrentUserId;
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 var exists = db.SalesOrderExists(dto.SalesOrder.SupplierOrderNumber);
                 if (!exists)
                 {
                     string msg = null;
+
                     var eBayOrder = eBayUtility.ebayAPIs.GetOrders(dto.SalesOrder.eBayOrderNumber, 1, out msg);
+                    //var eBayOrder = eBayUtility.ebayAPIs.GetOrders(dto.SalesOrder.eBayOrderNumber, settings.StoreID, out msg);
+
+                    if (!string.IsNullOrEmpty(msg))
+                    {
+                        return Content(HttpStatusCode.InternalServerError, msg);
+                    }
                     dto.SalesOrder.BuyerHandle = eBayOrder.BuyerHandle;
                     dto.SalesOrder.Buyer = eBayOrder.Buyer;
                     dto.SalesOrder.DatePurchased = eBayOrder.DatePurchased;
+                    dto.SalesOrder.BuyerPaid = eBayOrder.BuyerPaid;
+                    dto.SalesOrder.BuyerState = eBayOrder.BuyerState;
                     dto.FieldNames.Add("CustomerName");
                     dto.FieldNames.Add("CustomerHandle");
                     dto.FieldNames.Add("DatePurchased");
+                    dto.FieldNames.Add("BuyerPaid");
+                    dto.FieldNames.Add("BuyerState");
                 }
                 await db.SalesOrderSaveAsync(dto.SalesOrder, dto.FieldNames.ToArray());
                 return Ok();
