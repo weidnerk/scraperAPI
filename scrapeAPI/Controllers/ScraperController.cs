@@ -1042,6 +1042,32 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        /// <summary>
+        /// 02.09.2020
+        /// eBay will be requiring more item specifics
+        /// </summary>
+        /// <param name="ID">ID of listing</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("refreshitemspecifics")]
+        public async Task<IHttpActionResult> RefreshItemSpecifics(int ID)
+        {
+            var settings = new UserSettingsView();
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
+                await eBayItem.RefreshItemSpecifics(settings, ID);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("RefreshItemSpecifics", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
