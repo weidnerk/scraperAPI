@@ -504,7 +504,7 @@ namespace scrapeAPI.Controllers
         }
         [HttpPost]
         [Route("storenote")]
-        public async Task<IHttpActionResult> StoreNote(ListingNote note, int storeID)
+        public async Task<IHttpActionResult> StoreNote(ListingNote note)
         {
             try
             {
@@ -513,7 +513,6 @@ namespace scrapeAPI.Controllers
                 //var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 note.UserID = strCurrentUserId;
-                note.StoreID = storeID;
                 await db.NoteSave(note);
                 return Ok();
             }
@@ -526,7 +525,7 @@ namespace scrapeAPI.Controllers
         }
         [HttpGet]
         [Route("itemnotes")]
-        public async Task<IHttpActionResult> GetItemNotes(string itemID)
+        public async Task<IHttpActionResult> GetItemNotes(string itemID, int storeID)
         {
             try
             {
@@ -534,7 +533,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var notes = await db.ItemNotes(itemID, settings.StoreID);
+                var notes = await db.ItemNotes(itemID, storeID);
                 return Ok(notes);
             }
             catch (Exception exc)
