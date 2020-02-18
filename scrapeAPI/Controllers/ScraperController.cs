@@ -571,8 +571,11 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                var shippingProfile = db.GetAppSetting("shippingProfile");
+                var returnProfile = db.GetAppSetting("returnProfile");
+                var paymentProfile = db.GetAppSetting("paymentProfile");
 
-                var output = await eBayItem.ListingCreateAsync(settings, itemID, storeID);
+                var output = await eBayItem.ListingCreateAsync(settings, itemID, storeID, shippingProfile, returnProfile, paymentProfile);
                 if (ListingNotCreated(output))
                 {
                     var errStr = dsutil.DSUtil.ListToDelimited(output.ToArray(), ';');
