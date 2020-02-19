@@ -109,7 +109,8 @@ namespace scrapeAPI.Controllers
             try
             {
                 decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
-                var px = wallib.wmUtility.wmNewPrice(supplierPrice, _pctProfit, wmShipping);
+                decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
+                var px = wallib.wmUtility.wmNewPrice(supplierPrice, _pctProfit, wmShipping, wmFreeShippingMin);
                 return Ok(px);
             }
             catch (Exception exc)
@@ -270,9 +271,10 @@ namespace scrapeAPI.Controllers
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
             var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
             decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
+            decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
             double pctProfit = Convert.ToDouble(db.GetAppSetting("pctProfit"));
 
-            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping);
+            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin);
             if (string.IsNullOrEmpty(ret))
             {
                 return Ok();
