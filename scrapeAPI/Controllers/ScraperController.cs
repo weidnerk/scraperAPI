@@ -110,7 +110,8 @@ namespace scrapeAPI.Controllers
             {
                 decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
                 decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
-                var px = wallib.wmUtility.wmNewPrice(supplierPrice, _pctProfit, wmShipping, wmFreeShippingMin);
+                double eBayPct = Convert.ToDouble(db.GetAppSetting("eBay pct"));
+                var px = wallib.wmUtility.wmNewPrice(supplierPrice, _pctProfit, wmShipping, wmFreeShippingMin, eBayPct);
                 return Ok(px);
             }
             catch (Exception exc)
@@ -273,8 +274,9 @@ namespace scrapeAPI.Controllers
             decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
             decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
             double pctProfit = Convert.ToDouble(db.GetAppSetting("pctProfit"));
+            double eBayPct = Convert.ToDouble(db.GetAppSetting("eBay pct"));
 
-            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin);
+            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, eBayPct);
             if (string.IsNullOrEmpty(ret))
             {
                 return Ok();
