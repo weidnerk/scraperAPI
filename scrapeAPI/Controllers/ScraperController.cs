@@ -570,7 +570,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("createlisting")]
-        public async Task<IHttpActionResult> CreateListing(string itemID, int storeID)
+        public async Task<IHttpActionResult> CreateListing(int listingID)
         {
             var settings = new UserSettingsView();
             try
@@ -582,7 +582,7 @@ namespace scrapeAPI.Controllers
                 var returnProfile = db.GetAppSetting("returnProfile");
                 var paymentProfile = db.GetAppSetting("paymentProfile");
 
-                var output = await eBayItem.ListingCreateAsync(settings, itemID, storeID, shippingProfile, returnProfile, paymentProfile);
+                var output = await eBayItem.ListingCreateAsync(settings, listingID, shippingProfile, returnProfile, paymentProfile);
                 if (ListingNotCreated(output))
                 {
                     var errStr = dsutil.DSUtil.ListToDelimited(output.ToArray(), ';');
@@ -715,11 +715,11 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getlisting")]
-        public IHttpActionResult GetListing(string userName, string itemID, int storeID)
+        public IHttpActionResult GetListing(int listingID)
         {
             try
             {
-                var listing = db.ListingGet(itemID, storeID);
+                var listing = db.ListingGet(listingID);
                 if (listing == null)
                 {
                     return NotFound();
@@ -729,7 +729,27 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "noname");
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+        [HttpGet]
+        [Route("getsupplieritem")]
+        public IHttpActionResult GetSupplierItem(int ID)
+        {
+            try
+            {
+                var listing = db.SupplierItemGet(ID);
+                if (listing == null)
+                {
+                    return NotFound();
+                }
+                return Ok(listing);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetSupplierItem", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "noname");
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
