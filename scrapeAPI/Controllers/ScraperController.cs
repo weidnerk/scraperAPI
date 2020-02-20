@@ -136,9 +136,9 @@ namespace scrapeAPI.Controllers
         /// <param name="itemID">Pass null if passing rptNumber</param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}/{storeID}/{isSupplierVariation}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}/{storeID}/{isSupplierVariation}/{priceDelta}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter, int storeID, bool? isSupplierVariation)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter, int storeID, bool? isSupplierVariation, bool? priceDelta)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -220,7 +220,6 @@ namespace scrapeAPI.Controllers
                         mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => !db.IsVERO(p.SupplierBrand)).ToList();
                     }
                 }
-
                 foreach (var item in mv.TimesSoldRpt.Where(w => w.SupplierPrice.HasValue))
                 {
                     if (item.SupplierPrice > 0)
@@ -233,9 +232,16 @@ namespace scrapeAPI.Controllers
                         }
                     }
                 }
-
                 //mv.TimesSoldRpt.ToList().ForEach(c => c.IsVero = db.IsVERO(c.SupplierBrand));
-                mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LastSold).ToList();
+                if (!priceDelta.HasValue)
+                {
+                    mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LastSold).ToList();
+                }
+                if (priceDelta.HasValue)
+                {
+                    decimal pxDelta = Convert.ToDecimal(db.GetAppSetting("priceDelta"));
+                    mv.TimesSoldRpt = mv.TimesSoldRpt.Where(o => o.PriceDelta > pxDelta).OrderByDescending(p => p.LastSold).ToList();
+                }
                 //mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.SellerUPC).ThenBy(p => p.SellerMPN).ToList();
                 mv.ListingsProcessed = 0;
                 mv.TotalOrders = 0;
@@ -774,8 +780,8 @@ namespace scrapeAPI.Controllers
         }
 
         [HttpGet]
-        [Route("getlistings/{storeID}")]
-        public IHttpActionResult GetListings(int storeID)
+        [Route("getlistings/{storeID}/{listedOnly}")]
+        public IHttpActionResult GetListings(int storeID, bool listedOnly)
         {
             
             // eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
@@ -790,7 +796,7 @@ namespace scrapeAPI.Controllers
                 //eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
                 // eBayUtility.ebayAPIs.ProcessTransactions(settings, "223707436249", new DateTime(2019, 12, 1), new DateTime(2019, 12, 15));
 
-                var listings = db.GetListings(storeID);
+                var listings = db.GetListings(storeID, listedOnly);
                 if (listings == null)
                     return NotFound();
                 return Ok(listings);
