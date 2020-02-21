@@ -136,9 +136,9 @@ namespace scrapeAPI.Controllers
         /// <param name="itemID">Pass null if passing rptNumber</param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}/{storeID}/{isSupplierVariation}/{priceDelta}")]
+        [Route("getreport/{rptNumber}/{minSold}/{daysBack}/{minPrice}/{maxPrice}/{activeStatusOnly}/{isSellerVariation}/{itemID}/{filter}/{storeID}/{isSupplierVariation}/{priceDelta}/{excludeListed}")]
         [HttpGet]
-        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter, int storeID, bool? isSupplierVariation, bool? priceDelta)
+        public IHttpActionResult GetReport(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int filter, int storeID, bool? isSupplierVariation, bool? priceDelta, bool? excludeListed)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -175,6 +175,10 @@ namespace scrapeAPI.Controllers
                 if (isSupplierVariation.HasValue)
                 {
                     x = x.Where(p => p.IsSupplierVariation == isSupplierVariation.Value);
+                }
+                if (excludeListed.HasValue)
+                {
+                    x = x.Where(p => p.Listed == null);
                 }
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
