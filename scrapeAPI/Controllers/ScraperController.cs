@@ -1008,6 +1008,23 @@ namespace scrapeAPI.Controllers
             }
         }
         [HttpGet]
+        [Route("lasterror")]
+        public IHttpActionResult GetLastError(string filename)
+        {
+            try
+            {
+                string path = AppDomain.CurrentDomain.BaseDirectory;
+                string fullpath = path + filename;
+                string lastErr = dsutil.DSUtil.GetLastError(fullpath, "ERROR");
+                return Ok(lastErr);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetLastError", exc);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+        [HttpGet]
         [Route("getuserstores")]
         public IHttpActionResult GetUserStores()
         {
