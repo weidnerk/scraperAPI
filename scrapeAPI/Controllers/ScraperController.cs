@@ -641,7 +641,7 @@ namespace scrapeAPI.Controllers
 
                 // https://www.ebay.com/itm/Rachel-Ray-Cookware-Set-Nonstick-Enamel-Marine-Blue-Non-Stick-Enamel-Pots-Pans/133245568450?hash=item1f060e05c2:m:miqH_90tUTRCqI2Zd3KZfTQ
                 var sellerListing = await ebayAPIs.GetSingleItem(settings, "133245568450");
-                output = eBayItemVariation.AddFPItemWithVariations_potspans(1, sellerListing);
+                output = eBayItemVariation.AddFPItemWithVariations_potspans(settings, 1, sellerListing);
 
                 // eBayItem.ReviseFixedPriceItem("223892293783", "Color", "White");
 
@@ -672,9 +672,12 @@ namespace scrapeAPI.Controllers
         [Route("endlisting")]
         public async Task<IHttpActionResult> EndListing(string listedItemID)
         {
+            var settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
             try
             {
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 var listing = db.ListingGet(listedItemID);
                 bool salesExist = db.SalesExists(listedItemID);
                 if (!salesExist)
@@ -688,7 +691,7 @@ namespace scrapeAPI.Controllers
                     listing.EndedBy = strCurrentUserId;
                     await db.ListingSaveAsync(listing, strCurrentUserId, "Ended", "EndedBy");
                 }
-                string ret = Utility.eBayItem.EndFixedPriceItem(listing);
+                string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
 
                 return Ok(ret);
             }
@@ -1066,7 +1069,7 @@ namespace scrapeAPI.Controllers
                 {
                     string msg = null;
 
-                    var eBayOrder = eBayUtility.ebayAPIs.GetOrders(dto.SalesOrder.eBayOrderNumber, 1, out msg);
+                    var eBayOrder = eBayUtility.ebayAPIs.GetOrders(settings, dto.SalesOrder.eBayOrderNumber, 1, out msg);
                     //var eBayOrder = eBayUtility.ebayAPIs.GetOrders(dto.SalesOrder.eBayOrderNumber, settings.StoreID, out msg);
 
                     if (!string.IsNullOrEmpty(msg))
