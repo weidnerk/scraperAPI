@@ -840,27 +840,6 @@ namespace scrapeAPI.Controllers
             }
         }
 
-
-        [HttpGet]
-        [Route("getpostedlisting")]
-        public IHttpActionResult GetPostedListing_unused(string ebayItemId)
-        {
-            try
-            {
-                // a seller may have sold his item at different prices
-                var item = db.Listings.SingleOrDefault(r => r.ListedItemID == ebayItemId);
-                if (item == null)
-                    return NotFound();
-                return Ok(item);
-            }
-            catch (Exception exc)
-            {
-                string msg = dsutil.DSUtil.ErrMsg("GetPostedListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return Content(HttpStatusCode.InternalServerError, msg);
-            }
-        }
-
         [HttpGet]
         [Route("getcategories")]
         public IHttpActionResult GetCategories(int sourceId)
