@@ -828,8 +828,13 @@ namespace scrapeAPI.Controllers
         {
             try
             {
+                byte handlingTime = Convert.ToByte(db.GetAppSetting("handlingTime"));
+                byte maxShippingDays = Convert.ToByte(db.GetAppSetting("maxShippingDays"));
+                var allowedDeliveryDays = handlingTime + maxShippingDays;
                 int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
+
                 var w = await wallib.wmUtility.GetDetail(url, imgLimit);
+                eBayUtility.FetchSeller.CanList(w, allowedDeliveryDays);
                 return Ok(w);
             }
             catch (Exception exc)
