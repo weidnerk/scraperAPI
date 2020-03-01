@@ -834,7 +834,7 @@ namespace scrapeAPI.Controllers
                 int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
 
                 var w = await wallib.wmUtility.GetDetail(url, imgLimit);
-                eBayUtility.FetchSeller.CanList(w, allowedDeliveryDays);
+                wallib.wmUtility.CanList(w, allowedDeliveryDays);
                 return Ok(w);
             }
             catch (Exception exc)
