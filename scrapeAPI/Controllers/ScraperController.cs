@@ -743,6 +743,10 @@ namespace scrapeAPI.Controllers
                 {
                     return NotFound();
                 }
+                else
+                {
+                    listing.Warning = GetWarnings(listing.Description);
+                }
                 return Ok(listing);
             }
             catch (Exception exc)
@@ -751,6 +755,22 @@ namespace scrapeAPI.Controllers
                 dsutil.DSUtil.WriteFile(_logfile, msg, "noname");
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
+        }
+        protected List<string> GetWarnings(string strCheck)
+        {
+            var warning = new List<string>();
+            string segment;
+            bool hasOddQuestionMark = dsutil.DSUtil.ContainsQuestionMark(strCheck, out segment);
+            if (hasOddQuestionMark)
+            {
+                warning.Add("Description has odd place question mark -> " + segment);
+            }
+            bool hasKeyWords = dsutil.DSUtil.ContationsKeyWords(strCheck);
+            if (hasKeyWords)
+            {
+                warning.Add("Description contains 'QUESTIONS' or 'COMMENTS' or 'WALMART' or 'WARRANTY'");
+            }
+            return warning;
         }
         [HttpGet]
         [Route("getsupplieritem")]
@@ -1108,5 +1128,6 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+      
     }
 }
