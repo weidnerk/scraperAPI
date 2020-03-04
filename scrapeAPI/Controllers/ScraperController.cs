@@ -745,7 +745,7 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
-                    listing.Warning = GetWarnings(listing.Description);
+                    listing.Warning = wallib.wmUtility.GetWarnings(listing.Description);
                 }
                 return Ok(listing);
             }
@@ -756,22 +756,7 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-        protected List<string> GetWarnings(string strCheck)
-        {
-            var warning = new List<string>();
-            string segment;
-            bool hasOddQuestionMark = dsutil.DSUtil.ContainsQuestionMark(strCheck, out segment);
-            if (hasOddQuestionMark)
-            {
-                warning.Add("Description has odd place question mark -> " + segment);
-            }
-            bool hasKeyWords = dsutil.DSUtil.ContationsKeyWords(strCheck);
-            if (hasKeyWords)
-            {
-                warning.Add("Description contains 'QUESTIONS' or 'COMMENTS' or 'WALMART' or 'WARRANTY'");
-            }
-            return warning;
-        }
+    
         [HttpGet]
         [Route("getsupplieritem")]
         public IHttpActionResult GetSupplierItem(int ID)
