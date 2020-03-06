@@ -797,9 +797,16 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storeID"></param>
+        /// <param name="unlisted">only filter if set to True</param>
+        /// <param name="listed">only filter if set to True</param>
+        /// <returns></returns>
         [HttpGet]
-        [Route("getlistings/{storeID}/{unlisted}")]
-        public IHttpActionResult GetListings(int storeID, bool unlisted)
+        [Route("getlistings/{storeID}/{unlisted}/{listed}")]
+        public IHttpActionResult GetListings(int storeID, bool unlisted, bool listed)
         {
             
             // eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
@@ -814,7 +821,7 @@ namespace scrapeAPI.Controllers
                 //eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
                 // eBayUtility.ebayAPIs.ProcessTransactions(settings, "223707436249", new DateTime(2019, 12, 1), new DateTime(2019, 12, 15));
 
-                var listings = db.GetListings(storeID, unlisted);
+                var listings = db.GetListings(storeID, unlisted, listed);
                 if (listings == null)
                     return NotFound();
                 return Ok(listings);
@@ -927,12 +934,14 @@ namespace scrapeAPI.Controllers
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var dashboard = new Dashboard();
-                //int OOS = db.Listings.Where(p => p.OOS && p.StoreID == settings.StoreID).Count();
-                int OOS = 0;
+                int OOS = db.Listings.Where(p => p.Qty == 0 && p.StoreID == settings.StoreID && p.Listed != null).Count();
                 dashboard.OOS = OOS;
 
                 int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == settings.StoreID).Count();
                 dashboard.NotListed = notListed;
+
+                int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == settings.StoreID).Count();
+                dashboard.Listed = listed;
 
                 return Ok(dashboard);
             }
