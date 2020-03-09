@@ -182,8 +182,7 @@ namespace scrapeAPI.Controllers
                 }
                 if (excludeFreight.HasValue)
                 {
-                    x = x.Where(p => p.IsFreightShipping == null || p.IsFreightShipping == false);
-                    //x = x.Where(p => p.IsFreightShipping == true);
+                    //x = x.Where(p => p.IsFreightShipping == null || p.IsFreightShipping == false);
                 }
                 var mv = new ModelViewTimesSold();
                 mv.TimesSoldRpt = x.ToList();
