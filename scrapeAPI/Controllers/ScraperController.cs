@@ -820,10 +820,11 @@ namespace scrapeAPI.Controllers
                 //eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
                 // eBayUtility.ebayAPIs.ProcessTransactions(settings, "223707436249", new DateTime(2019, 12, 1), new DateTime(2019, 12, 15));
 
-                var listings = db.GetListings(storeID, unlisted, listed);
+                var listings = db.GetListings(storeID);
+                //var listings = db.GetListings(storeID, unlisted, listed);
                 if (listings == null)
                     return NotFound();
-                return Ok(listings);
+                return Ok(listings.ToList());
             }
             catch (Exception exc)
             {
