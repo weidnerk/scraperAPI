@@ -291,7 +291,7 @@ namespace scrapeAPI.Controllers
             double eBayPct = Convert.ToDouble(db.GetAppSetting("eBay pct"));
             int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
 
-            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, eBayPct, imgLimit);
+            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, eBayPct, imgLimit, "walmart");
             if (string.IsNullOrEmpty(ret))
             {
                 return Ok();
@@ -820,7 +820,7 @@ namespace scrapeAPI.Controllers
                 //eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
                 // eBayUtility.ebayAPIs.ProcessTransactions(settings, "223707436249", new DateTime(2019, 12, 1), new DateTime(2019, 12, 15));
 
-                var listings = db.GetListings(storeID);
+                var listings = db.GetListings(storeID, unlisted, listed);
                 //var listings = db.GetListings(storeID, unlisted, listed);
                 if (listings == null)
                     return NotFound();
@@ -885,6 +885,12 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
+                /*
+                 * 
+                 * Occassionally delete scan fails if itemID still in UpdateToListing.
+                 * We do cleanup UpdateToListing so not sure why some records don't get removed.
+                 * 
+                 */
                 await db.HistoryRemove(connStr, rptNumber);
                 return Ok();
             }
