@@ -744,7 +744,10 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
-                    listing.Warning = wallib.wmUtility.GetWarnings(listing.Description);
+                    if (!string.IsNullOrEmpty(listing.Description))
+                    {
+                        listing.Warning = wallib.wmUtility.GetWarnings(listing.Description);
+                    }
                 }
                 return Ok(listing);
             }
