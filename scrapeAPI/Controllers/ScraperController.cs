@@ -466,7 +466,8 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                await db.ListingSaveAsync(dto.Listing, strCurrentUserId, dto.FieldNames.ToArray());
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
@@ -688,7 +689,7 @@ namespace scrapeAPI.Controllers
                 {
                     listing.Ended = DateTime.Now;
                     listing.EndedBy = strCurrentUserId;
-                    await db.ListingSaveAsync(listing, strCurrentUserId, "Ended", "EndedBy");
+                    await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy");
                 }
                 string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
 
