@@ -467,6 +467,22 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                dto.Listing.SupplierItem.Updated = DateTime.Now;
+                if (dto.Listing.ID == 0)
+                {
+                    var si = db.GetSellerListing(dto.Listing.SellerListing.ItemID);
+                    if (si == null)
+                    {
+                        var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.SellerListing.ItemID);
+                        sellerListing.Updated = DateTime.Now;
+                        dto.Listing.SellerListing = sellerListing;
+                    }
+                    else
+                    {
+                        dto.Listing.ItemID = dto.Listing.SellerListing.ItemID;
+                        dto.Listing.SellerListing = null;
+                    }
+                }
                 await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
                 return Ok();
             }
