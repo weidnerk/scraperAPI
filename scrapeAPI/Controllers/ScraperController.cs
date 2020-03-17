@@ -467,7 +467,10 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                dto.Listing.SupplierItem.Updated = DateTime.Now;
+
+                // this should not be stuck here like this - find where it should go
+                //dto.Listing.SupplierItem.Updated = DateTime.Now;
+
                 if (dto.Listing.ID == 0)
                 {
                     var si = db.GetSellerListing(dto.Listing.SellerListing.ItemID);
