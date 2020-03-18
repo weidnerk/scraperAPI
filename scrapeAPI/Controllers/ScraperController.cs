@@ -74,6 +74,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Cancel running scan.
+        /// </summary>
+        /// <param name="rptNumber"></param>
+        /// <returns></returns>
         [Route("cancelscan/{rptNumber}")]
         [HttpGet]
         public IHttpActionResult CancelScan(int rptNumber)
@@ -99,6 +104,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Calculate new supplier price. 
+        /// </summary>
+        /// <param name="supplierPrice"></param>
+        /// <returns></returns>
         [Route("calculatewmpx")]
         [HttpGet]
         public IHttpActionResult CalculateWMPrice(decimal supplierPrice)
@@ -236,11 +246,9 @@ namespace scrapeAPI.Controllers
                         {
                             var r = (item.EbaySellerPrice - item.ProposePrice.Value) / item.ProposePrice;
                             item.PriceDelta = r;
-                            //item.PriceDelta = Math.Round(r.Value * 100m, 2);
                         }
                     }
                 }
-                //mv.TimesSoldRpt.ToList().ForEach(c => c.IsVero = db.IsVERO(c.SupplierBrand));
                 if (!priceDelta.HasValue)
                 {
                     mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.LastSold).ToList();
@@ -250,7 +258,6 @@ namespace scrapeAPI.Controllers
                     decimal pxDelta = Convert.ToDecimal(db.GetAppSetting("priceDelta"));
                     mv.TimesSoldRpt = mv.TimesSoldRpt.Where(o => o.PriceDelta > pxDelta).OrderByDescending(p => p.LastSold).ToList();
                 }
-                //mv.TimesSoldRpt = mv.TimesSoldRpt.OrderByDescending(p => p.SellerUPC).ThenBy(p => p.SellerMPN).ToList();
                 mv.ListingsProcessed = 0;
                 mv.TotalOrders = 0;
                 mv.ItemCount = mv.TimesSoldRpt.Count;
@@ -302,6 +309,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Does the given email exist.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpGet]
         [Route("emailtaken")]
@@ -323,6 +335,12 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        /// <summary>
+        /// Is the username taken
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpGet]
         [Route("usernametaken")]
@@ -345,6 +363,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// How much of tradng API is used.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("tradingapiusage")]
         public async Task<IHttpActionResult> GetTradingAPIUsage(string userName)
@@ -371,6 +394,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Get status of token
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("tokenstatustype")]
         public async Task<IHttpActionResult> GetTokenStatus(string userName)
@@ -397,6 +425,12 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Return a seller listing.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="itemID"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getsellerlisting")]
         public async Task<IHttpActionResult> GetSellerListing(string userName, string itemID)
@@ -422,6 +456,12 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        /// <summary>
+        /// Move a staged listing to the Listing table.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="storeID"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("storetolisting")]
         public async Task<IHttpActionResult> StoreToListing(string userName, int storeID)
@@ -496,6 +536,11 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        /// <summary>
+        /// Store the user settings.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("usersettingssave")]
         public async Task<IHttpActionResult> UserSettingsSave(UserSettingsDTO dto)
@@ -515,6 +560,11 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+        /// <summary>
+        /// Store users' stage to listing selections.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("updatetolisting")]
         public async Task<IHttpActionResult> UpdateToListingSave(UpdateToListingDTO dto)
@@ -533,6 +583,12 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        /// <summary>
+        /// Store a note that user puts on a listing.
+        /// </summary>
+        /// <param name="note"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("storenote")]
         public async Task<IHttpActionResult> StoreNote(ListingNote note)
@@ -554,6 +610,13 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        /// <summary>
+        /// Get list of Listing notes.
+        /// </summary>
+        /// <param name="itemID"></param>
+        /// <param name="storeID"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("itemnotes")]
         public async Task<IHttpActionResult> GetItemNotes(string itemID, int storeID)
@@ -574,6 +637,12 @@ namespace scrapeAPI.Controllers
                 return BadRequest(msg);
             }
         }
+
+        /// <summary>
+        /// Store user note put on a seller.
+        /// </summary>
+        /// <param name="sellerProfile"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("storesellerprofile")]
         public async Task<IHttpActionResult> StoreSellerProfile(SellerProfile sellerProfile)
@@ -599,7 +668,7 @@ namespace scrapeAPI.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Create a listing on eBay
         /// </summary>
         /// <param name="itemID">ebay seller listing id</param>
         /// <returns></returns>
@@ -637,6 +706,10 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// BETA - create a variation listing.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("createvariationlisting")]
         public async Task<IHttpActionResult> CreateVariationListing()
@@ -687,6 +760,11 @@ namespace scrapeAPI.Controllers
             return false;
         }
 
+        /// <summary>
+        /// End the listing on eBay and clean up db.
+        /// </summary>
+        /// <param name="listedItemID"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("endlisting")]
         public async Task<IHttpActionResult> EndListing(string listedItemID)
@@ -736,6 +814,12 @@ namespace scrapeAPI.Controllers
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
             }
         }
+
+        /// <summary>
+        /// Get an order that was placed on walmart.
+        /// </summary>
+        /// <param name="orderURL"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getwmorder")]
         public async Task<IHttpActionResult> GetWMOrder(string orderURL)
@@ -751,6 +835,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a listing from the db.
+        /// </summary>
+        /// <param name="listingID"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getlisting")]
         public IHttpActionResult GetListing(int listingID)
@@ -779,6 +868,11 @@ namespace scrapeAPI.Controllers
             }
         }
     
+        /// <summary>
+        /// Get a supplier item detail
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getsupplieritem")]
         public IHttpActionResult GetSupplierItem(int ID)
@@ -800,6 +894,12 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a seller's profile.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="seller"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getsellerprofile")]
         public async Task<IHttpActionResult> GetSellerProfile(string userName, string seller)
@@ -820,7 +920,7 @@ namespace scrapeAPI.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Get set of listings.
         /// </summary>
         /// <param name="storeID"></param>
         /// <param name="unlisted">only filter if set to True</param>
@@ -857,6 +957,12 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Get item from walmart website and determine validity.
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("getwmitem")]
         public async Task<IHttpActionResult> GetWMItem(string userName, string url)
@@ -896,6 +1002,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete a seller scan.
+        /// </summary>
+        /// <param name="rptNumber"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("deletescan/{rptNumber}")]
         [AcceptVerbs("DELETE")]
@@ -925,6 +1036,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="listingID"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("deletelistingrecord/{listingID}")]
         [AcceptVerbs("DELETE")]
@@ -951,6 +1067,11 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+
+        /// <summary>
+        /// Return data structure of dasbhoard figures.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("dashboard")]
         public IHttpActionResult GetDashboard()
@@ -981,6 +1102,11 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+
+        /// <summary>
+        /// Determine properties of eBay store such as out of stock items that are now available.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("storeanalysis")]
         public IHttpActionResult StoreAnalysis()
@@ -1007,6 +1133,11 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Look up UPC on walmart's website.
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("walmartsearchprodid")]
         public IHttpActionResult WalmartSearchProdID(string search)
@@ -1025,6 +1156,12 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+
+        /// <summary>
+        /// Count how many errors in log.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("logerrorcount")]
         public IHttpActionResult GetLogErrorCount(string filename)
@@ -1042,6 +1179,12 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+
+        /// <summary>
+        /// Return last error.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("lasterror")]
         public IHttpActionResult GetLastError(string filename)
@@ -1059,6 +1202,11 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+
+        /// <summary>
+        /// User may have multiple stores configured.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("getuserstores")]
         public IHttpActionResult GetUserStores()
@@ -1082,6 +1230,12 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+
+        /// <summary>
+        /// BETA - store an order placed with the supplier for an eBay customer
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("salesorderupdate")]
         public async Task<IHttpActionResult> SalesOrderSave(SalesOrderDTO dto)
