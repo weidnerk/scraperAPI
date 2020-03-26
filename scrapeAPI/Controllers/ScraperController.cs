@@ -519,6 +519,8 @@ namespace scrapeAPI.Controllers
                         var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.SellerListing.ItemID);
                         sellerListing.Updated = DateTime.Now;
                         dto.Listing.SellerListing = sellerListing;
+                        dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
+                        dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
                     }
                     else
                     {
