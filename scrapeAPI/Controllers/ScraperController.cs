@@ -538,12 +538,8 @@ namespace scrapeAPI.Controllers
                         }
                     }
                 }
-                string msg = await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
-                if (!string.IsNullOrEmpty(msg))
-                {
-                    return BadRequest(msg);
-                }
-                return Ok();
+                int ID = await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
+                return Ok(ID);
             }
             catch (Exception exc)
             {
