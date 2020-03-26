@@ -70,7 +70,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetSearchHistory", exc);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -100,7 +100,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("CancelScan", exc);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -128,7 +128,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("CalculateWMPrice", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -268,7 +268,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetReport", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -332,7 +332,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetEmailTaken", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "admin");
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -359,7 +359,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = "GetUsernameTaken: " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg, username);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -390,7 +390,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = "GetTradingAPIUsage: " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -421,7 +421,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = "GetTokenStatus: " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg, userName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -453,7 +453,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = "GetSellerListing: " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
         /// <summary>
@@ -489,7 +489,7 @@ namespace scrapeAPI.Controllers
             {
                 string msg = "StoreToListing: " + exc.Message;
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -525,15 +525,31 @@ namespace scrapeAPI.Controllers
                         dto.Listing.ItemID = dto.Listing.SellerListing.ItemID;
                         dto.Listing.SellerListing = null;
                     }
+
+                    // for new listing, supplier pulled but don't know if exists in db yet....
+                    if (dto.Listing.SupplierItem.ID == 0)
+                    {
+                        // exists in db?
+                        var r = db.GetSupplierItemByURL(dto.Listing.SupplierItem.ItemURL);
+                        if (r != null)
+                        {
+                            dto.Listing.SupplierID = r.ID;
+                            dto.Listing.SupplierItem = null;
+                        }
+                    }
                 }
-                await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
+                string msg = await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
+                if (!string.IsNullOrEmpty(msg))
+                {
+                    return BadRequest(msg);
+                }
                 return Ok();
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
         /// <summary>
