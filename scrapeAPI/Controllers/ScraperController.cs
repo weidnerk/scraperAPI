@@ -869,7 +869,7 @@ namespace scrapeAPI.Controllers
                 {
                     if (!string.IsNullOrEmpty(listing.Description))
                     {
-                        listing.Warning = wallib.wmUtility.GetWarnings(listing.Description);
+                        listing.Warning = wallib.wmUtility.GetWarnings(listing.SupplierItem);
                     }
                 }
                 return Ok(listing);
@@ -988,7 +988,7 @@ namespace scrapeAPI.Controllers
                 var allowedDeliveryDays = handlingTime + maxShippingDays;
                 int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
 
-                var w = await wallib.wmUtility.GetDetail(url, imgLimit);
+                var w = await wallib.wmUtility.GetDetail(url, imgLimit, false);
                 wallib.wmUtility.CanList(w, allowedDeliveryDays);
                 return Ok(w);
             }
