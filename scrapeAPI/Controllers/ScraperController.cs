@@ -869,7 +869,7 @@ namespace scrapeAPI.Controllers
                 {
                     if (!string.IsNullOrEmpty(listing.Description))
                     {
-                        listing.Warning = wallib.wmUtility.GetWarnings(listing.SupplierItem);
+                        listing.Warning = dsutil.DSUtil.GetDescrWarnings(listing.Description);
                     }
                 }
                 return Ok(listing);
