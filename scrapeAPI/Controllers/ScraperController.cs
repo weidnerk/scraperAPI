@@ -989,6 +989,12 @@ namespace scrapeAPI.Controllers
                 int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
 
                 var w = await wallib.wmUtility.GetDetail(url, imgLimit, false);
+                if (w == null)
+                {
+                    string msg = "Could not fetch supplier item - possibly bad URL";
+                    dsutil.DSUtil.WriteFile(_logfile, msg + " " + url, userName);
+                    return BadRequest(msg);
+                }
                 wallib.wmUtility.CanList(w, allowedDeliveryDays);
                 return Ok(w);
             }
