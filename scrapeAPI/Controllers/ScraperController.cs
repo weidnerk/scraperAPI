@@ -14,7 +14,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using scrapeAPI.Models;
 using System.Web;
 using Microsoft.AspNet.Identity.Owin;
 using System.Threading.Tasks;
@@ -22,12 +21,10 @@ using System.Collections.Generic;
 using System.Web.Http.Results;
 using dsmodels;
 using Microsoft.AspNet.Identity;
-using System.Data.Entity.SqlServer;
 using eBay.Service.Core.Soap;
 using eBayUtility;
 using System.Configuration;
 using Utility;
-using System.Data.Entity;
 
 namespace scrapeAPI.Controllers
 {
@@ -39,7 +36,6 @@ namespace scrapeAPI.Controllers
 
         const string _filename = "order.csv";
         const string _logfile = "log.txt";
-        const double _pctProfit = 5;
 
         const int _qtyToList = 2;
 
@@ -114,14 +110,15 @@ namespace scrapeAPI.Controllers
         public IHttpActionResult CalculateWMPrice(decimal supplierPrice)
         {
             string strCurrentUserId = User.Identity.GetUserId();
-            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
 
             try
             {
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
                 decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
                 double eBayPct = Convert.ToDouble(db.GetAppSetting("eBay pct"));
-                var px = wallib.wmUtility.wmNewPrice(supplierPrice, _pctProfit, wmShipping, wmFreeShippingMin, eBayPct);
+                var px = wallib.wmUtility.wmNewPrice(supplierPrice, settings.PctProfit, wmShipping, wmFreeShippingMin, eBayPct);
                 return Ok(px);
             }
             catch (Exception exc)
@@ -294,7 +291,7 @@ namespace scrapeAPI.Controllers
             var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
             decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
             decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
-            double pctProfit = Convert.ToDouble(db.GetAppSetting("pctProfit"));
+            double pctProfit = settings.PctProfit;
             double eBayPct = Convert.ToDouble(db.GetAppSetting("eBay pct"));
             int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
 
