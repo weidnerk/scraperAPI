@@ -984,8 +984,12 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                byte handlingTime = Convert.ToByte(db.GetAppSetting("handlingTime"));
-                byte maxShippingDays = Convert.ToByte(db.GetAppSetting("maxShippingDays"));
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                byte handlingTime = settings.HandlingTime;
+                byte maxShippingDays = settings.MaxShippingDays;
                 var allowedDeliveryDays = handlingTime + maxShippingDays;
                 int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
 
