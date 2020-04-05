@@ -857,7 +857,11 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var listing = db.ListingGet(listingID);
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                var listing = db.ListingGet(listingID, settings.StoreID);
                 if (listing == null)
                 {
                     return NotFound();
