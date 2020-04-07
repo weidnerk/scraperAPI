@@ -510,6 +510,18 @@ namespace scrapeAPI.Controllers
 
                 if (dto.Listing.ID == 0)
                 {
+                    if (dto.Listing.SupplierItem == null)
+                    {
+                        string msg = "Could not read supplier item.";
+                        return BadRequest(msg);
+                    }
+                    var ret = wallib.wmUtility.isValidProductURL(dto.Listing.SupplierItem.ItemURL);
+                    if (!ret)
+                    {
+                        string msg = "Supplier URL is not of walmart pattern.";
+                        return BadRequest(msg);
+                    }
+
                     var si = db.GetSellerListing(dto.Listing.SellerListing.ItemID);
                     if (si == null)
                     {
@@ -976,14 +988,20 @@ namespace scrapeAPI.Controllers
         /// Get item from walmart website and determine validity.
         /// </summary>
         /// <param name="userName"></param>
-        /// <param name="url"></param>
+        /// <param name="URL"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("getwmitem")]
-        public async Task<IHttpActionResult> GetWMItem(string userName, string url)
+        public async Task<IHttpActionResult> GetWMItem(string userName, string URL)
         {
             try
             {
+                var ret = wallib.wmUtility.isValidProductURL(URL);
+                if (!ret)
+                {
+                    return BadRequest("Invalid Walmart URL.");  // throws error on client
+                }
+
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
@@ -993,11 +1011,11 @@ namespace scrapeAPI.Controllers
                 var allowedDeliveryDays = handlingTime + maxShippingDays;
                 int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
 
-                var w = await wallib.wmUtility.GetDetail(url, imgLimit, false);
+                var w = await wallib.wmUtility.GetDetail(URL, imgLimit, false);
                 if (w == null)
                 {
                     string msg = "Could not fetch supplier item - possibly bad URL";
-                    dsutil.DSUtil.WriteFile(_logfile, msg + " " + url, userName);
+                    dsutil.DSUtil.WriteFile(_logfile, msg + " " + URL, userName);
                     return BadRequest(msg);
                 }
                 wallib.wmUtility.CanList(w, allowedDeliveryDays);
@@ -1330,6 +1348,28 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-      
+
+        [HttpGet]
+        [Route("isvalidwalmarturl")]
+        public IHttpActionResult IsValidWalmartURL(string URL)
+        {
+            try
+            {
+                var ret = wallib.wmUtility.isValidProductURL(URL);
+                return Ok(ret);
+            }
+            catch (Exception exc)
+            {
+                var settings = new UserSettingsView();
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                string msg = dsutil.DSUtil.ErrMsg("IsValidWalmartURL", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+
     }
 }
