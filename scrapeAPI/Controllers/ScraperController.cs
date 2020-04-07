@@ -534,6 +534,8 @@ namespace scrapeAPI.Controllers
                     else
                     {
                         dto.Listing.ItemID = dto.Listing.SellerListing.ItemID;
+                        dto.Listing.PrimaryCategoryID = si.PrimaryCategoryID;
+                        dto.Listing.PrimaryCategoryName = si.PrimaryCategoryName;
                         dto.Listing.SellerListing = null;
                     }
 
