@@ -526,10 +526,18 @@ namespace scrapeAPI.Controllers
                     if (si == null)
                     {
                         var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.SellerListing.ItemID);
-                        sellerListing.Updated = DateTime.Now;
-                        dto.Listing.SellerListing = sellerListing;
-                        dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
-                        dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
+                        if (sellerListing != null)
+                        {
+                            sellerListing.Updated = DateTime.Now;
+                            dto.Listing.SellerListing = sellerListing;
+                            dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
+                            dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
+                        }
+                        else
+                        {
+                            string msg = "ERROR: eBay seller item ID could not be found.";
+                            return BadRequest(msg);
+                        }
                     }
                     else
                     {
