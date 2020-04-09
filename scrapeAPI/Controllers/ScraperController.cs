@@ -25,6 +25,7 @@ using eBay.Service.Core.Soap;
 using eBayUtility;
 using System.Configuration;
 using Utility;
+using System.Data.Entity;
 
 namespace scrapeAPI.Controllers
 {
@@ -505,9 +506,6 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                // this should not be stuck here like this - find where it should go
-                //dto.Listing.SupplierItem.Updated = DateTime.Now;
-
                 if (dto.Listing.ID == 0)
                 {
                     if (dto.Listing.SupplierItem == null)
@@ -522,16 +520,18 @@ namespace scrapeAPI.Controllers
                         return BadRequest(msg);
                     }
 
-                    var si = db.GetSellerListing(dto.Listing.SellerListing.ItemID);
+                    var si = db.GetSellerListing(dto.Listing.ItemID);
                     if (si == null)
                     {
-                        var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.SellerListing.ItemID);
+                        var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID);
                         if (sellerListing != null)
                         {
                             sellerListing.Updated = DateTime.Now;
-                            dto.Listing.SellerListing = sellerListing;
                             dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
                             dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
+
+                            // copy seller listing item specifics
+                            dto.Listing.ItemSpecifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
                         }
                         else
                         {
@@ -541,10 +541,10 @@ namespace scrapeAPI.Controllers
                     }
                     else
                     {
-                        dto.Listing.ItemID = dto.Listing.SellerListing.ItemID;
+                        dto.Listing.ItemID = dto.Listing.ItemID;
                         dto.Listing.PrimaryCategoryID = si.PrimaryCategoryID;
                         dto.Listing.PrimaryCategoryName = si.PrimaryCategoryName;
-                        dto.Listing.SellerListing = null;
+                        //dto.Listing.SellerListing = null;
                     }
 
                     // for new listing, supplier pulled but don't know if exists in db yet....
@@ -559,8 +559,31 @@ namespace scrapeAPI.Controllers
                         }
                     }
                 }
-                int ID = await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
-                return Ok(ID);
+                else
+                {
+                    // See if ebay item id changed on existing record.
+                    var listing = db.ListingGet(dto.Listing.ID, settings.StoreID);
+                    if (listing != null)
+                    {
+                        if (!string.IsNullOrEmpty(listing.ItemID))
+                        {
+                            if (listing.ItemID != dto.Listing.ItemID)
+                            {
+                                var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID);
+                                if (sellerListing != null)
+                                {
+                                    sellerListing.Updated = DateTime.Now;
+                                    dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
+                                    dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
+
+                                    dto.Listing.ItemSpecifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
+                                }
+                            }
+                        }
+                    }
+                }
+                var updatedListing = await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
+                return Ok(updatedListing);
             }
             catch (Exception exc)
             {
