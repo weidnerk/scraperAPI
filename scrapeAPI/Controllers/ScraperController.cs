@@ -492,7 +492,7 @@ namespace scrapeAPI.Controllers
         }
 
         /// <summary>
-        /// Note we are hard-coding how many available items through '_qtyToList'
+        /// 
         /// </summary>
         /// <param name="listing"></param>
         /// <returns></returns>
