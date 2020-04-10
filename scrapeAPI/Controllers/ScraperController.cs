@@ -578,6 +578,11 @@ namespace scrapeAPI.Controllers
 
                                     dto.Listing.ItemSpecifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
                                 }
+                                else
+                                {
+                                    string msg = "ERROR: eBay seller item ID could not be found.";
+                                    return BadRequest(msg);
+                                }
                             }
                         }
                     }
