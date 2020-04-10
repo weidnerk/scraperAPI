@@ -497,8 +497,8 @@ namespace scrapeAPI.Controllers
         /// <param name="listing"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("storelisting")]
-        public async Task<IHttpActionResult> StoreListing(ListingDTO dto)
+        [Route("listingsave")]
+        public async Task<IHttpActionResult> ListingSave(ListingDTO dto)
         {
             try
             {
@@ -506,6 +506,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
+                // New listing
                 if (dto.Listing.ID == 0)
                 {
                     if (dto.Listing.SupplierItem == null)
@@ -519,7 +520,6 @@ namespace scrapeAPI.Controllers
                         string msg = "Supplier URL is not of walmart pattern.";
                         return BadRequest(msg);
                     }
-
                     var si = db.GetSellerListing(dto.Listing.ItemID);
                     if (si == null)
                     {
@@ -529,6 +529,7 @@ namespace scrapeAPI.Controllers
                             sellerListing.Updated = DateTime.Now;
                             dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
                             dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
+                            dto.Listing.eBaySellerURL = sellerListing.EbayURL;
 
                             // copy seller listing item specifics
                             dto.Listing.ItemSpecifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
@@ -544,7 +545,6 @@ namespace scrapeAPI.Controllers
                         dto.Listing.ItemID = dto.Listing.ItemID;
                         dto.Listing.PrimaryCategoryID = si.PrimaryCategoryID;
                         dto.Listing.PrimaryCategoryName = si.PrimaryCategoryName;
-                        //dto.Listing.SellerListing = null;
                     }
 
                     // for new listing, supplier pulled but don't know if exists in db yet....
@@ -561,7 +561,7 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
-                    // See if ebay item id changed on existing record.
+                    // Pull exiting record and see if ebay item id changed.
                     var listing = db.ListingGet(dto.Listing.ID, settings.StoreID);
                     if (listing != null)
                     {
@@ -1173,6 +1173,9 @@ namespace scrapeAPI.Controllers
 
                 int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == settings.StoreID).Count();
                 dashboard.Listed = listed;
+
+                var storeItems = new ItemTypeCollection();
+                var dbMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
 
                 return Ok(dashboard);
             }
