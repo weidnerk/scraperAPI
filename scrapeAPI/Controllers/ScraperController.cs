@@ -1174,8 +1174,12 @@ namespace scrapeAPI.Controllers
                 int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == settings.StoreID).Count();
                 dashboard.Listed = listed;
 
+                /*
+                 * 04.10.2020 don't run this yet
+                 * 
                 var storeItems = new ItemTypeCollection();
                 var dbMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
+                */
 
                 return Ok(dashboard);
             }
