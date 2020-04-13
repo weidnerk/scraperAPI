@@ -526,6 +526,12 @@ namespace scrapeAPI.Controllers
                         var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID);
                         if (sellerListing != null)
                         {
+                            dto.Listing.SellerListing = sellerListing;
+                            // if new listing and no title provided, then copy title from seller
+                            if (string.IsNullOrEmpty(dto.Listing.ListingTitle))
+                            {
+                                dto.Listing.ListingTitle = sellerListing.Title;
+                            }
                             sellerListing.Updated = DateTime.Now;
                             dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
                             dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
@@ -572,6 +578,7 @@ namespace scrapeAPI.Controllers
                                 var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID);
                                 if (sellerListing != null)
                                 {
+                                    dto.Listing.SellerListing = sellerListing;
                                     sellerListing.Updated = DateTime.Now;
                                     dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
                                     dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
