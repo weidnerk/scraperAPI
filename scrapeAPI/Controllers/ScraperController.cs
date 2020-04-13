@@ -848,7 +848,7 @@ namespace scrapeAPI.Controllers
                 if (!salesExist)
                 {
                     // can delete from db - what's the point of keeping track of what did not sell?
-                    await db.DeleteListingRecordAsync(listing.ID, true);
+                    await db.DeleteListingRecordAsync(settings, listing.ID, true);
                 }
                 else
                 {
@@ -1141,7 +1141,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                string ret = await db.DeleteListingRecordAsync(listingID, false);
+                string ret = await db.DeleteListingRecordAsync(settings, listingID, false);
                 if (!string.IsNullOrEmpty(ret))
                 {
                     return BadRequest(ret);
