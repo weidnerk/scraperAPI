@@ -481,24 +481,25 @@ namespace scrapeAPI.Controllers
         [Route("Register")]
         public async Task<IHttpActionResult> Register(RegisterBindingModel model)
         {
+            //await DeleteUsrAsync("star@gmail.com");
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            /*
             var user = new ApplicationUser() { UserName = model.Username, Email = model.Email };
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
             }
-            var p = new UserProfileVM();
-            p.Id = user.Id;
+            var p = new UserProfile();
+            p.UserID = user.Id;
             p.Firstname = model.Firstname;
             p.Lastname = model.Lastname;
-            p.userName = model.Username;
-            await db.UserProfileSaveAsync(p);
-            */
+            p.Created = DateTime.Now;
+            await models.UserProfileSaveAsync(p);
+
             return Ok();
         }
 
@@ -555,14 +556,82 @@ namespace scrapeAPI.Controllers
             }
             return Ok();
         }
-
-        public static void DeleteUsr(string email)
+        [HttpPost, ActionName("Delete")]
+        public async Task<IHttpActionResult> DeleteUser(string id)
         {
-            ApplicationUserManager manager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            ApplicationUser user = manager.FindByEmail(email);
-            manager.Delete(user);
+            try
+            {
+                await DeleteUsrAsync(id);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("DeleteUser", exc);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+        public async Task DeleteUsrAsync(string id)
+        {
+            var profile = models.UserProfiles.SingleOrDefault(p => p.UserID == id);
+            if (profile != null)
+            {
+                string ret = await models.UserProfileDeleteAsync(profile);
+                var user = await _userManager.FindByIdAsync(id);
+
+                ApplicationUserManager manager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                //ApplicationUser appuser = await manager.FindByEmailAsync(user.Email);
+                await manager.DeleteAsync(user);
+            }           
         }
 
+        /// <summary>
+        /// Decided to keep this as found at stackoverflow link.
+        /// https://stackoverflow.com/questions/23977036/asp-net-mvc-5-how-to-delete-a-user-and-its-related-data-in-identity-2-0 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        // 
+        // POST: /Users/Delete/5
+        [HttpPost, ActionName("Delete")]
+        public async Task<IHttpActionResult> DeleteConfirmed(string id)
+        {
+            if (ModelState.IsValid)
+            {
+                if (id == null)
+                {
+                    return BadRequest("invalid id");
+                }
+                var user = await _userManager.FindByIdAsync(id);
+                var logins = user.Logins;
+                var rolesForUser = await _userManager.GetRolesAsync(id);
+
+                using (var transaction = models.Database.BeginTransaction())
+                {
+                    foreach (var login in logins.ToList())
+                    {
+                        await _userManager.RemoveLoginAsync(login.UserId, new UserLoginInfo(login.LoginProvider, login.ProviderKey));
+                    }
+
+                    if (rolesForUser.Count() > 0)
+                    {
+                        foreach (var item in rolesForUser.ToList())
+                        {
+                            // item should be the name of the role
+                            var result = await _userManager.RemoveFromRoleAsync(user.Id, item);
+                        }
+                    }
+
+                    await _userManager.DeleteAsync(user);
+                    transaction.Commit();
+                }
+
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("modelstate is invalid");
+            }
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing && _userManager != null)
