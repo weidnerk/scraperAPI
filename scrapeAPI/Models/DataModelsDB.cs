@@ -38,19 +38,10 @@ namespace scrapeAPI.Models
             }
         }
 
-
-        public UserProfile UserProfileGet(ApplicationUser usr, string appID)
+        public UserProfile UserProfileGet(ApplicationUser usr)
         {
-            if (!string.IsNullOrEmpty(appID))
-            {
-                var profile = db.GetUserProfile(usr.Id);
-                return profile;
-            }
-            else
-            {
-                var profile = db.GetUserProfile(usr.Id);
-                return profile;
-            }
+            var profile = db.GetUserProfile(usr.Id);
+            return profile;
         }
  
         public async Task<bool> GetEmailTaken(string email)

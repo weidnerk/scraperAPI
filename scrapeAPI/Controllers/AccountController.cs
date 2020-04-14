@@ -142,10 +142,10 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("userprofileget")]
-        public async Task<IHttpActionResult> UserProfileGet(string userName, string appID)
+        public async Task<IHttpActionResult> UserProfileGet(string userName)
         {
             var user = await UserManager.FindByNameAsync(userName);
-            var p = db.UserProfileGet(user, appID);
+            var p = db.UserProfileGet(user);
             if (p == null)
                 return NotFound();
             else
@@ -768,5 +768,26 @@ namespace scrapeAPI.Controllers
         }
 
         #endregion
+
+        [HttpPost]
+        [Route("userprofilesave")]
+        public async Task<IHttpActionResult> UserProfileSave(UserProfile profile)
+        {
+            UserSettingsView settings = null;
+            try
+            {
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = models.GetUserSettingsView(connStr, profile.UserID);
+
+                await models.UserProfileSaveAsync(profile, "SelectedStore");
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("UserProfileSave", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return BadRequest(msg);
+            }
+        }
     }
 }
