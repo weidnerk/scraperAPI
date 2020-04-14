@@ -912,11 +912,13 @@ namespace scrapeAPI.Controllers
         [Route("getlisting")]
         public IHttpActionResult GetListing(int listingID)
         {
+            string username = null;
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                username = settings.UserName;
 
                 var listing = db.ListingGet(listingID, settings.StoreID);
                 if (listing == null)
@@ -935,7 +937,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "noname");
+                dsutil.DSUtil.WriteFile(_logfile, msg, username);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
@@ -949,8 +951,14 @@ namespace scrapeAPI.Controllers
         [Route("getsupplieritem")]
         public IHttpActionResult GetSupplierItem(int ID)
         {
+            string username = null;
             try
             {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                username = settings.UserName;
+
                 var listing = db.SupplierItemGet(ID);
                 if (listing == null)
                 {
@@ -961,7 +969,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetSupplierItem", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "noname");
+                dsutil.DSUtil.WriteFile(_logfile, msg, username);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
