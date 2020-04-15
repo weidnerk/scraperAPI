@@ -481,28 +481,37 @@ namespace scrapeAPI.Controllers
         [Route("Register")]
         public async Task<IHttpActionResult> Register(RegisterBindingModel model)
         {
-            //await DeleteUsrAsync("star@gmail.com");
-
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                //await DeleteUsrAsync("cf04dc88-09d2-43df-aced-800d75ac11c6");
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var user = new ApplicationUser() { UserName = model.Username, Email = model.Email };
+                IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    return GetErrorResult(result);
+                }
+                var p = new UserProfile();
+                p.UserID = user.Id;
+                p.Firstname = model.Firstname;
+                p.Lastname = model.Lastname;
+                p.Created = DateTime.Now;
+
+                var settings = new UserSettingsView { UserName = model.Username };
+                await models.UserProfileSaveAsync(settings, p);
+
+                return Ok();
             }
-            var user = new ApplicationUser() { UserName = model.Username, Email = model.Email };
-            IdentityResult result = await UserManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+            catch (Exception exc)
             {
-                return GetErrorResult(result);
+                string msg = dsutil.DSUtil.ErrMsg("Register", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "admin");
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
-            var p = new UserProfile();
-            p.UserID = user.Id;
-            p.Firstname = model.Firstname;
-            p.Lastname = model.Lastname;
-            p.Created = DateTime.Now;
-
-            var settings = new UserSettingsView { UserName = model.Username};
-            await models.UserProfileSaveAsync(settings, p);
-
-            return Ok();
         }
 
         private IHttpActionResult GetErrorResultDetail(IdentityResult result)
@@ -572,17 +581,17 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-        public async Task DeleteUsrAsync(string id)
+        protected async Task DeleteUsrAsync(string id)
         {
             var profile = models.UserProfiles.SingleOrDefault(p => p.UserID == id);
             if (profile != null)
             {
                 string ret = await models.UserProfileDeleteAsync(profile);
-                var user = await _userManager.FindByIdAsync(id);
+                var user = await UserManager.FindByIdAsync(id);
 
-                ApplicationUserManager manager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                //ApplicationUserManager manager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
                 //ApplicationUser appuser = await manager.FindByEmailAsync(user.Email);
-                await manager.DeleteAsync(user);
+                await UserManager.DeleteAsync(user);
             }           
         }
 

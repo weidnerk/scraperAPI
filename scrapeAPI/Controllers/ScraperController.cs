@@ -116,9 +116,9 @@ namespace scrapeAPI.Controllers
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
-                decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
-                double eBayPct = Convert.ToDouble(db.GetAppSetting("eBay pct"));
+                decimal wmShipping = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart shipping"));
+                decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart free shipping min"));
+                double eBayPct = Convert.ToDouble(db.GetAppSetting(settings, "eBay pct"));
                 var px = wallib.wmUtility.wmNewPrice(supplierPrice, settings.PctProfit, wmShipping, wmFreeShippingMin, eBayPct);
                 return Ok(px);
             }
@@ -150,6 +150,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
@@ -253,7 +254,7 @@ namespace scrapeAPI.Controllers
                 }
                 if (priceDelta.HasValue)
                 {
-                    decimal pxDelta = Convert.ToDecimal(db.GetAppSetting("priceDelta"));
+                    decimal pxDelta = Convert.ToDecimal(db.GetAppSetting(settings, "priceDelta"));
                     mv.TimesSoldRpt = mv.TimesSoldRpt.Where(o => o.PriceDelta > pxDelta).OrderByDescending(p => p.LastSold).ToList();
                 }
                 mv.ListingsProcessed = 0;
@@ -287,23 +288,33 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int storeID)
         {
-            string strCurrentUserId = User.Identity.GetUserId();
-            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-            decimal wmShipping = Convert.ToDecimal(db.GetAppSetting("Walmart shipping"));
-            decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting("Walmart free shipping min"));
-            double pctProfit = settings.PctProfit;
-            double eBayPct = Convert.ToDouble(db.GetAppSetting("eBay pct"));
-            int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
+            UserSettingsView settings = null;
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                decimal wmShipping = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart shipping"));
+                decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart free shipping min"));
+                double pctProfit = settings.PctProfit;
+                double eBayPct = Convert.ToDouble(db.GetAppSetting(settings, "eBay pct"));
+                int imgLimit = Convert.ToInt32(db.GetAppSetting(settings, "Listing Image Limit"));
 
-            string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, eBayPct, imgLimit, "walmart");
-            if (string.IsNullOrEmpty(ret))
-            {
-                return Ok();
+                string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, eBayPct, imgLimit, "walmart");
+                if (string.IsNullOrEmpty(ret))
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(ret);
+                }
             }
-            else
+            catch (Exception exc)
             {
-                return BadRequest(ret);
+                string msg = dsutil.DSUtil.ErrMsg("FillMatch", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
 
@@ -750,9 +761,9 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                var shippingProfile = db.GetAppSetting("shippingProfile");
-                var returnProfile = db.GetAppSetting("returnProfile");
-                var paymentProfile = db.GetAppSetting("paymentProfile");
+                var shippingProfile = db.GetAppSetting(settings, "shippingProfile");
+                var returnProfile = db.GetAppSetting(settings, "returnProfile");
+                var paymentProfile = db.GetAppSetting(settings, "paymentProfile");
 
                 var output = await eBayItem.ListingCreateAsync(settings, listingID, shippingProfile, returnProfile, paymentProfile);
                 if (ListingNotCreated(output))
@@ -1054,7 +1065,6 @@ namespace scrapeAPI.Controllers
                 {
                     return BadRequest("Invalid Walmart URL.");  // throws error on client
                 }
-
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
@@ -1062,7 +1072,7 @@ namespace scrapeAPI.Controllers
                 byte handlingTime = settings.HandlingTime;
                 byte maxShippingDays = settings.MaxShippingDays;
                 var allowedDeliveryDays = handlingTime + maxShippingDays;
-                int imgLimit = Convert.ToInt32(db.GetAppSetting("Listing Image Limit"));
+                int imgLimit = Convert.ToInt32(db.GetAppSetting(settings, "Listing Image Limit"));
 
                 var w = await wallib.wmUtility.GetDetail(URL, imgLimit, false);
                 if (w == null)
@@ -1343,11 +1353,12 @@ namespace scrapeAPI.Controllers
         [Route("salesorderupdate")]
         public async Task<IHttpActionResult> SalesOrderSave(SalesOrderDTO dto)
         {
+            UserSettingsView settings = null;
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 var exists = db.SalesOrderExists(dto.SalesOrder.SupplierOrderNumber);
                 if (!exists)
                 {
@@ -1371,13 +1382,13 @@ namespace scrapeAPI.Controllers
                     dto.FieldNames.Add("BuyerPaid");
                     dto.FieldNames.Add("BuyerState");
                 }
-                await db.SalesOrderSaveAsync(dto.SalesOrder, dto.FieldNames.ToArray());
+                await db.SalesOrderSaveAsync(settings, dto.SalesOrder, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("SalesOrderSave", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
         }
