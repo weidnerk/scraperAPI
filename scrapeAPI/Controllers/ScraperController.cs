@@ -624,9 +624,12 @@ namespace scrapeAPI.Controllers
         [Route("usersettingssave")]
         public async Task<IHttpActionResult> UserSettingsSave(UserSettingsDTO dto)
         {
+            UserSettingsView settings = null;
             try
             {
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 string strCurrentUserId = User.Identity.GetUserId();
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 dto.UserSettings.UserID = strCurrentUserId;
                 dto.UserSettings.ApplicationID = 1;
                 await db.UserSettingsSave(dto.UserSettings, dto.FieldNames.ToArray());
@@ -635,7 +638,7 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("UserSettingsSave", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return BadRequest(msg);
             }
         }
