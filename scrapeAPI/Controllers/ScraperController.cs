@@ -1197,24 +1197,31 @@ namespace scrapeAPI.Controllers
                 //await eBayUtility.ebayAPIs.GetShippingPolicy(settings);
                 //eBayItem.GetSellerBusinessPolicy(settings);
 
-                var dashboard = new Dashboard();
-                int OOS = db.Listings.Where(p => p.Qty == 0 && p.StoreID == settings.StoreID && p.Listed != null).Count();
-                dashboard.OOS = OOS;
+                if (settings != null)
+                {
+                    var dashboard = new Dashboard();
+                    int OOS = db.Listings.Where(p => p.Qty == 0 && p.StoreID == settings.StoreID && p.Listed != null).Count();
+                    dashboard.OOS = OOS;
 
-                int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == settings.StoreID).Count();
-                dashboard.NotListed = notListed;
+                    int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == settings.StoreID).Count();
+                    dashboard.NotListed = notListed;
 
-                int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == settings.StoreID).Count();
-                dashboard.Listed = listed;
+                    int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == settings.StoreID).Count();
+                    dashboard.Listed = listed;
 
-                /*
-                 * 04.10.2020 don't run this yet
-                 * 
-                var storeItems = new ItemTypeCollection();
-                var dbMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
-                */
+                    /*
+                     * 04.10.2020 don't run this yet
+                     * 
+                    var storeItems = new ItemTypeCollection();
+                    var dbMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
+                    */
 
-                return Ok(dashboard);
+                    return Ok(dashboard);
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             catch (Exception exc)
             {
