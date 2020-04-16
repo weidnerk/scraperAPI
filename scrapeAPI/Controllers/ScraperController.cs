@@ -1192,6 +1192,11 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
+                // TESTING
+                //eBayUtility.ebayAPIs.GetebayDetails(settings);
+                //await eBayUtility.ebayAPIs.GetShippingPolicy(settings);
+                //eBayItem.GetSellerBusinessPolicy(settings);
+
                 var dashboard = new Dashboard();
                 int OOS = db.Listings.Where(p => p.Qty == 0 && p.StoreID == settings.StoreID && p.Listed != null).Count();
                 dashboard.OOS = OOS;
