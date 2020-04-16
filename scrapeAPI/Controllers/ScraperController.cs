@@ -1345,11 +1345,19 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-
-                var userStores = db.GetUserStores(settings);
-                if (userStores == null)
+                if (settings == null)
+                {
                     return NotFound();
-                return Ok(userStores);
+                }
+                else
+                {
+                    var userStores = db.GetUserStores(settings);
+                    if (userStores == null)
+                    {
+                        return NotFound();
+                    }
+                    return Ok(userStores);
+                }
             }
             catch (Exception exc)
             {
