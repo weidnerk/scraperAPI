@@ -855,6 +855,8 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 var listing = db.ListingGet(listingID, settings.StoreID);
+
+                /*
                 bool salesExist = db.SalesExists(listing.ListedItemID);
                 if (!salesExist)
                 {
@@ -863,10 +865,19 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
+                    listing.Listed = null;
                     listing.Ended = DateTime.Now;
                     listing.EndedBy = strCurrentUserId;
-                    await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy");
+                    await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy", "Listed");
                 }
+                string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
+                */
+
+                // delist and leave in database
+                listing.Listed = null;
+                listing.Ended = DateTime.Now;
+                listing.EndedBy = strCurrentUserId;
+                await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy", "Listed");
                 string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
 
                 return Ok(ret);
@@ -1457,6 +1468,27 @@ namespace scrapeAPI.Controllers
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 string msg = dsutil.DSUtil.ErrMsg("IsValidWalmartURL", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+
+        [HttpGet]
+        [Route("getbusinesspolicies")]
+        public IHttpActionResult GetBusinessPolicies()
+        {
+            var settings = new UserSettingsView();
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                var policies = eBayItem.GetSellerBusinessPolicy(settings);
+                return Ok(policies);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetBusinessPolicies", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
