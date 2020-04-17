@@ -1191,7 +1191,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("dashboard")]
-        public IHttpActionResult GetDashboard()
+        public IHttpActionResult GetDashboard(int storeID)
         {
             var settings = new UserSettingsView();
             try
@@ -1199,6 +1199,7 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                //var profile = db.GetUserProfile(strCurrentUserId);
 
                 // TESTING
                 //eBayUtility.ebayAPIs.GetebayDetails(settings);
@@ -1208,13 +1209,13 @@ namespace scrapeAPI.Controllers
                 if (settings != null)
                 {
                     var dashboard = new Dashboard();
-                    int OOS = db.Listings.Where(p => p.Qty == 0 && p.StoreID == settings.StoreID && p.Listed != null).Count();
+                    int OOS = db.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).Count();
                     dashboard.OOS = OOS;
 
-                    int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == settings.StoreID).Count();
+                    int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == storeID).Count();
                     dashboard.NotListed = notListed;
 
-                    int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == settings.StoreID).Count();
+                    int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == storeID).Count();
                     dashboard.Listed = listed;
 
                     /*
