@@ -842,11 +842,11 @@ namespace scrapeAPI.Controllers
         /// <summary>
         /// End the listing on eBay and clean up db.
         /// </summary>
-        /// <param name="listedItemID"></param>
+        /// <param name="listedID"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("endlisting")]
-        public async Task<IHttpActionResult> EndListing(string listedItemID)
+        public async Task<IHttpActionResult> EndListing(int listingID)
         {
             var settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
@@ -854,8 +854,8 @@ namespace scrapeAPI.Controllers
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                var listing = db.ListingGet(listedItemID);
-                bool salesExist = db.SalesExists(listedItemID);
+                var listing = db.ListingGet(listingID, settings.StoreID);
+                bool salesExist = db.SalesExists(listing.ListedItemID);
                 if (!salesExist)
                 {
                     // can delete from db - what's the point of keeping track of what did not sell?

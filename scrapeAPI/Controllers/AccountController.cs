@@ -165,6 +165,19 @@ namespace scrapeAPI.Controllers
             else
                 return Ok(settings);
         }
+        [HttpGet]
+        [Route("usersettingsviewgetbystore")]
+        public async Task<IHttpActionResult> UserSettingsViewGet(string userName, int storeID)
+        {
+            var user = await UserManager.FindByNameAsync(userName);
+            string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+            var settings = models.GetUserSettingsView(connStr, user.Id, storeID);
+            // dsutil.DSUtil.WriteFile(_logfile, "UserSettingsGet ", user.UserName);
+            if (settings == null)
+                return NotFound();
+            else
+                return Ok(settings);
+        }
 
         // POST api/Account/ChangePassword
         [HttpPost]
