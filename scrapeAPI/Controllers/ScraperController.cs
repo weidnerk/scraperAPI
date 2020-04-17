@@ -1475,14 +1475,16 @@ namespace scrapeAPI.Controllers
 
         [HttpGet]
         [Route("getbusinesspolicies")]
-        public IHttpActionResult GetBusinessPolicies()
+        public IHttpActionResult GetBusinessPolicies(int storeID)
         {
             var settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                // need store Token
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId, storeID);
                 var policies = eBayItem.GetSellerBusinessPolicy(settings);
                 return Ok(policies);
             }
