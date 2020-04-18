@@ -874,11 +874,11 @@ namespace scrapeAPI.Controllers
                 */
 
                 // delist and leave in database
+                string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
                 listing.Listed = null;
                 listing.Ended = DateTime.Now;
                 listing.EndedBy = strCurrentUserId;
                 await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy", "Listed");
-                string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
 
                 return Ok(ret);
             }
