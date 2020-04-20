@@ -1496,6 +1496,26 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-
+        [HttpGet]
+        [Route("getlistinglog")]
+        public IHttpActionResult GetListingLog(int listingID)
+        {
+            var settings = new UserSettingsView();
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                
+                var log = db.ListingLogGet(listingID);
+                return Ok(log);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetListingLog", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
