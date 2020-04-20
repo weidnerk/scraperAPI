@@ -1246,14 +1246,14 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("storeanalysis")]
-        public IHttpActionResult StoreAnalysis()
+        public IHttpActionResult StoreAnalysis(int storeID)
         {
             var settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId, storeID);
 
                 var analysis = new StoreAnalysis();
 
