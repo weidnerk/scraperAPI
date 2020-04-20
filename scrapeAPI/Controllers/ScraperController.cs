@@ -884,7 +884,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("RemoveListing", exc);
+                string msg = dsutil.DSUtil.ErrMsg("EndListing", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
             }
