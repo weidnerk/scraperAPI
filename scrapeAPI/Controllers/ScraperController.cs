@@ -1519,5 +1519,27 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpPost]
+        [Route("listinglogadd")]
+        public async Task<IHttpActionResult> ListingLogAdd(ListingLog log)
+        {
+
+            UserSettingsView settings = null;
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+              
+                await db.ListingLogAdd(log);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("ListingLogAdd", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return BadRequest(msg);
+            }
+        }
     }
 }
