@@ -880,6 +880,12 @@ namespace scrapeAPI.Controllers
                 listing.EndedBy = strCurrentUserId;
                 await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy", "Listed");
 
+                var log = new ListingLog();
+                log.MsgID = 900;
+                log.Note = "listing ended by " + settings.UserName;
+                log.ListingID = listing.ID;
+                await db.ListingLogAdd(log);
+
                 return Ok(ret);
             }
             catch (Exception exc)
