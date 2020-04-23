@@ -14,7 +14,6 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
