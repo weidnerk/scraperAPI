@@ -884,6 +884,7 @@ namespace scrapeAPI.Controllers
                 log.MsgID = 900;
                 log.Note = "listing ended by " + settings.UserName;
                 log.ListingID = listing.ID;
+                log.UserID = settings.UserID;
                 await db.ListingLogAdd(log);
 
                 return Ok(ret);
