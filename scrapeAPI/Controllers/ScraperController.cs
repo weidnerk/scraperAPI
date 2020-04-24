@@ -549,7 +549,9 @@ namespace scrapeAPI.Controllers
                             dto.Listing.eBaySellerURL = sellerListing.EbayURL;
 
                             // copy seller listing item specifics
-                            dto.Listing.ItemSpecifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
+                            var specifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
+                            var revisedItemSpecs = eBayItem.ModifyItemSpecific(specifics);
+                            dto.Listing.ItemSpecifics = revisedItemSpecs;
                         }
                         else
                         {
