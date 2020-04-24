@@ -1261,10 +1261,10 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId, storeID);
 
-                var analysis = new StoreAnalysis();
 
                 var storeItems = new ItemTypeCollection();
-                analysis.DBIsMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
+                var analysis = StoreCheck.Analysis(settings, ref storeItems);
+                //analysis.DBIsMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
 
                 return Ok(analysis);
             }
