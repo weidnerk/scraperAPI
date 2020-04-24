@@ -1493,9 +1493,7 @@ namespace scrapeAPI.Controllers
                 // need store Token
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId, storeID);
                 var policies = eBayItem.GetSellerBusinessPolicy(settings);
-                var businessPolicies = new eBayBusinessPolicies();
-                businessPolicies.ShippingPolicies = policies;
-                return Ok(businessPolicies);
+                return Ok(policies);
             }
             catch (Exception exc)
             {
