@@ -972,7 +972,7 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-    
+
         /// <summary>
         /// Get a supplier item detail
         /// </summary>
@@ -1041,7 +1041,7 @@ namespace scrapeAPI.Controllers
         [Route("getlistings/{storeID}/{unlisted}/{listed}")]
         public IHttpActionResult GetListings(int storeID, bool unlisted, bool listed)
         {
-            
+
             // eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
             var settings = new UserSettingsView();
             try
@@ -1515,7 +1515,7 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                
+
                 var log = db.ListingLogGet(listingID);
                 return Ok(log);
             }
@@ -1537,7 +1537,7 @@ namespace scrapeAPI.Controllers
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-              
+
                 await db.ListingLogAdd(log);
                 return Ok();
             }
@@ -1545,7 +1545,28 @@ namespace scrapeAPI.Controllers
             {
                 string msg = dsutil.DSUtil.ErrMsg("ListingLogAdd", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
-                return BadRequest(msg);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+        [HttpPost]
+        [Route("ebaykeysupdate")]
+        public async Task<IHttpActionResult> eBayKeysSave(eBayKeysDTO dto)
+        {
+            UserSettingsView settings = null;
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                await db.UserProfileKeysUpdate(dto.eBayKeys, dto.FieldNames.ToArray());
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("eBayKeysSave", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
     }
