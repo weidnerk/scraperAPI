@@ -410,13 +410,13 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("tokenstatustype")]
-        public async Task<IHttpActionResult> GetTokenStatus(string userName)
+        public async Task<IHttpActionResult> GetTokenStatus(string userName, int storeID)
         {
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, user.Id);
+                var settings = db.GetUserSettingsView(connStr, user.Id, storeID);
 
                 if (user == null)
                     return Ok(false);
