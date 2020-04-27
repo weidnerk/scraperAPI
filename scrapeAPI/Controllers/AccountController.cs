@@ -143,12 +143,21 @@ namespace scrapeAPI.Controllers
         [Route("userprofileget")]
         public async Task<IHttpActionResult> UserProfileGet(string userName)
         {
-            var user = await UserManager.FindByNameAsync(userName);
-            var p = db.UserProfileGet(user);
-            if (p == null)
-                return NotFound();
-            else
-                return Ok(p);
+            try
+            {
+                var user = await UserManager.FindByNameAsync(userName);
+                var p = db.UserProfileGet(user);
+                if (p == null)
+                    return NotFound();
+                else
+                    return Ok(p);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("UserProfileGet", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, userName);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
         }
 
         [HttpGet]
@@ -495,7 +504,9 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                //await DeleteUsrAsync("b855d2be-7588-4990-90e9-0faad164d0a7");
+                //await DeleteUsrAsync("c81504b7-558d-4a75-ba57-c8b86f19197b");
+                //await DeleteUsrAsync("78cd1257-a514-4f30-87e5-316369ef0488");
+                //await DeleteUsrAsync("b21112f2-bc3e-4540-8587-229b2b1ed0b3");
 
                 if (!ModelState.IsValid)
                 {

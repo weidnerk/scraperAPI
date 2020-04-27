@@ -38,9 +38,9 @@ namespace scrapeAPI.Models
             }
         }
 
-        public UserProfile UserProfileGet(ApplicationUser usr)
+        public UserProfileView UserProfileGet(ApplicationUser usr)
         {
-            var profile = db.GetUserProfile(usr.Id);
+            var profile = db.GetUserProfileView(usr.Id);
             return profile;
         }
  
