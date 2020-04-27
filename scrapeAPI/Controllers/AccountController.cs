@@ -495,7 +495,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                //await DeleteUsrAsync("cf04dc88-09d2-43df-aced-800d75ac11c6");
+                //await DeleteUsrAsync("b855d2be-7588-4990-90e9-0faad164d0a7");
 
                 if (!ModelState.IsValid)
                 {
@@ -605,6 +605,11 @@ namespace scrapeAPI.Controllers
                 //ApplicationUser appuser = await manager.FindByEmailAsync(user.Email);
                 await UserManager.DeleteAsync(user);
             }           
+            else
+            {
+                var user = await UserManager.FindByIdAsync(id);
+                await UserManager.DeleteAsync(user);
+            }
         }
 
         /// <summary>

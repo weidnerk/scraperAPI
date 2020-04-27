@@ -876,7 +876,12 @@ namespace scrapeAPI.Controllers
                 */
 
                 // delist and leave in database
-                string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
+                bool auctionWasEnded;
+                string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing, out auctionWasEnded);
+                if (auctionWasEnded)
+                {
+                    return BadRequest("Auction was ended");
+                }
                 listing.Listed = null;
                 listing.Ended = DateTime.Now;
                 listing.EndedBy = strCurrentUserId;
