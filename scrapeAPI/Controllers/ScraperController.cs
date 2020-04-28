@@ -1593,5 +1593,26 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpGet]
+        [Route("getstore")]
+        public IHttpActionResult GetStore(int storeID)
+        {
+            var settings = new UserSettingsView();
+            try
+            {
+                string strCurrentUserId = User.Identity.GetUserId();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                var subscription = Utility.eBayItem.GetStore(storeID, settings.UserID);
+                return Ok(subscription);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetStore", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
