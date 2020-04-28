@@ -1574,5 +1574,24 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpPost]
+        [Route("storeprofileadd")]
+        public async Task<IHttpActionResult> StoreAdd(StoreProfile profile)
+        {
+            string strCurrentUserId = string.Empty;
+            try
+            {
+                strCurrentUserId = User.Identity.GetUserId();
+
+                await db.StoreAddAsync(strCurrentUserId, profile);
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("storeprofileadd", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
