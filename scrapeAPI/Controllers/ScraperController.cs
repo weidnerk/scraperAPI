@@ -1362,30 +1362,23 @@ namespace scrapeAPI.Controllers
         [Route("getuserstores")]
         public IHttpActionResult GetUserStores()
         {
-            var settings = new UserSettingsView();
+            string strCurrentUserId = null;
             try
             {
-                string strCurrentUserId = User.Identity.GetUserId();
+                strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                if (settings == null)
+               
+                var userStores = db.GetUserStores(strCurrentUserId);
+                if (userStores == null)
                 {
                     return NotFound();
                 }
-                else
-                {
-                    var userStores = db.GetUserStores(settings);
-                    if (userStores == null)
-                    {
-                        return NotFound();
-                    }
-                    return Ok(userStores);
-                }
+                return Ok(userStores);
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetUserStores", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
@@ -1500,8 +1493,16 @@ namespace scrapeAPI.Controllers
 
                 // need store Token
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId, storeID);
-                var policies = eBayItem.GetSellerBusinessPolicy(settings);
-                return Ok(policies);
+                if (settings != null)
+                {
+                    var policies = eBayItem.GetSellerBusinessPolicy(settings);
+                    return Ok(policies);
+                }
+                else
+                {
+                    // new user, no stores configures yet
+                    return NotFound();
+                }
             }
             catch (Exception exc)
             {
@@ -1597,20 +1598,18 @@ namespace scrapeAPI.Controllers
         [Route("getstore")]
         public IHttpActionResult GetStore(int storeID)
         {
-            var settings = new UserSettingsView();
+            string strCurrentUserId = null;
             try
             {
-                string strCurrentUserId = User.Identity.GetUserId();
-                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                strCurrentUserId = User.Identity.GetUserId();
 
-                var subscription = Utility.eBayItem.GetStore(storeID, settings.UserID);
+                var subscription = Utility.eBayItem.GetStore(storeID, strCurrentUserId);
                 return Ok(subscription);
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetStore", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
