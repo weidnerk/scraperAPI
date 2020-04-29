@@ -1665,8 +1665,8 @@ namespace scrapeAPI.Controllers
             {
                 strCurrentUserId = User.Identity.GetUserId();
                 var u = Utility.eBayItem.GetUser(storeID, strCurrentUserId);
-                var subscription = Utility.eBayItem.GetStore(storeID, strCurrentUserId);
-                return Ok(subscription);
+                var eBayStore = Utility.eBayItem.GetStore(storeID, strCurrentUserId);
+                return Ok(eBayStore);
             }
             catch (Exception exc)
             {
