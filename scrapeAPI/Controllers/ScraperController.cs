@@ -634,7 +634,7 @@ namespace scrapeAPI.Controllers
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 dto.UserSettings.UserID = strCurrentUserId;
                 dto.UserSettings.ApplicationID = 1;
-                await db.UserSettingsSave(dto.UserSettings, dto.FieldNames.ToArray());
+                await db.UserSettingsSaveAsync(dto.UserSettings, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
@@ -1558,20 +1558,82 @@ namespace scrapeAPI.Controllers
         [Route("ebaykeysupdate")]
         public async Task<IHttpActionResult> eBayKeysSave(eBayKeysDTO dto)
         {
-            UserSettingsView settings = null;
+            string strCurrentUserId = null;
+            int storeID = dto.StoreID;
             try
             {
-                string strCurrentUserId = User.Identity.GetUserId();
-                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                strCurrentUserId = User.Identity.GetUserId();
 
-                await db.UserProfileKeysUpdate(dto.eBayKeys, dto.FieldNames.ToArray());
+                using (DbContextTransaction transaction = db.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        StoreProfile profile;
+                        // if we didn't get passed the ids then try to create the store in StoreProfile
+                        if (dto.StoreID == 0 && dto.eBayKeys.ID == 0)
+                        {
+                            // try to add to StoreProfile
+                            var user = Utility.eBayItem.GetUser(dto.Token);
+                            var store = Utility.eBayItem.GetStore(dto.Token);
+                            profile = new StoreProfile();
+                            profile.eBayUserID = user.eBayUserID;
+                            if (store != null)
+                            {
+                                // if user has paid for eBay store
+                                profile.StoreName = store.StoreName;
+                            }
+                            await db.StoreProfileAddAsync(profile);
+                            storeID = profile.ID;
+                        }
+
+                        // update eBayKeys
+                        var keys = await db.UserProfileKeysUpdate(dto.eBayKeys, dto.FieldNames.ToArray());
+
+                        // update UserToken
+                        var ut = new UserToken
+                        {
+                            UserID = strCurrentUserId,
+                            StoreID = storeID,
+                            KeysID = keys.ID,
+                            Token = dto.Token
+                        };
+                        await db.UserTokenUpdate(ut, "Token");
+
+                        // Add to UserStore
+                        var userStore = new UserStore
+                        {
+                            StoreID = storeID,
+                            UserID = strCurrentUserId
+                        };
+                        await db.UserStoreAddAsync(userStore);
+
+                        // add to UserSettings
+                        /*
+                        var settings = new UserSettings();
+                        settings.UserID = strCurrentUserId;
+                        settings.StoreID = storeID;
+                        settings.KeysID = keys.ID;
+                        settings.ApplicationID = 1;
+                        await db.UserSettingsSaveAsync(settings);
+                        */
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        string msg = dsutil.DSUtil.ErrMsg("eBayKeysSave", ex);
+                        dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                        return Content(HttpStatusCode.InternalServerError, msg);
+                    }
+                }
+                      
                 return Ok();
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("eBayKeysSave", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
@@ -1583,7 +1645,6 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-
                 await db.StoreAddAsync(strCurrentUserId, profile);
                 return Ok();
             }
@@ -1603,13 +1664,31 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-
+                var u = Utility.eBayItem.GetUser(storeID, strCurrentUserId);
                 var subscription = Utility.eBayItem.GetStore(storeID, strCurrentUserId);
                 return Ok(subscription);
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetStore", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+        [HttpGet]
+        [Route("getuserprofilekeys")]
+        public IHttpActionResult GetUserProfileKeys(int storeID)
+        {
+            string strCurrentUserId = null;
+            try
+            {
+                strCurrentUserId = User.Identity.GetUserId();
+                var keys = db.GetUserProfileKeysView(storeID, strCurrentUserId);
+                return Ok(keys);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetUserProfileKeys", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
