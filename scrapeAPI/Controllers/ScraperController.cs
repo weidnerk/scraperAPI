@@ -1594,6 +1594,7 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+   
         [HttpGet]
         [Route("getstore")]
         public IHttpActionResult GetStore(int storeID)
