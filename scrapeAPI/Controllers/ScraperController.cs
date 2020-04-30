@@ -1554,6 +1554,11 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        /// <summary>
+        /// Sets up initial API keys
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("ebaykeysupdate")]
         public async Task<IHttpActionResult> eBayKeysSave(eBayKeysDTO dto)
@@ -1656,6 +1661,11 @@ namespace scrapeAPI.Controllers
             }
         }
    
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storeID"></param>
+        /// <returns>type eBayStore</returns>
         [HttpGet]
         [Route("getstore")]
         public IHttpActionResult GetStore(int storeID)
@@ -1689,6 +1699,24 @@ namespace scrapeAPI.Controllers
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("GetUserProfileKeys", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+        [HttpGet]
+        [Route("getebayuser")]
+        public IHttpActionResult GeteBayUser(int storeID)
+        {
+            string strCurrentUserId = null;
+            try
+            {
+                strCurrentUserId = User.Identity.GetUserId();
+                var u = Utility.eBayItem.GeteBayUser(storeID, strCurrentUserId);
+                return Ok(u);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetUser", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
