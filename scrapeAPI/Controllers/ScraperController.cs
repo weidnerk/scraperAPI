@@ -1674,8 +1674,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                var u = Utility.eBayItem.GetUser(storeID, strCurrentUserId);
-                var eBayStore = Utility.eBayItem.GetStore(storeID, strCurrentUserId);
+                string token = db.GetToken(storeID, strCurrentUserId);
+                var u = Utility.eBayItem.GetUser(token);
+                var eBayStore = Utility.eBayItem.GetStore(token);
                 return Ok(eBayStore);
             }
             catch (Exception exc)
