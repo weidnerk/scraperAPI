@@ -904,14 +904,39 @@ namespace scrapeAPI.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("setorder")]
-        public IHttpActionResult SetOrder(Listing listing)
+        public IHttpActionResult SetOrder(Listing listing, DateTime fromDate, DateTime toDate)
         {
+            var settings = new UserSettingsView();
+            string strCurrentUserId = User.Identity.GetUserId();
             try
             {
-                // ebayAPIs.GetOrders("19-04026-11927");
-                return Ok();
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                string msg = null;
+                //ebayAPIs.GetOrders(settings, "19-04026-11927", out msg);
+                //ebayAPIs.GetOrderTransactions(settings, listing.ListedItemID);
+
+                var orders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate);
+
+                var eBayOrders = new List<SalesOrder>();
+                foreach (var order in orders)
+                {
+                    if (order.ListedItemID == listing.ListedItemID)
+                    {
+                        eBayOrders.Add(order);
+                    }
+                }
+                if (eBayOrders.Count == 1)
+                {
+                    return Ok(eBayOrders[0]);
+                }
+                else
+                {
+                    return Ok();
+                }
             }
             catch (Exception exc)
             {
@@ -1403,8 +1428,7 @@ namespace scrapeAPI.Controllers
                 {
                     string msg = null;
 
-                    var eBayOrder = eBayUtility.ebayAPIs.GetOrders(settings, dto.SalesOrder.eBayOrderNumber, 1, out msg);
-                    //var eBayOrder = eBayUtility.ebayAPIs.GetOrders(dto.SalesOrder.eBayOrderNumber, settings.StoreID, out msg);
+                    var eBayOrder = eBayUtility.ebayAPIs.GetOrders(settings, dto.SalesOrder.eBayOrderNumber, out msg);
 
                     if (!string.IsNullOrEmpty(msg))
                     {
