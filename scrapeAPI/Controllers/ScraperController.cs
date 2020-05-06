@@ -929,13 +929,13 @@ namespace scrapeAPI.Controllers
                         eBayOrders.Add(order);
                     }
                 }
-                if (eBayOrders.Count == 1)
+                if (eBayOrders.Count > 0)
                 {
-                    return Ok(eBayOrders[0]);
+                    return Ok(eBayOrders);
                 }
                 else
                 {
-                    return Ok();
+                    return NotFound();
                 }
             }
             catch (Exception exc)
