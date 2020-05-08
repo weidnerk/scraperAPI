@@ -930,7 +930,32 @@ namespace scrapeAPI.Controllers
                 return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
             }
         }
+        [HttpGet]
+        [Route("getorders")]
+        public IHttpActionResult GetOrders(DateTime fromDate, DateTime toDate)
+        {
+            var settings = new UserSettingsView();
+            string strCurrentUserId = User.Identity.GetUserId();
+            try
+            {
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
+                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate);
+                if (eBayOrders.Count > 0)
+                {
+                    return Ok(eBayOrders);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception exc)
+            {
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
+            }
+        }
         /// <summary>
         /// Get an order that was placed on walmart.
         /// </summary>
