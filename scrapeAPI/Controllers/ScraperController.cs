@@ -915,20 +915,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                string msg = null;
-                //ebayAPIs.GetOrders(settings, "19-04026-11927", out msg);
-                //ebayAPIs.GetOrderTransactions(settings, listing.ListedItemID);
-
-                var orders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate);
-
-                var eBayOrders = new List<SalesOrder>();
-                foreach (var order in orders)
-                {
-                    if (order.ListedItemID == listing.ListedItemID)
-                    {
-                        eBayOrders.Add(order);
-                    }
-                }
+                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, listing.ListedItemID, fromDate, toDate);
                 if (eBayOrders.Count > 0)
                 {
                     return Ok(eBayOrders);
