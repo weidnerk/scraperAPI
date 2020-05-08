@@ -581,7 +581,7 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     // Pull exiting record and see if ebay item id changed.
-                    var listing = db.ListingGet(dto.Listing.ID, settings.StoreID);
+                    var listing = db.ListingGet(dto.Listing.ID);
                     if (listing != null)
                     {
                         if (!string.IsNullOrEmpty(listing.ItemID))
@@ -856,7 +856,7 @@ namespace scrapeAPI.Controllers
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                var listing = db.ListingGet(listingID, settings.StoreID);
+                var listing = db.ListingGet(listingID);
 
                 /*
                 bool salesExist = db.SalesExists(listing.ListedItemID);
@@ -993,7 +993,7 @@ namespace scrapeAPI.Controllers
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 username = settings.UserName;
 
-                var listing = db.ListingGet(listingID, settings.StoreID);
+                var listing = db.ListingGet(listingID);
                 if (listing == null)
                 {
                     return NotFound();
@@ -1758,5 +1758,25 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpPost]
+        [Route("salesorderadd")]
+        public async Task<IHttpActionResult> SalesOrderAdd(SalesOrder salesOrder)
+        {
+            string strCurrentUserId = string.Empty;
+            try
+            {
+                strCurrentUserId = User.Identity.GetUserId();
+                salesOrder.CreatedBy = strCurrentUserId;
+                var ret = await db.SalesOrderAddAsync(salesOrder);
+                return Ok(ret);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("SalesOrderAdd listingID", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+
     }
 }
