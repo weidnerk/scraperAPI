@@ -918,6 +918,10 @@ namespace scrapeAPI.Controllers
                 var eBayOrders = ebayAPIs.GetOrdersByDate(settings, listing.ListedItemID, fromDate, toDate);
                 if (eBayOrders.Count > 0)
                 {
+                    //foreach(var o in eBayOrders)
+                    //{
+                    //    o.Profit = eBayUtility.FetchSeller.CalcProfit(o);
+                    //}
                     return Ok(eBayOrders);
                 }
                 else
@@ -1767,6 +1771,8 @@ namespace scrapeAPI.Controllers
             {
                 strCurrentUserId = User.Identity.GetUserId();
                 salesOrder.CreatedBy = strCurrentUserId;
+                salesOrder.Profit = eBayUtility.FetchSeller.CalcProfit(salesOrder);
+                salesOrder.ProfitMargin = FetchSeller.CalcProfitMargin(salesOrder);
                 var ret = await db.SalesOrderAddAsync(salesOrder);
                 return Ok(ret);
             }
