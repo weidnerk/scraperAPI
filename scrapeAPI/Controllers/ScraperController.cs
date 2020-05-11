@@ -118,8 +118,7 @@ namespace scrapeAPI.Controllers
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 decimal wmShipping = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart shipping"));
                 decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart free shipping min"));
-                double eBayPct = Convert.ToDouble(db.GetAppSetting(settings, "eBay pct"));
-                var px = wallib.wmUtility.wmNewPrice(supplierPrice, settings.PctProfit, wmShipping, wmFreeShippingMin, eBayPct);
+                var px = wallib.wmUtility.wmNewPrice(supplierPrice, settings.PctProfit, wmShipping, wmFreeShippingMin, settings.FinalValueFeePct);
                 return Ok(px);
             }
             catch (Exception exc)
@@ -297,10 +296,9 @@ namespace scrapeAPI.Controllers
                 decimal wmShipping = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart shipping"));
                 decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart free shipping min"));
                 double pctProfit = settings.PctProfit;
-                double eBayPct = Convert.ToDouble(db.GetAppSetting(settings, "eBay pct"));
                 int imgLimit = Convert.ToInt32(db.GetAppSetting(settings, "Listing Image Limit"));
 
-                string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, eBayPct, imgLimit, "walmart");
+                string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, settings.FinalValueFeePct, imgLimit, "walmart");
                 if (string.IsNullOrEmpty(ret))
                 {
                     return Ok();
