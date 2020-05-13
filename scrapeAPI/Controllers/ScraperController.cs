@@ -507,7 +507,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("listingsave")]
-        public async Task<IHttpActionResult> ListingSave(ListingDTO dto)
+        public async Task<IHttpActionResult> ListingSave(ListingDTO dto, bool updateItemSpecifics)
         {
             try
             {
@@ -605,7 +605,7 @@ namespace scrapeAPI.Controllers
                         }
                     }
                 }
-                var updatedListing = await db.ListingSaveAsync(settings, dto.Listing, dto.FieldNames.ToArray());
+                var updatedListing = await db.ListingSaveAsync(settings, dto.Listing, updateItemSpecifics, dto.FieldNames.ToArray());
                 return Ok(updatedListing);
             }
             catch (Exception exc)
@@ -883,7 +883,7 @@ namespace scrapeAPI.Controllers
                 listing.Listed = null;
                 listing.Ended = DateTime.Now;
                 listing.EndedBy = strCurrentUserId;
-                await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy", "Listed");
+                await db.ListingSaveAsync(settings, listing, false, "Ended", "EndedBy", "Listed");
 
                 var log = new ListingLog();
                 log.MsgID = 900;
