@@ -452,7 +452,7 @@ namespace scrapeAPI.Controllers
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                     var settings = db.GetUserSettingsView(connStr, user.Id);
 
-                    var i = await ebayAPIs.GetSingleItem(settings, itemID);
+                    var i = await ebayAPIs.GetSingleItem(settings, itemID, true);
                     return Ok(i);
                 }
             }
@@ -532,7 +532,7 @@ namespace scrapeAPI.Controllers
                     var si = db.GetSellerListing(dto.Listing.ItemID);
                     if (si == null)
                     {
-                        var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID);
+                        var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID, true);
                         if (sellerListing != null)
                         {
                             dto.Listing.SellerListing = sellerListing;
@@ -586,7 +586,7 @@ namespace scrapeAPI.Controllers
                         {
                             if (listing.ItemID != dto.Listing.ItemID)
                             {
-                                var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID);
+                                var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID, true);
                                 if (sellerListing != null)
                                 {
                                     dto.Listing.SellerListing = sellerListing;
@@ -811,7 +811,7 @@ namespace scrapeAPI.Controllers
                 //output = eBayItem.AddFPItemWithVariations_cutlery(1, sellerListing);
 
                 // https://www.ebay.com/itm/Rachel-Ray-Cookware-Set-Nonstick-Enamel-Marine-Blue-Non-Stick-Enamel-Pots-Pans/133245568450?hash=item1f060e05c2:m:miqH_90tUTRCqI2Zd3KZfTQ
-                var sellerListing = await ebayAPIs.GetSingleItem(settings, "133245568450");
+                var sellerListing = await ebayAPIs.GetSingleItem(settings, "133245568450", true);
                 output = eBayItemVariation.AddFPItemWithVariations_potspans(settings, 1, sellerListing);
 
                 // eBayItem.ReviseFixedPriceItem("223892293783", "Color", "White");
