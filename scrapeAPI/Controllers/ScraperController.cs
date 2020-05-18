@@ -26,6 +26,7 @@ using eBayUtility;
 using System.Configuration;
 using Utility;
 using System.Data.Entity;
+using System.IO;
 
 namespace scrapeAPI.Controllers
 {
@@ -1781,6 +1782,33 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpGet]
+        [Route("downloadimages")]
+        public IHttpActionResult DownloadImages(int ID)
+        {
+            string strCurrentUserId = null;
+            try
+            {
+                strCurrentUserId = User.Identity.GetUserId();
+                var item = db.GetSupplierItem(ID);
 
+                var urls = dsutil.DSUtil.DelimitedToList(item.SupplierPicURL, ';');
+
+                Uri uri = new Uri(urls[0]);
+                string filename = System.IO.Path.GetFileName(uri.LocalPath);
+                string path = HttpContext.Current.Request.PhysicalApplicationPath + @"productimages\" + filename;
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.DownloadFile(urls[0], path);
+                }
+                return Ok();
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("DownloadImages", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
