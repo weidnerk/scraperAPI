@@ -262,3 +262,4 @@ __pycache__/
 
 scrape_log.txt
 /scrapeAPI/log.txt
+/scrapeAPI/productimages/*.*
