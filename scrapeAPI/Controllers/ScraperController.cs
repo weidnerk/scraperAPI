@@ -510,9 +510,9 @@ namespace scrapeAPI.Controllers
         [Route("listingsave")]
         public async Task<IHttpActionResult> ListingSave(ListingDTO dto, bool updateItemSpecifics)
         {
+            string strCurrentUserId = User.Identity.GetUserId();
             try
             {
-                string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
@@ -607,12 +607,14 @@ namespace scrapeAPI.Controllers
                     }
                 }
                 var updatedListing = await db.ListingSaveAsync(settings, dto.Listing, updateItemSpecifics, dto.FieldNames.ToArray());
+                updatedListing.Warning = dsutil.DSUtil.GetDescrWarnings(updatedListing.Description);
+
                 return Ok(updatedListing);
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("StoreListing", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, "nousername");
+                string msg = dsutil.DSUtil.ErrMsg("ListingSave", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
