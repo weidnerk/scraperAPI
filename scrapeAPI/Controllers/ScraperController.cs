@@ -1772,8 +1772,8 @@ namespace scrapeAPI.Controllers
             {
                 strCurrentUserId = User.Identity.GetUserId();
                 salesOrder.CreatedBy = strCurrentUserId;
-                salesOrder.Profit = eBayUtility.FetchSeller.CalcProfit(salesOrder);
-                salesOrder.ProfitMargin = FetchSeller.CalcProfitMargin(salesOrder);
+                salesOrder.Profit = eBayUtility.FetchSeller.CalcProfitOnSalesOrder(salesOrder);
+                salesOrder.ProfitMargin = FetchSeller.CalcProfitMarginOnSalesOrder(salesOrder);
                 var ret = await db.SalesOrderAddAsync(salesOrder);
                 return Ok(ret);
             }
