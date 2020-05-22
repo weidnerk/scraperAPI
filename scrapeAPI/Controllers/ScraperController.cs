@@ -109,7 +109,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [Route("calculatewmpx")]
         [HttpGet]
-        public IHttpActionResult CalculateWMPrice(decimal supplierPrice)
+        public IHttpActionResult CalculateWMPrice(decimal supplierPrice, double pctProfit)
         {
             string strCurrentUserId = User.Identity.GetUserId();
 
@@ -119,7 +119,7 @@ namespace scrapeAPI.Controllers
                 var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 decimal wmShipping = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart shipping"));
                 decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart free shipping min"));
-                var px = wallib.wmUtility.wmNewPrice(supplierPrice, settings.PctProfit, wmShipping, wmFreeShippingMin, settings.FinalValueFeePct);
+                var px = wallib.wmUtility.wmNewPrice(supplierPrice, pctProfit, wmShipping, wmFreeShippingMin, settings.FinalValueFeePct);
                 return Ok(px);
             }
             catch (Exception exc)
