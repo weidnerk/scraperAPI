@@ -1784,6 +1784,23 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-       
+        [HttpGet]
+        [Route("getsupplieritembyurl")]
+        public IHttpActionResult GetSupplierItemByURL(string URL)
+        {
+            string strCurrentUserId = null;
+            try
+            {
+                strCurrentUserId = User.Identity.GetUserId();
+                var u = db.GetSupplierItemByURL(URL);
+                return Ok(u);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("GetSupplierItemByURL", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
     }
 }
