@@ -130,6 +130,24 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        [Route("calculateprofit")]
+        [HttpPost]
+        public IHttpActionResult CalculateProfit(Listing listing)
+        {
+            string strCurrentUserId = User.Identity.GetUserId();
+            try
+            {
+                var profit = eBayUtility.FetchSeller.CalcProfit(listing);
+                return Ok(profit);
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("CalculateWMPrice", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
+                return Content(HttpStatusCode.InternalServerError, msg);
+            }
+        }
+
         /// <summary>
         /// Get stored scan.
         /// This may be called on a timer to keep feeding results.
