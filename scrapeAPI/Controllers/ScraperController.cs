@@ -131,13 +131,13 @@ namespace scrapeAPI.Controllers
         }
 
         [Route("calculateprofit")]
-        [HttpPost]
-        public IHttpActionResult CalculateProfit(Listing listing)
+        [HttpGet]
+        public IHttpActionResult CalculateProfit(decimal listingPrice, decimal supplierPrice)
         {
             string strCurrentUserId = User.Identity.GetUserId();
             try
             {
-                var profit = eBayUtility.FetchSeller.CalcProfit(listing);
+                var profit = eBayUtility.FetchSeller.CalcProfit(listingPrice, supplierPrice);
                 return Ok(profit);
             }
             catch (Exception exc)
@@ -1803,14 +1803,14 @@ namespace scrapeAPI.Controllers
             }
         }
         [HttpGet]
-        [Route("getsupplieritembyurl")]
-        public IHttpActionResult GetSupplierItemByURL(string URL)
+        [Route("getlistingbysupplierurl")]
+        public IHttpActionResult GetListingBySupplierURL(int storeID, string URL)
         {
             string strCurrentUserId = null;
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                var u = db.GetSupplierItemByURL(URL);
+                var u = db.GetListingBySupplierURL(storeID, URL);
                 return Ok(u);
             }
             catch (Exception exc)
