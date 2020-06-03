@@ -867,7 +867,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("endlisting")]
-        public async Task<IHttpActionResult> EndListing(int listingID)
+        public async Task<IHttpActionResult> EndListing(int listingID, string reason)
         {
             var settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
@@ -908,7 +908,7 @@ namespace scrapeAPI.Controllers
 
                 var log = new ListingLog();
                 log.MsgID = 900;
-                log.Note = "listing, " + listing.ListedItemID + ", ended by " + settings.UserName;
+                log.Note = string.Format("listing {0}; Ended by {1}; {2}", listing.ListedItemID, settings.UserName, reason);
                 log.ListingID = listing.ID;
                 log.UserID = settings.UserID;
                 await db.ListingLogAdd(log);
