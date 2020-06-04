@@ -530,7 +530,7 @@ namespace scrapeAPI.Controllers
                 p.Created = DateTime.Now;
 
                 var settings = new UserSettingsView { UserName = model.Username };
-                await models.UserProfileSaveAsync(settings, p);
+                await models.UserProfileSaveAsync(p);
 
                 return Ok();
             }
@@ -824,7 +824,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = models.GetUserSettingsView(connStr, profile.UserID);
 
-                await models.UserProfileSaveAsync(settings, profile, "SelectedStore");
+                await models.UserProfileSaveAsync(profile, "SelectedStore");
                 return Ok();
             }
             catch (Exception exc)

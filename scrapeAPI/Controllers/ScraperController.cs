@@ -645,21 +645,21 @@ namespace scrapeAPI.Controllers
         [Route("usersettingssave")]
         public async Task<IHttpActionResult> UserSettingsSave(UserSettingsDTO dto)
         {
-            UserSettingsView settings = null;
+            string strCurrentUserId = null;
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                string strCurrentUserId = User.Identity.GetUserId();
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                strCurrentUserId = User.Identity.GetUserId();
+                //settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 dto.UserSettings.UserID = strCurrentUserId;
                 dto.UserSettings.ApplicationID = 1;
-                await db.UserSettingsSaveAsync(dto.UserSettings, dto.FieldNames.ToArray());
-                return Ok();
+                var view = await db.UserSettingsSaveAsync(connStr, dto.UserSettings, dto.FieldNames.ToArray());
+                return Ok(view);
             }
             catch (Exception exc)
             {
                 string msg = dsutil.DSUtil.ErrMsg("UserSettingsSave", exc);
-                dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
+                dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return BadRequest(msg);
             }
         }
@@ -1303,7 +1303,7 @@ namespace scrapeAPI.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return BadRequest("No settings configured.");
                 }
             }
             catch (Exception exc)
@@ -1632,22 +1632,26 @@ namespace scrapeAPI.Controllers
                 {
                     try
                     {
-                        StoreProfile profile;
+                        StoreProfile storeProfile;
                         // if we didn't get passed the ids then try to create the store in StoreProfile
                         if (dto.StoreID == 0 && dto.eBayKeys.ID == 0)
                         {
                             // try to add to StoreProfile
                             var user = Utility.eBayItem.GetUser(dto.Token);
                             var store = Utility.eBayItem.GetStore(dto.Token);
-                            profile = new StoreProfile();
-                            profile.eBayUserID = user.eBayUserID;
-                            if (store != null)
+                            storeProfile = new StoreProfile();
+                            storeProfile.eBayUserID = user.eBayUserID;
+                            if (store?.StoreName != null)
                             {
                                 // if user has paid for eBay store
-                                profile.StoreName = store.StoreName;
+                                storeProfile.StoreName = store.StoreName;
                             }
-                            await db.StoreProfileAddAsync(profile);
-                            storeID = profile.ID;
+                            else
+                            {
+                                storeProfile.StoreName = user.eBayUserID;
+                            }
+                            await db.StoreProfileAddAsync(storeProfile);
+                            storeID = storeProfile.ID;
                         }
 
                         // update eBayKeys
@@ -1680,6 +1684,10 @@ namespace scrapeAPI.Controllers
                         settings.ApplicationID = 1;
                         await db.UserSettingsSaveAsync(settings);
                         */
+
+                        var userProfile = db.GetUserProfile(strCurrentUserId);
+                        userProfile.SelectedStore = storeID;
+                        await db.UserProfileSaveAsync(userProfile, "SelectedStore");
 
                         transaction.Commit();
                     }
