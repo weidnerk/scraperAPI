@@ -434,7 +434,10 @@ namespace scrapeAPI.Controllers
                 var user = await UserManager.FindByNameAsync(userName);
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 var settings = db.GetUserSettingsView(connStr, user.Id, storeID);
-
+                if (settings is null)
+                {
+                    return BadRequest("User settingss do not exist");
+                }
                 if (user == null)
                     return Ok(false);
                 else
@@ -1624,6 +1627,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = null;
             int storeID = dto.StoreID;
+            var userToken = new UserToken();
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
@@ -1652,28 +1656,28 @@ namespace scrapeAPI.Controllers
                             }
                             await db.StoreProfileAddAsync(storeProfile);
                             storeID = storeProfile.ID;
+
+                            // Add to UserStore
+                            var userStore = new UserStore
+                            {
+                                StoreID = storeID,
+                                UserID = strCurrentUserId
+                            };
+                            await db.UserStoreAddAsync(userStore);
                         }
 
                         // update eBayKeys
                         var keys = await db.UserProfileKeysUpdate(dto.eBayKeys, dto.FieldNames.ToArray());
 
                         // update UserToken
-                        var ut = new UserToken
+                        userToken = new UserToken
                         {
                             UserID = strCurrentUserId,
                             StoreID = storeID,
                             KeysID = keys.ID,
                             Token = dto.Token
                         };
-                        await db.UserTokenUpdate(ut, "Token");
-
-                        // Add to UserStore
-                        var userStore = new UserStore
-                        {
-                            StoreID = storeID,
-                            UserID = strCurrentUserId
-                        };
-                        await db.UserStoreAddAsync(userStore);
+                        await db.UserTokenUpdate(userToken, "Token");
 
                         // add to UserSettings
                         /*
@@ -1700,7 +1704,7 @@ namespace scrapeAPI.Controllers
                     }
                 }
                       
-                return Ok();
+                return Ok(userToken);
             }
             catch (Exception exc)
             {
