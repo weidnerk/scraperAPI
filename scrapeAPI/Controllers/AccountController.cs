@@ -502,14 +502,13 @@ namespace scrapeAPI.Controllers
         [Route("Register")]
         public async Task<IHttpActionResult> Register(RegisterBindingModel model)
         {
-            
             try
             {
                 //Utility.eBayItem.GetStore(11, "03d519ce-2f86-4bb7-8f26-e19fade3e261");
                 //Utility.eBayItem.GetStore(1, "65e09eec-a014-4526-a569-9f2d3600aa89");
                 //Utility.eBayItem.GetStore(3, "9b63b57d-8839-4ed2-ba98-fad513c4ecec");
 
-                //await DeleteUsrAsync("c81504b7-558d-4a75-ba57-c8b86f19197b");
+                //await DeleteUsrAsync("74286d9d-2593-40f0-b2ce-0f3ab7d79b44");
                 //await DeleteUsrAsync("78cd1257-a514-4f30-87e5-316369ef0488");
                 //await DeleteUsrAsync("b21112f2-bc3e-4540-8587-229b2b1ed0b3");
 
