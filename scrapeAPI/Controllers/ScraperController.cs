@@ -581,9 +581,22 @@ namespace scrapeAPI.Controllers
                     }
                     else
                     {
+                        // Seller listings aren't always removed since may be shared between stores
+                        dto.Listing.SellerListing = si;
+                        // if new listing and no title provided, then copy title from seller
+                        if (string.IsNullOrEmpty(dto.Listing.ListingTitle))
+                        {
+                            dto.Listing.ListingTitle = si.Title;
+                        }
+                        si.Updated = DateTime.Now;
                         dto.Listing.ItemID = dto.Listing.ItemID;
                         dto.Listing.PrimaryCategoryID = si.PrimaryCategoryID;
                         dto.Listing.PrimaryCategoryName = si.PrimaryCategoryName;
+
+                        // copy seller listing item specifics
+                        var specifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, si.ItemSpecifics);
+                        var revisedItemSpecs = eBayItem.ModifyItemSpecific(specifics);
+                        dto.Listing.ItemSpecifics = revisedItemSpecs;
                     }
 
                     // for new listing, supplier pulled but don't know if exists in db yet....
