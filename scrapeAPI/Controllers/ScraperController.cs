@@ -137,7 +137,7 @@ namespace scrapeAPI.Controllers
             string strCurrentUserId = User.Identity.GetUserId();
             try
             {
-                var profit = eBayUtility.FetchSeller.CalcProfit(listingPrice, supplierPrice);
+                var profit = eBayUtility.FetchSeller.CalcProfit(listingPrice, supplierPrice, 7.0);
                 return Ok(profit);
             }
             catch (Exception exc)
