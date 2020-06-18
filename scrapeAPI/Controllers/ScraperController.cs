@@ -893,23 +893,6 @@ namespace scrapeAPI.Controllers
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 var listing = db.ListingGet(listingID);
 
-                /*
-                bool salesExist = db.SalesExists(listing.ListedItemID);
-                if (!salesExist)
-                {
-                    // can delete from db - what's the point of keeping track of what did not sell?
-                    await db.DeleteListingRecordAsync(settings, listing.ID, true);
-                }
-                else
-                {
-                    listing.Listed = null;
-                    listing.Ended = DateTime.Now;
-                    listing.EndedBy = strCurrentUserId;
-                    await db.ListingSaveAsync(settings, listing, "Ended", "EndedBy", "Listed");
-                }
-                string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing);
-                */
-
                 // delist and leave in database
                 bool auctionWasEnded;
                 string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing, out auctionWasEnded);
@@ -1260,10 +1243,18 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                string ret = await db.DeleteListingRecordAsync(settings, listingID, false);
-                if (!string.IsNullOrEmpty(ret))
+                bool salesExist = db.SalesExists(listingID);
+                if (!salesExist)
                 {
-                    return BadRequest(ret);
+                    string ret = await db.DeleteListingRecordAsync(settings, listingID, false);
+                    if (!string.IsNullOrEmpty(ret))
+                    {
+                        return BadRequest(ret);
+                    }
+                }
+                else
+                {
+                    return BadRequest("Cannot delete - sales exist");
                 }
                 return Ok();
             }
@@ -1315,6 +1306,10 @@ namespace scrapeAPI.Controllers
                     var dbMissingItems = StoreCheck.DBIsMissingItems(settings, ref storeItems);
                     */
 
+                    RemoveImages("productimages");
+                    
+                    // local
+                    // RemoveImages(@"C:\Projects\eBay\scraperAPI\scrapeAPI\productimages");
                     return Ok(dashboard);
                 }
                 else
@@ -1330,6 +1325,35 @@ namespace scrapeAPI.Controllers
             }
         }
 
+        void RemoveImages(string dirName)
+        {
+            // https://stackoverflow.com/questions/2222348/delete-files-older-than-3-months-old-in-a-directory-using-net
+
+            try
+            {
+                string path = HttpContext.Current.Request.PhysicalApplicationPath + @"productimages";
+
+                string[] files = Directory.GetFiles(path);
+                // dsutil.DSUtil.WriteFile(_logfile, "Found " + files.Count() + " files.", "");
+
+                /*
+                foreach (string file in files)
+                {
+                    FileInfo fi = new FileInfo(file);
+                    if (fi.CreationTime < DateTime.Now.AddDays(-2))
+                    {
+                        fi.Delete();
+                    }
+                }
+                */
+            }
+            catch (Exception exc)
+            {
+                string msg = dsutil.DSUtil.ErrMsg("RemoveImages", exc);
+                dsutil.DSUtil.WriteFile(_logfile, msg, "");
+                throw;
+            }
+        }
         /// <summary>
         /// Determine properties of eBay store such as out of stock items that are now available.
         /// </summary>
