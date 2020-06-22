@@ -112,7 +112,6 @@ namespace scrapeAPI.Controllers
         public IHttpActionResult CalculateWMPrice(decimal supplierPrice, double pctProfit)
         {
             string strCurrentUserId = User.Identity.GetUserId();
-
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -1299,6 +1298,8 @@ namespace scrapeAPI.Controllers
                     int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == storeID).Count();
                     dashboard.Listed = listed;
 
+                    var repricerLastRan = db.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().RepricerLastRan;
+                    dashboard.RepricerLastRan = repricerLastRan;
                     /*
                      * 04.10.2020 don't run this yet
                      * 
