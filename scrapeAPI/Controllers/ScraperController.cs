@@ -136,7 +136,7 @@ namespace scrapeAPI.Controllers
             string strCurrentUserId = User.Identity.GetUserId();
             try
             {
-                var profit = eBayUtility.FetchSeller.CalcProfit(listingPrice, supplierPrice, 7.0);
+                var profit = eBayUtility.FetchSeller.CalcProfit(listingPrice, supplierPrice, 7.0, 0.0915);
                 return Ok(profit);
             }
             catch (Exception exc)
@@ -932,7 +932,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, listing.ListedItemID, fromDate, toDate);
+                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, listing.ListedItemID, fromDate, toDate, 0.0915);
                 if (eBayOrders.Count > 0)
                 {
                     //foreach(var o in eBayOrders)
@@ -962,7 +962,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate);
+                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915);
                 if (eBayOrders.Count > 0)
                 {
                     return Ok(eBayOrders);
