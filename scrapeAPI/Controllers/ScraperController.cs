@@ -897,8 +897,12 @@ namespace scrapeAPI.Controllers
                 string ret = Utility.eBayItem.EndFixedPriceItem(settings, listing, out auctionWasEnded);
                 if (auctionWasEnded)
                 {
-                    return BadRequest("Auction was ended");
+                    var entry = new ListingLog { ListingID = listingID, MsgID = 1700, UserID = settings.UserID };
+                    await db.ListingLogAdd(entry);
+                    // return BadRequest("Auction was ended");
                 }
+
+                // even if listing was already ended by user on eBay site, we end it in the db
                 listing.Listed = null;
                 listing.Ended = DateTime.Now;
                 listing.EndedBy = strCurrentUserId;
