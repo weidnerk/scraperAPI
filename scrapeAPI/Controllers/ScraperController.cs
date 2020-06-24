@@ -957,7 +957,7 @@ namespace scrapeAPI.Controllers
         }
         [HttpGet]
         [Route("getorders")]
-        public IHttpActionResult GetOrders(DateTime fromDate, DateTime toDate)
+        public IHttpActionResult GetOrders(DateTime fromDate, DateTime toDate, string orderStatus)
         {
             var settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
@@ -966,7 +966,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915);
+                var eBayOrders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915, orderStatus);
                 if (eBayOrders.Count > 0)
                 {
                     return Ok(eBayOrders);
