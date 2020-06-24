@@ -1304,6 +1304,9 @@ namespace scrapeAPI.Controllers
 
                     var repricerLastRan = db.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().RepricerLastRan;
                     dashboard.RepricerLastRan = repricerLastRan;
+
+                    var repricerElapsedTime = db.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().ElapsedTime;
+                    dashboard.RepricerElapsedTime = repricerElapsedTime;
                     /*
                      * 04.10.2020 don't run this yet
                      * 
