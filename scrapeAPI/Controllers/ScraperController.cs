@@ -792,7 +792,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("createlisting")]
-        public async Task<IHttpActionResult> CreateListing(int listingID)
+        public async Task<IHttpActionResult> CreateListing(int listingID, bool reviseUploadImages)
         {
             var settings = new UserSettingsView();
             try
@@ -801,7 +801,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var output = await eBayItem.ListingCreateAsync(settings, listingID);
+                var output = await eBayItem.ListingCreateAsync(settings, listingID, reviseUploadImages);
                 if (ListingNotCreated(output))
                 {
                     var errStr = dsutil.DSUtil.ListToDelimited(output.ToArray(), ';');
