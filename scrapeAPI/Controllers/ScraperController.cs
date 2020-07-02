@@ -1342,7 +1342,6 @@ namespace scrapeAPI.Controllers
                 string path = HttpContext.Current.Request.PhysicalApplicationPath + @"productimages";
 
                 string[] files = Directory.GetFiles(path);
-                dsutil.DSUtil.WriteFile(_logfile, "Found " + files.Count() + " files.", "");
 
                 foreach (string file in files)
                 {
