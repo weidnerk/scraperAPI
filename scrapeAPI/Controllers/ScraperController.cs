@@ -641,6 +641,7 @@ namespace scrapeAPI.Controllers
                 }
                 var updatedListing = await db.ListingSaveAsync(settings, dto.Listing, updateItemSpecifics, dto.FieldNames.ToArray());
                 updatedListing.Warning = dsutil.DSUtil.GetDescrWarnings(updatedListing.Description);
+                updatedListing.ItemSpecificWarning = eBayUtility.FetchSeller.GetItemDescriptionWarnings(updatedListing);
 
                 return Ok(updatedListing);
             }
