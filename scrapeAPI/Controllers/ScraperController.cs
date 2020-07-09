@@ -531,6 +531,7 @@ namespace scrapeAPI.Controllers
         public async Task<IHttpActionResult> ListingSave(ListingDTO dto, bool updateItemSpecifics)
         {
             string strCurrentUserId = User.Identity.GetUserId();
+            Listing listing;
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
@@ -609,11 +610,12 @@ namespace scrapeAPI.Controllers
                             dto.Listing.SupplierItem = null;
                         }
                     }
+                    listing = dto.Listing;
                 }
                 else
                 {
                     // Pull exiting record and see if ebay item id changed.
-                    var listing = db.ListingGet(dto.Listing.ID);
+                    listing = db.ListingGet(dto.Listing.ID);
                     if (listing != null)
                     {
                         if (!string.IsNullOrEmpty(listing.ItemID))
@@ -639,9 +641,10 @@ namespace scrapeAPI.Controllers
                         }
                     }
                 }
+
                 var updatedListing = await db.ListingSaveAsync(settings, dto.Listing, updateItemSpecifics, dto.FieldNames.ToArray());
                 updatedListing.Warning = dsutil.DSUtil.GetDescrWarnings(updatedListing.Description);
-                updatedListing.ItemSpecificWarning = eBayUtility.FetchSeller.GetItemDescriptionWarnings(updatedListing);
+                updatedListing.ItemSpecificWarning = eBayUtility.FetchSeller.GetItemDescriptionWarnings(listing);
 
                 return Ok(updatedListing);
             }
