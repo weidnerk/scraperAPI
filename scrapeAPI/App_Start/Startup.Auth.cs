@@ -31,6 +31,8 @@ namespace scrapeAPI
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
+
+            //https://stackoverflow.com/questions/44546570/asp-net-web-api-how-to-change-token-expiration-time-in-runtime
             // Configure the application for OAuth based flow
             PublicClientId = "self";
             OAuthOptions = new OAuthAuthorizationServerOptions
@@ -38,7 +40,7 @@ namespace scrapeAPI
                 TokenEndpointPath = new PathString("/Token"),
                 Provider = new ApplicationOAuthProvider(PublicClientId),
                 AuthorizeEndpointPath = new PathString("/api/Account/ExternalLogin"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromDays(14),
+                AccessTokenExpireTimeSpan = TimeSpan.FromDays(1),
                 // In production mode set AllowInsecureHttp = false
                 AllowInsecureHttp = true
             };
