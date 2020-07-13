@@ -1881,5 +1881,33 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        [HttpGet]
+        [Route("compareorders")]
+        public IHttpActionResult CompareOrders(DateTime fromDate, DateTime toDate)
+        {
+            var settings = new UserSettingsView();
+            string strCurrentUserId = User.Identity.GetUserId();
+            var orderIDs = new List<string>();
+            try
+            {
+                string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
+                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+
+                var orders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915, "");
+                foreach(var o in orders)
+                {
+                    var salesOrder = db.SalesOrders.Where(p => p.OrderID == o.OrderID).SingleOrDefault();
+                    if (salesOrder == null)
+                    {
+                        orderIDs.Add(o.OrderID);
+                    }
+                }
+                return Ok(orderIDs.Count);
+            }
+            catch (Exception exc)
+            {
+                return new ResponseMessageResult(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, exc.Message));
+            }
+        }
     }
 }
