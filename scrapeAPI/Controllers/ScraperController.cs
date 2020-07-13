@@ -1899,7 +1899,10 @@ namespace scrapeAPI.Controllers
                     var salesOrder = db.SalesOrders.Where(p => p.OrderID == o.OrderID).SingleOrDefault();
                     if (salesOrder == null)
                     {
-                        orderIDs.Add(o.OrderID);
+                        if (o.OrderID != "2426445679012")   // the iphone is not found in the SalesOrder table since it was listed indepedent of a seller's listing.
+                        {
+                            orderIDs.Add(o.OrderID);
+                        }
                     }
                 }
                 return Ok(orderIDs.Count);
