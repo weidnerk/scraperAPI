@@ -1863,6 +1863,12 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="storeID"></param>
+        /// <param name="URL"></param>
+        /// <returns>null if OK to use</returns>
         [HttpGet]
         [Route("getlistingbysupplierurl")]
         public IHttpActionResult GetListingBySupplierURL(int storeID, string URL)
@@ -1872,7 +1878,13 @@ namespace scrapeAPI.Controllers
             {
                 strCurrentUserId = User.Identity.GetUserId();
                 var u = db.GetListingBySupplierURL(storeID, URL);
-                return Ok(u);
+                var uresult = u.ToList();
+
+                // might exist but if not listed or Ended, then can use
+                var w = u.Where(p=> p.StoreID == storeID && (p.Listed != null || p.Ended == null)).SingleOrDefault();
+
+                // return null if OK to use
+                return Ok(w);
             }
             catch (Exception exc)
             {
