@@ -13,7 +13,7 @@ namespace scrapeAPI.Models
 {
     public class DataModelsDB : DbContext
     {
-        dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+        dsmodels.Repository db = new dsmodels.Repository();
 
         static DataModelsDB()
         {

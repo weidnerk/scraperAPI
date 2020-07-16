@@ -33,7 +33,7 @@ namespace scrapeAPI.Controllers
     [Authorize]
     public class ScraperController : ApiController
     {
-        dsmodels.DataModelsDB db = new dsmodels.DataModelsDB();
+        IRepository _repository = new dsmodels.Repository();
         Models.DataModelsDB models = new Models.DataModelsDB();
 
         const string _filename = "order.csv";
@@ -60,7 +60,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var sh = db.SearchHistoryView.AsNoTracking().OrderByDescending(x => x.Updated).ToList();
+                var sh = _repository.SearchHistoryView.AsNoTracking().OrderByDescending(x => x.Updated).ToList();
                 return Ok(sh);
             }
             catch (Exception exc)
@@ -85,11 +85,11 @@ namespace scrapeAPI.Controllers
 
             try
             {
-                var f = db.SearchHistory.Where(p => p.ID == rptNumber).FirstOrDefault();
+                var f = _repository.SearchHistory.Where(p => p.ID == rptNumber).FirstOrDefault();
                 if (f != null)
                 {
                     f.Running = false;
-                    db.SearchHistoryUpdate(f, "Running");
+                    _repository.SearchHistoryUpdate(f, "Running");
                 }
                 return Ok();
             }
@@ -113,9 +113,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                decimal wmShipping = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart shipping"));
-                decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart free shipping min"));
+                var settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
+                decimal wmShipping = Convert.ToDecimal(_repository.GetAppSetting(settings, "Walmart shipping"));
+                decimal wmFreeShippingMin = Convert.ToDecimal(_repository.GetAppSetting(settings, "Walmart free shipping min"));
                 var px = wallib.wmUtility.wmNewPrice(supplierPrice, pctProfit, wmShipping, wmFreeShippingMin, settings.FinalValueFeePct);
                 return Ok(px);
             }
@@ -165,7 +165,7 @@ namespace scrapeAPI.Controllers
         {
             string strCurrentUserId = User.Identity.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+            var settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-daysBack);
@@ -175,7 +175,7 @@ namespace scrapeAPI.Controllers
                 itemID = (itemID == "null") ? null : itemID;
 
                 IQueryable<TimesSold> x = null;
-                x = db.GetSalesData(rptNumber, ModTimeFrom, storeID, itemID);
+                x = _repository.GetSalesData(rptNumber, ModTimeFrom, storeID, itemID);
                 if (minPrice.HasValue)
                 {
                     x = x.Where(p => p.Price >= minPrice);
@@ -249,7 +249,7 @@ namespace scrapeAPI.Controllers
                     }
                     if (filter >= 4)
                     {
-                        mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => !db.IsVERO(p.SupplierBrand)).ToList();
+                        mv.TimesSoldRpt = mv.TimesSoldRpt.Where(p => !_repository.IsVERO(p.SupplierBrand)).ToList();
                     }
                 }
                 foreach (var item in mv.TimesSoldRpt.Where(w => w.SupplierPrice.HasValue))
@@ -269,7 +269,7 @@ namespace scrapeAPI.Controllers
                 }
                 if (priceDelta.HasValue)
                 {
-                    decimal pxDelta = Convert.ToDecimal(db.GetAppSetting(settings, "priceDelta"));
+                    decimal pxDelta = Convert.ToDecimal(_repository.GetAppSetting(settings, "priceDelta"));
                     mv.TimesSoldRpt = mv.TimesSoldRpt.Where(o => o.PriceDelta > pxDelta).OrderByDescending(p => p.LastSold).ToList();
                 }
                 mv.ListingsProcessed = 0;
@@ -308,11 +308,11 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                decimal wmShipping = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart shipping"));
-                decimal wmFreeShippingMin = Convert.ToDecimal(db.GetAppSetting(settings, "Walmart free shipping min"));
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
+                decimal wmShipping = Convert.ToDecimal(_repository.GetAppSetting(settings, "Walmart shipping"));
+                decimal wmFreeShippingMin = Convert.ToDecimal(_repository.GetAppSetting(settings, "Walmart free shipping min"));
                 double pctProfit = settings.PctProfit;
-                int imgLimit = Convert.ToInt32(db.GetAppSetting(settings, "Listing Image Limit"));
+                int imgLimit = Convert.ToInt32(_repository.GetAppSetting(settings, "Listing Image Limit"));
 
                 string ret = await FetchSeller.CalculateMatch(settings, rptNumber, minSold, daysBack, minPrice, maxPrice, activeStatusOnly, isSellerVariation, itemID, pctProfit, 0, wmShipping, wmFreeShippingMin, settings.FinalValueFeePct, imgLimit, "walmart");
                 if (string.IsNullOrEmpty(ret))
@@ -399,7 +399,7 @@ namespace scrapeAPI.Controllers
             {
                 var user = await UserManager.FindByNameAsync(userName);
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, user.Id);
+                var settings = _repository.GetUserSettingsView(connStr, user.Id);
 
                 if (user == null)
                     return Ok(false);
@@ -430,7 +430,7 @@ namespace scrapeAPI.Controllers
             {
                 var user = await UserManager.FindByNameAsync(userName);
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, user.Id, storeID);
+                var settings = _repository.GetUserSettingsView(connStr, user.Id, storeID);
                 if (settings is null)
                 {
                     return BadRequest("User settingss do not exist");
@@ -469,7 +469,7 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                    var settings = db.GetUserSettingsView(connStr, user.Id);
+                    var settings = _repository.GetUserSettingsView(connStr, user.Id);
 
                     var i = await ebayAPIs.GetSingleItem(settings, itemID, true);
                     return Ok(i);
@@ -506,7 +506,7 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                    var settings = db.GetUserSettingsView(connStr, user.Id);
+                    var settings = _repository.GetUserSettingsView(connStr, user.Id);
                     string ret = await eBayUtility.FetchSeller.StoreToListing(settings, storeID);
                     return Ok(ret);
                 }
@@ -533,7 +533,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                var settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 // New listing
                 if (dto.Listing.ID == 0)
@@ -549,7 +549,7 @@ namespace scrapeAPI.Controllers
                         string msg = "Supplier URL is not of walmart pattern.";
                         return BadRequest(msg);
                     }
-                    var si = db.GetSellerListing(dto.Listing.ItemID);
+                    var si = _repository.GetSellerListing(dto.Listing.ItemID);
                     if (si == null)
                     {
                         var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID, true);
@@ -567,7 +567,7 @@ namespace scrapeAPI.Controllers
                             dto.Listing.eBaySellerURL = sellerListing.EbayURL;
 
                             // copy seller listing item specifics
-                            var specifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
+                            var specifics = dsmodels.Repository.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
                             var revisedItemSpecs = eBayItem.ModifyItemSpecific(specifics);
                             dto.Listing.ItemSpecifics = revisedItemSpecs;
                         }
@@ -592,7 +592,7 @@ namespace scrapeAPI.Controllers
                         dto.Listing.PrimaryCategoryName = si.PrimaryCategoryName;
 
                         // copy seller listing item specifics
-                        var specifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, si.ItemSpecifics);
+                        var specifics = dsmodels.Repository.CopyItemSpecificFromSellerListing(dto.Listing, si.ItemSpecifics);
                         var revisedItemSpecs = eBayItem.ModifyItemSpecific(specifics);
                         dto.Listing.ItemSpecifics = revisedItemSpecs;
                     }
@@ -601,7 +601,7 @@ namespace scrapeAPI.Controllers
                     if (dto.Listing.SupplierItem.ID == 0)
                     {
                         // exists in db?
-                        var r = db.GetSupplierItemByURL(dto.Listing.SupplierItem.ItemURL);
+                        var r = _repository.GetSupplierItemByURL(dto.Listing.SupplierItem.ItemURL);
                         if (r != null)
                         {
                             dto.Listing.SupplierID = r.ID;
@@ -613,7 +613,7 @@ namespace scrapeAPI.Controllers
                 else
                 {
                     // Pull exiting record and see if ebay item id changed.
-                    listing = db.ListingGet(dto.Listing.ID);
+                    listing = _repository.ListingGet(dto.Listing.ID);
                     if (listing != null)
                     {
                         if (!string.IsNullOrEmpty(listing.ItemID))
@@ -628,7 +628,7 @@ namespace scrapeAPI.Controllers
                                     dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
                                     dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
 
-                                    dto.Listing.ItemSpecifics = dsmodels.DataModelsDB.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
+                                    dto.Listing.ItemSpecifics = dsmodels.Repository.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
                                 }
                                 else
                                 {
@@ -640,7 +640,7 @@ namespace scrapeAPI.Controllers
                     }
                 }
 
-                var updatedListing = await db.ListingSaveAsync(settings, dto.Listing, updateItemSpecifics, dto.FieldNames.ToArray());
+                var updatedListing = await _repository.ListingSaveAsync(settings, dto.Listing, updateItemSpecifics, dto.FieldNames.ToArray());
                 updatedListing.Warning = dsutil.DSUtil.GetDescrWarnings(updatedListing.Description);
                 updatedListing.ItemSpecificWarning = eBayUtility.FetchSeller.GetItemDescriptionWarnings(listing);
 
@@ -670,7 +670,7 @@ namespace scrapeAPI.Controllers
                 //settings = db.GetUserSettingsView(connStr, strCurrentUserId);
                 dto.UserSettings.UserID = strCurrentUserId;
                 dto.UserSettings.ApplicationID = 1;
-                var view = await db.UserSettingsSaveAsync(connStr, dto.UserSettings, dto.FieldNames.ToArray());
+                var view = await _repository.UserSettingsSaveAsync(connStr, dto.UserSettings, dto.FieldNames.ToArray());
                 return Ok(view);
             }
             catch (Exception exc)
@@ -693,7 +693,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 dto.UpdateToListing.UserID = strCurrentUserId;
-                await db.UpdateToListingSave(dto.UpdateToListing, dto.FieldNames.ToArray());
+                await _repository.UpdateToListingSave(dto.UpdateToListing, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
@@ -720,7 +720,7 @@ namespace scrapeAPI.Controllers
                 //var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
 
                 note.UserID = strCurrentUserId;
-                await db.NoteSave(note);
+                await _repository.NoteSave(note);
                 return Ok();
             }
             catch (Exception exc)
@@ -745,9 +745,9 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                var settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var notes = await db.ItemNotes(itemID, storeID);
+                var notes = await _repository.ItemNotes(itemID, storeID);
                 return Ok(notes);
             }
             catch (Exception exc)
@@ -773,7 +773,7 @@ namespace scrapeAPI.Controllers
                 sellerProfile.Updated = DateTime.Now;
                 sellerProfile.UpdatedBy = strCurrentUserId;
                 sellerProfile.UserID = strCurrentUserId;
-                await db.SellerProfileSave(sellerProfile,
+                await _repository.SellerProfileSave(sellerProfile,
                     "Note",
                     "Updated",
                     "UpdatedBy");
@@ -801,7 +801,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var output = await eBayItem.ListingCreateAsync(settings, listingID, reviseUploadImages);
                 if (ListingNotCreated(output))
@@ -837,7 +837,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 // for testing, get some variation listing for item specifics
                 // https://www.ebay.com/itm/Low-Profile-Microwave-Oven-RV-Dorm-Mini-Small-Best-Compact-Kitchen-Countertop-/133041437329?var=0
@@ -891,8 +891,8 @@ namespace scrapeAPI.Controllers
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                var listing = db.ListingGet(listingID);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
+                var listing = _repository.ListingGet(listingID);
 
                 // delist and leave in database
                 bool auctionWasEnded;
@@ -900,7 +900,7 @@ namespace scrapeAPI.Controllers
                 if (auctionWasEnded)
                 {
                     var entry = new ListingLog { ListingID = listingID, MsgID = 1700, UserID = settings.UserID };
-                    await db.ListingLogAdd(entry);
+                    await _repository.ListingLogAdd(entry);
                     // return BadRequest("Auction was ended");
                 }
 
@@ -908,14 +908,14 @@ namespace scrapeAPI.Controllers
                 listing.Listed = null;
                 listing.Ended = DateTime.Now;
                 listing.EndedBy = strCurrentUserId;
-                await db.ListingSaveAsync(settings, listing, false, "Ended", "EndedBy", "Listed");
+                await _repository.ListingSaveAsync(settings, listing, false, "Ended", "EndedBy", "Listed");
 
                 var log = new ListingLog();
                 log.MsgID = 900;
                 log.Note = string.Format("listing {0}; Ended by {1}; {2}", listing.ListedItemID, settings.UserName, reason);
                 log.ListingID = listing.ID;
                 log.UserID = settings.UserID;
-                await db.ListingLogAdd(log);
+                await _repository.ListingLogAdd(log);
 
                 return Ok(ret);
             }
@@ -936,7 +936,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var eBayOrders = ebayAPIs.GetOrdersByDate(settings, listing.ListedItemID, fromDate, toDate, 0.0915);
                 if (eBayOrders.Count > 0)
@@ -966,7 +966,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var eBayOrders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915, orderStatus);
                 if (eBayOrders.Count > 0)
@@ -1017,10 +1017,10 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                var settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
                 username = settings.UserName;
 
-                var listing = db.ListingGet(listingID);
+                var listing = _repository.ListingGet(listingID);
                 if (listing == null)
                 {
                     return NotFound();
@@ -1056,10 +1056,10 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                var settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
                 username = settings.UserName;
 
-                var listing = db.SupplierItemGet(ID);
+                var listing = _repository.SupplierItemGet(ID);
                 if (listing == null)
                 {
                     return NotFound();
@@ -1086,7 +1086,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                var sellerProfile = await db.SellerProfileGet(seller);
+                var sellerProfile = await _repository.SellerProfileGet(seller);
                 if (sellerProfile == null)
                     return NotFound();
                 return Ok(sellerProfile);
@@ -1117,13 +1117,13 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 // In both calls here, referring to RCA home theatre sold on 12/4/2019
                 //eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
                 // eBayUtility.ebayAPIs.ProcessTransactions(settings, "223707436249", new DateTime(2019, 12, 1), new DateTime(2019, 12, 15));
 
-                var listings = db.GetListings(storeID, unlisted, listed);
+                var listings = _repository.GetListings(storeID, unlisted, listed);
                 //var listings = db.GetListings(storeID, unlisted, listed);
                 if (listings == null)
                     return NotFound();
@@ -1156,12 +1156,12 @@ namespace scrapeAPI.Controllers
                 }
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                var settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                var settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 byte handlingTime = settings.HandlingTime;
                 byte maxShippingDays = settings.MaxShippingDays;
                 var allowedDeliveryDays = handlingTime + maxShippingDays;
-                int imgLimit = Convert.ToInt32(db.GetAppSetting(settings, "Listing Image Limit"));
+                int imgLimit = Convert.ToInt32(_repository.GetAppSetting(settings, "Listing Image Limit"));
 
                 var w = await wallib.wmUtility.GetDetail(URL, imgLimit, false);
                 if (w == null)
@@ -1187,7 +1187,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                return Ok(db.SourceCategories.Where(r => r.SourceID == sourceId).OrderBy(o => o.SubCategory).ToList());
+                return Ok(_repository.SourceCategories.Where(r => r.SourceID == sourceId).OrderBy(o => o.SubCategory).ToList());
             }
             catch (Exception exc)
             {
@@ -1212,7 +1212,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 /*
                  * 
@@ -1220,7 +1220,7 @@ namespace scrapeAPI.Controllers
                  * We do cleanup UpdateToListing so not sure why some records don't get removed.
                  * 
                  */
-                await db.HistoryRemove(connStr, rptNumber);
+                await _repository.HistoryRemove(connStr, rptNumber);
                 return Ok();
             }
             catch (Exception exc)
@@ -1246,12 +1246,12 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
-                bool salesExist = db.SalesExists(listingID);
+                bool salesExist = _repository.SalesExists(listingID);
                 if (!salesExist)
                 {
-                    string ret = await db.DeleteListingRecordAsync(settings, listingID, false);
+                    string ret = await _repository.DeleteListingRecordAsync(settings, listingID, false);
                     if (!string.IsNullOrEmpty(ret))
                     {
                         return BadRequest(ret);
@@ -1284,7 +1284,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
                 //var profile = db.GetUserProfile(strCurrentUserId);
 
                 // TESTING
@@ -1295,19 +1295,19 @@ namespace scrapeAPI.Controllers
                 if (settings != null)
                 {
                     var dashboard = new Dashboard();
-                    int OOS = db.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).Count();
+                    int OOS = _repository.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).Count();
                     dashboard.OOS = OOS;
 
-                    int notListed = db.Listings.Where(p => p.Listed == null && p.StoreID == storeID).Count();
+                    int notListed = _repository.Listings.Where(p => p.Listed == null && p.StoreID == storeID).Count();
                     dashboard.NotListed = notListed;
 
-                    int listed = db.Listings.Where(p => p.Listed != null && p.StoreID == storeID).Count();
+                    int listed = _repository.Listings.Where(p => p.Listed != null && p.StoreID == storeID).Count();
                     dashboard.Listed = listed;
 
-                    var repricerLastRan = db.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().RepricerLastRan;
+                    var repricerLastRan = _repository.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().RepricerLastRan;
                     dashboard.RepricerLastRan = repricerLastRan;
 
-                    var repricerElapsedTime = db.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().ElapsedTime;
+                    var repricerElapsedTime = _repository.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().ElapsedTime;
                     dashboard.RepricerElapsedTime = repricerElapsedTime;
                     /*
                      * 04.10.2020 don't run this yet
@@ -1374,7 +1374,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId, storeID);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId, storeID);
 
 
                 var storeItems = new ItemTypeCollection();
@@ -1475,7 +1475,7 @@ namespace scrapeAPI.Controllers
                 strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                
-                var userStores = db.GetUserStores(strCurrentUserId);
+                var userStores = _repository.GetUserStores(strCurrentUserId);
                 if (userStores == null)
                 {
                     return NotFound();
@@ -1504,8 +1504,8 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
-                var exists = db.SalesOrderExists(dto.SalesOrder.SupplierOrderNumber);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
+                var exists = _repository.SalesOrderExists(dto.SalesOrder.SupplierOrderNumber);
                 if (!exists)
                 {
                     string msg = null;
@@ -1527,7 +1527,7 @@ namespace scrapeAPI.Controllers
                     dto.FieldNames.Add("BuyerPaid");
                     dto.FieldNames.Add("BuyerState");
                 }
-                await db.SalesOrderSaveAsync(settings, dto.SalesOrder, dto.FieldNames.ToArray());
+                await _repository.SalesOrderSaveAsync(settings, dto.SalesOrder, dto.FieldNames.ToArray());
                 return Ok();
             }
             catch (Exception exc)
@@ -1552,7 +1552,7 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 await eBayItem.RefreshItemSpecifics(settings, ID);
                 return Ok();
@@ -1579,7 +1579,7 @@ namespace scrapeAPI.Controllers
                 IUserSettingsView settings = new UserSettingsView();
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 string msg = dsutil.DSUtil.ErrMsg("IsValidWalmartURL", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, settings.UserName);
@@ -1598,7 +1598,7 @@ namespace scrapeAPI.Controllers
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
 
                 // need store Token
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId, storeID);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId, storeID);
                 if (settings != null)
                 {
                     var policies = eBayItem.GetSellerBusinessPolicy(settings);
@@ -1626,9 +1626,9 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
-                var log = db.ListingLogGet(listingID);
+                var log = _repository.ListingLogGet(listingID);
                 return Ok(log);
             }
             catch (Exception exc)
@@ -1648,9 +1648,9 @@ namespace scrapeAPI.Controllers
             {
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
-                await db.ListingLogAdd(log);
+                await _repository.ListingLogAdd(log);
                 return Ok();
             }
             catch (Exception exc)
@@ -1669,6 +1669,7 @@ namespace scrapeAPI.Controllers
         [Route("ebaykeysupdate")]
         public async Task<IHttpActionResult> eBayKeysSave(eBayKeysDTO dto)
         {
+            var db = new dsmodels.Repository();
             string strCurrentUserId = null;
             int storeID = dto.StoreID;
             var userToken = new UserToken();
@@ -1765,7 +1766,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                await db.StoreAddAsync(strCurrentUserId, profile);
+                await _repository.StoreAddAsync(strCurrentUserId, profile);
                 return Ok();
             }
             catch (Exception exc)
@@ -1789,7 +1790,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                string token = db.GetToken(storeID, strCurrentUserId);
+                string token = _repository.GetToken(storeID, strCurrentUserId);
                 var u = Utility.eBayItem.GetUser(token);
                 var eBayStore = Utility.eBayItem.GetStore(token);
                 return Ok(eBayStore);
@@ -1809,7 +1810,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                var keys = db.GetUserProfileKeysView(storeID, strCurrentUserId);
+                var keys = _repository.GetUserProfileKeysView(storeID, strCurrentUserId);
                 return Ok(keys);
             }
             catch (Exception exc)
@@ -1851,7 +1852,7 @@ namespace scrapeAPI.Controllers
                     salesOrder.Profit = eBayUtility.FetchSeller.CalcProfitOnSalesOrder(salesOrder);
                     salesOrder.ProfitMargin = FetchSeller.CalcProfitMarginOnSalesOrder(salesOrder);
                 }
-                var ret = await db.SalesOrderAddAsync(salesOrder);
+                var ret = await _repository.SalesOrderAddAsync(salesOrder);
                 return Ok(ret);
             }
             catch (Exception exc)
@@ -1875,7 +1876,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                var u = db.GetListingBySupplierURL(storeID, URL);
+                var u = _repository.GetListingBySupplierURL(storeID, URL);
                 var uresult = u.ToList();
 
                 // might exist but if not listed or Ended, then can use
@@ -1901,12 +1902,12 @@ namespace scrapeAPI.Controllers
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = db.GetUserSettingsView(connStr, strCurrentUserId);
+                settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var orders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915, "");
                 foreach(var o in orders)
                 {
-                    var salesOrder = db.SalesOrders.Where(p => p.OrderID == o.OrderID).SingleOrDefault();
+                    var salesOrder = _repository.SalesOrders.Where(p => p.OrderID == o.OrderID).SingleOrDefault();
                     if (salesOrder == null)
                     {
                         if (o.OrderID != "2426445679012")   // the iphone is not found in the SalesOrder table since it was listed indepedent of a seller's listing.

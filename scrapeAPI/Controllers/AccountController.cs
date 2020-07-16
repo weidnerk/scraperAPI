@@ -47,7 +47,7 @@ namespace scrapeAPI.Controllers
     public class AccountController : ApiController
     {
         private scrapeAPI.Models.DataModelsDB db = new scrapeAPI.Models.DataModelsDB();
-        dsmodels.DataModelsDB models = new dsmodels.DataModelsDB();
+        IRepository _repository = new dsmodels.Repository();
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
         const string _logfile = "log.txt";
@@ -166,7 +166,7 @@ namespace scrapeAPI.Controllers
         {
             var user = await UserManager.FindByNameAsync(userName);
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = models.GetUserSettingsView(connStr, user.Id);
+            var settings = _repository.GetUserSettingsView(connStr, user.Id);
             // dsutil.DSUtil.WriteFile(_logfile, "UserSettingsGet ", user.UserName);
             if (settings == null)
                 return NotFound();
@@ -179,7 +179,7 @@ namespace scrapeAPI.Controllers
         {
             var user = await UserManager.FindByNameAsync(userName);
             string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-            var settings = models.GetUserSettingsView(connStr, user.Id, storeID);
+            var settings = _repository.GetUserSettingsView(connStr, user.Id, storeID);
             // dsutil.DSUtil.WriteFile(_logfile, "UserSettingsGet ", user.UserName);
             if (settings == null)
                 return NotFound();
@@ -529,7 +529,7 @@ namespace scrapeAPI.Controllers
                 p.Created = DateTime.Now;
 
                 var settings = new UserSettingsView { UserName = model.Username };
-                await models.UserProfileSaveAsync(p);
+                await _repository.UserProfileSaveAsync(p);
 
                 return Ok();
             }
@@ -611,10 +611,10 @@ namespace scrapeAPI.Controllers
         }
         protected async Task DeleteUsrAsync(string id)
         {
-            var profile = models.UserProfiles.SingleOrDefault(p => p.UserID == id);
+            var profile = _repository.UserProfiles.SingleOrDefault(p => p.UserID == id);
             if (profile != null)
             {
-                string ret = await models.UserProfileDeleteAsync(profile);
+                string ret = await _repository.UserProfileDeleteAsync(profile);
                 var user = await UserManager.FindByIdAsync(id);
 
                 //ApplicationUserManager manager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
@@ -648,8 +648,9 @@ namespace scrapeAPI.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 var logins = user.Logins;
                 var rolesForUser = await _userManager.GetRolesAsync(id);
+                var db = new dsmodels.Repository();
 
-                using (var transaction = models.Database.BeginTransaction())
+                using (var transaction = db.Database.BeginTransaction())
                 {
                     foreach (var login in logins.ToList())
                     {
@@ -821,9 +822,9 @@ namespace scrapeAPI.Controllers
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-                settings = models.GetUserSettingsView(connStr, profile.UserID);
+                settings = _repository.GetUserSettingsView(connStr, profile.UserID);
 
-                await models.UserProfileSaveAsync(profile, "SelectedStore");
+                await _repository.UserProfileSaveAsync(profile, "SelectedStore");
                 return Ok();
             }
             catch (Exception exc)
