@@ -47,13 +47,15 @@ namespace scrapeAPI.Controllers
     public class AccountController : ApiController
     {
         private scrapeAPI.Models.DataModelsDB db = new scrapeAPI.Models.DataModelsDB();
-        IRepository _repository = new dsmodels.Repository();
+        //IRepository _repository = new dsmodels.Repository();
+        private IRepository _repository;
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
         const string _logfile = "log.txt";
 
-        public AccountController()
+        public AccountController(IRepository repository)
         {
+            _repository = repository;
         }
 
         public AccountController(ApplicationUserManager userManager,

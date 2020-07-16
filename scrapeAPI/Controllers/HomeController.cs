@@ -1,7 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿/*
+ * 
+ * Don't remove - gets us to the Web API home page.
+ * 
+ * 
+ */
+
 using System.Web.Mvc;
 
 namespace scrapeAPI.Controllers
