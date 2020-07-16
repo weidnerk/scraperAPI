@@ -817,7 +817,7 @@ namespace scrapeAPI.Controllers
         [Route("userprofilesave")]
         public async Task<IHttpActionResult> UserProfileSave(UserProfile profile)
         {
-            UserSettingsView settings = null;
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;

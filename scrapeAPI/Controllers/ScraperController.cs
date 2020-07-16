@@ -39,8 +39,6 @@ namespace scrapeAPI.Controllers
         const string _filename = "order.csv";
         const string _logfile = "log.txt";
 
-        const int _qtyToList = 2;
-
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
         {
@@ -305,7 +303,7 @@ namespace scrapeAPI.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> FillMatch(int rptNumber, int minSold, int daysBack, int? minPrice, int? maxPrice, bool? activeStatusOnly, bool? isSellerVariation, string itemID, int storeID)
         {
-            UserSettingsView settings = null;
+            IUserSettingsView settings = null;
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -798,7 +796,7 @@ namespace scrapeAPI.Controllers
         [Route("createlisting")]
         public async Task<IHttpActionResult> CreateListing(int listingID, bool reviseUploadImages)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -834,7 +832,7 @@ namespace scrapeAPI.Controllers
         public async Task<IHttpActionResult> CreateVariationListing()
         {
             string output = null;
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -888,7 +886,7 @@ namespace scrapeAPI.Controllers
         [Route("endlisting")]
         public async Task<IHttpActionResult> EndListing(int listingID, string reason)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
             try
             {
@@ -933,7 +931,7 @@ namespace scrapeAPI.Controllers
         [Route("setorder")]
         public IHttpActionResult SetOrder(Listing listing, DateTime fromDate, DateTime toDate)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
             try
             {
@@ -963,7 +961,7 @@ namespace scrapeAPI.Controllers
         [Route("getorders")]
         public IHttpActionResult GetOrders(DateTime fromDate, DateTime toDate, string orderStatus)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
             try
             {
@@ -1114,7 +1112,7 @@ namespace scrapeAPI.Controllers
         {
 
             // eBayUtility.ebayAPIs.GetOrders("24-04242-80495", 1);
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1209,7 +1207,7 @@ namespace scrapeAPI.Controllers
         [AcceptVerbs("DELETE")]
         public async Task<IHttpActionResult> DeleteScan(int rptNumber)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1243,7 +1241,7 @@ namespace scrapeAPI.Controllers
         [AcceptVerbs("DELETE")]
         public async Task<IHttpActionResult> DeleteListingRecord(int listingID)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1281,7 +1279,7 @@ namespace scrapeAPI.Controllers
         [Route("dashboard")]
         public IHttpActionResult GetDashboard(int storeID)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1501,7 +1499,7 @@ namespace scrapeAPI.Controllers
         [Route("salesorderupdate")]
         public async Task<IHttpActionResult> SalesOrderSave(SalesOrderDTO dto)
         {
-            UserSettingsView settings = null;
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1549,7 +1547,7 @@ namespace scrapeAPI.Controllers
         [Route("refreshitemspecifics")]
         public async Task<IHttpActionResult> RefreshItemSpecifics(int ID)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1578,7 +1576,7 @@ namespace scrapeAPI.Controllers
             }
             catch (Exception exc)
             {
-                var settings = new UserSettingsView();
+                IUserSettingsView settings = new UserSettingsView();
                 string strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
                 settings = db.GetUserSettingsView(connStr, strCurrentUserId);
@@ -1623,7 +1621,7 @@ namespace scrapeAPI.Controllers
         [Route("getlistinglog")]
         public IHttpActionResult GetListingLog(int listingID)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1645,7 +1643,7 @@ namespace scrapeAPI.Controllers
         public async Task<IHttpActionResult> ListingLogAdd(ListingLog log)
         {
 
-            UserSettingsView settings = null;
+            IUserSettingsView settings = new UserSettingsView();
             try
             {
                 string strCurrentUserId = User.Identity.GetUserId();
@@ -1897,7 +1895,7 @@ namespace scrapeAPI.Controllers
         [Route("compareorders")]
         public IHttpActionResult CompareOrders(DateTime fromDate, DateTime toDate)
         {
-            var settings = new UserSettingsView();
+            IUserSettingsView settings = new UserSettingsView();
             string strCurrentUserId = User.Identity.GetUserId();
             var orderIDs = new List<string>();
             try

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wallib", "..\wallib\wallib\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eBayUtility", "..\eBayUtility\eBayUtility\eBayUtility.csproj", "{7ABA8BC4-5B6E-4A74-8A14-56FB96ABBDAF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrapeAPITest", "..\ScrapeAPITest\ScrapeAPITest.csproj", "{E60FB569-4D5B-4C71-9EA6-2AC8F68BC874}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{7ABA8BC4-5B6E-4A74-8A14-56FB96ABBDAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7ABA8BC4-5B6E-4A74-8A14-56FB96ABBDAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7ABA8BC4-5B6E-4A74-8A14-56FB96ABBDAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E60FB569-4D5B-4C71-9EA6-2AC8F68BC874}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E60FB569-4D5B-4C71-9EA6-2AC8F68BC874}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E60FB569-4D5B-4C71-9EA6-2AC8F68BC874}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E60FB569-4D5B-4C71-9EA6-2AC8F68BC874}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
