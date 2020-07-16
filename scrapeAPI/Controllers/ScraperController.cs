@@ -33,12 +33,15 @@ namespace scrapeAPI.Controllers
     [Authorize]
     public class ScraperController : ApiController
     {
-        IRepository _repository = new dsmodels.Repository();
+        private IRepository _repository;
         Models.DataModelsDB models = new Models.DataModelsDB();
 
-        const string _filename = "order.csv";
         const string _logfile = "log.txt";
 
+        public ScraperController(IRepository repository)
+        {
+            _repository = repository;
+        }
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
         {
@@ -60,7 +63,7 @@ namespace scrapeAPI.Controllers
             try
             {
                 var user = await UserManager.FindByNameAsync(userName);
-                var sh = _repository.SearchHistoryView.AsNoTracking().OrderByDescending(x => x.Updated).ToList();
+                var sh = _repository.Context.SearchHistoryView.AsNoTracking().OrderByDescending(x => x.Updated).ToList();
                 return Ok(sh);
             }
             catch (Exception exc)
@@ -85,7 +88,7 @@ namespace scrapeAPI.Controllers
 
             try
             {
-                var f = _repository.SearchHistory.Where(p => p.ID == rptNumber).FirstOrDefault();
+                var f = _repository.Context.SearchHistory.Where(p => p.ID == rptNumber).FirstOrDefault();
                 if (f != null)
                 {
                     f.Running = false;
@@ -1187,7 +1190,7 @@ namespace scrapeAPI.Controllers
         {
             try
             {
-                return Ok(_repository.SourceCategories.Where(r => r.SourceID == sourceId).OrderBy(o => o.SubCategory).ToList());
+                return Ok(_repository.Context.SourceCategories.Where(r => r.SourceID == sourceId).OrderBy(o => o.SubCategory).ToList());
             }
             catch (Exception exc)
             {
@@ -1295,19 +1298,19 @@ namespace scrapeAPI.Controllers
                 if (settings != null)
                 {
                     var dashboard = new Dashboard();
-                    int OOS = _repository.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).Count();
+                    int OOS = _repository.Context.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).Count();
                     dashboard.OOS = OOS;
 
-                    int notListed = _repository.Listings.Where(p => p.Listed == null && p.StoreID == storeID).Count();
+                    int notListed = _repository.Context.Listings.Where(p => p.Listed == null && p.StoreID == storeID).Count();
                     dashboard.NotListed = notListed;
 
-                    int listed = _repository.Listings.Where(p => p.Listed != null && p.StoreID == storeID).Count();
+                    int listed = _repository.Context.Listings.Where(p => p.Listed != null && p.StoreID == storeID).Count();
                     dashboard.Listed = listed;
 
-                    var repricerLastRan = _repository.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().RepricerLastRan;
+                    var repricerLastRan = _repository.Context.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().RepricerLastRan;
                     dashboard.RepricerLastRan = repricerLastRan;
 
-                    var repricerElapsedTime = _repository.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().ElapsedTime;
+                    var repricerElapsedTime = _repository.Context.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().ElapsedTime;
                     dashboard.RepricerElapsedTime = repricerElapsedTime;
                     /*
                      * 04.10.2020 don't run this yet
@@ -1677,7 +1680,7 @@ namespace scrapeAPI.Controllers
             {
                 strCurrentUserId = User.Identity.GetUserId();
 
-                using (DbContextTransaction transaction = db.Database.BeginTransaction())
+                using (DbContextTransaction transaction = db.Context.Database.BeginTransaction())
                 {
                     try
                     {
@@ -1907,7 +1910,7 @@ namespace scrapeAPI.Controllers
                 var orders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915, "");
                 foreach(var o in orders)
                 {
-                    var salesOrder = _repository.SalesOrders.Where(p => p.OrderID == o.OrderID).SingleOrDefault();
+                    var salesOrder = _repository.Context.SalesOrders.Where(p => p.OrderID == o.OrderID).SingleOrDefault();
                     if (salesOrder == null)
                     {
                         if (o.OrderID != "2426445679012")   // the iphone is not found in the SalesOrder table since it was listed indepedent of a seller's listing.

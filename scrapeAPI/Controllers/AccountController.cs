@@ -611,7 +611,7 @@ namespace scrapeAPI.Controllers
         }
         protected async Task DeleteUsrAsync(string id)
         {
-            var profile = _repository.UserProfiles.SingleOrDefault(p => p.UserID == id);
+            var profile = _repository.Context.UserProfiles.SingleOrDefault(p => p.UserID == id);
             if (profile != null)
             {
                 string ret = await _repository.UserProfileDeleteAsync(profile);
@@ -648,7 +648,7 @@ namespace scrapeAPI.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 var logins = user.Logins;
                 var rolesForUser = await _userManager.GetRolesAsync(id);
-                var db = new dsmodels.Repository();
+                var db = new DataContext();
 
                 using (var transaction = db.Database.BeginTransaction())
                 {
