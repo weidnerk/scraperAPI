@@ -1297,7 +1297,7 @@ namespace scrapeAPI.Controllers
 
                 if (settings != null)
                 {
-                    var dashboard = new Dashboard();
+                    IDashboard dashboard = new Dashboard();
                     int OOS = _repository.Context.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).Count();
                     dashboard.OOS = OOS;
 
