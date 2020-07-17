@@ -11,24 +11,16 @@ using System.Web;
 
 namespace scrapeAPI.Models
 {
-    public class DataModelsDB : DbContext
+    public class DataModelsDB
     {
-        dsmodels.Repository db = new dsmodels.Repository();
+        //dsmodels.Repository db = new dsmodels.Repository();
+        private IRepository _repository;
 
-        static DataModelsDB()
-        {
-            //do not try to create a database 
-            Database.SetInitializer<DataModelsDB>(null);
-        }
-
-        public DataModelsDB()
-            : base("name=OPWContext")
-        {
-        }
-
-        //public DbSet<SearchHistoryView> SearchHistoryView { get; set; }
         private ApplicationUserManager _userManager;
-
+        public DataModelsDB(IRepository repository)
+        {
+            _repository = repository;
+        }
         public ApplicationUserManager UserManager
         {
             get => _userManager ?? HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
@@ -40,7 +32,7 @@ namespace scrapeAPI.Models
 
         public UserProfileView UserProfileGet(ApplicationUser usr)
         {
-            var profile = db.GetUserProfileView(usr.Id);
+            var profile = _repository.GetUserProfileView(usr.Id);
             return profile;
         }
  

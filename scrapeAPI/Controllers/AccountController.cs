@@ -46,8 +46,7 @@ namespace scrapeAPI.Controllers
     [RoutePrefix("api/Account")]
     public class AccountController : ApiController
     {
-        private scrapeAPI.Models.DataModelsDB db = new scrapeAPI.Models.DataModelsDB();
-        //IRepository _repository = new dsmodels.Repository();
+        private scrapeAPI.Models.DataModelsDB db;
         private IRepository _repository;
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
@@ -56,6 +55,7 @@ namespace scrapeAPI.Controllers
         public AccountController(IRepository repository)
         {
             _repository = repository;
+            db = new scrapeAPI.Models.DataModelsDB(_repository);
         }
 
         public AccountController(ApplicationUserManager userManager,
@@ -650,9 +650,8 @@ namespace scrapeAPI.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 var logins = user.Logins;
                 var rolesForUser = await _userManager.GetRolesAsync(id);
-                var db = new DataContext();
 
-                using (var transaction = db.Database.BeginTransaction())
+                using (var transaction = _repository.Context.Database.BeginTransaction())
                 {
                     foreach (var login in logins.ToList())
                     {
@@ -667,7 +666,6 @@ namespace scrapeAPI.Controllers
                             var result = await _userManager.RemoveFromRoleAsync(user.Id, item);
                         }
                     }
-
                     await _userManager.DeleteAsync(user);
                     transaction.Commit();
                 }

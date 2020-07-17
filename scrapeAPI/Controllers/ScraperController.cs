@@ -34,13 +34,16 @@ namespace scrapeAPI.Controllers
     public class ScraperController : ApiController
     {
         private IRepository _repository;
-        Models.DataModelsDB models = new Models.DataModelsDB();
 
         const string _logfile = "log.txt";
 
         public ScraperController(IRepository repository)
         {
             _repository = repository;
+            ebayAPIs.Init(_repository);
+            eBayItem.Init(_repository);
+            FetchSeller.Init(_repository);
+            StoreCheck.Init(_repository);
         }
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
@@ -570,7 +573,7 @@ namespace scrapeAPI.Controllers
                             dto.Listing.eBaySellerURL = sellerListing.EbayURL;
 
                             // copy seller listing item specifics
-                            var specifics = dsmodels.Repository.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
+                            var specifics = _repository.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
                             var revisedItemSpecs = eBayItem.ModifyItemSpecific(specifics);
                             dto.Listing.ItemSpecifics = revisedItemSpecs;
                         }
@@ -595,7 +598,7 @@ namespace scrapeAPI.Controllers
                         dto.Listing.PrimaryCategoryName = si.PrimaryCategoryName;
 
                         // copy seller listing item specifics
-                        var specifics = dsmodels.Repository.CopyItemSpecificFromSellerListing(dto.Listing, si.ItemSpecifics);
+                        var specifics = _repository.CopyItemSpecificFromSellerListing(dto.Listing, si.ItemSpecifics);
                         var revisedItemSpecs = eBayItem.ModifyItemSpecific(specifics);
                         dto.Listing.ItemSpecifics = revisedItemSpecs;
                     }
@@ -631,7 +634,7 @@ namespace scrapeAPI.Controllers
                                     dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
                                     dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;
 
-                                    dto.Listing.ItemSpecifics = dsmodels.Repository.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
+                                    dto.Listing.ItemSpecifics = _repository.CopyItemSpecificFromSellerListing(dto.Listing, sellerListing.ItemSpecifics);
                                 }
                                 else
                                 {
@@ -1672,7 +1675,6 @@ namespace scrapeAPI.Controllers
         [Route("ebaykeysupdate")]
         public async Task<IHttpActionResult> eBayKeysSave(eBayKeysDTO dto)
         {
-            var db = new dsmodels.Repository();
             string strCurrentUserId = null;
             int storeID = dto.StoreID;
             var userToken = new UserToken();
@@ -1680,7 +1682,7 @@ namespace scrapeAPI.Controllers
             {
                 strCurrentUserId = User.Identity.GetUserId();
 
-                using (DbContextTransaction transaction = db.Context.Database.BeginTransaction())
+                using (DbContextTransaction transaction = _repository.Context.Database.BeginTransaction())
                 {
                     try
                     {
@@ -1702,7 +1704,7 @@ namespace scrapeAPI.Controllers
                             {
                                 storeProfile.StoreName = user.eBayUserID;
                             }
-                            await db.StoreProfileAddAsync(storeProfile);
+                            await _repository.StoreProfileAddAsync(storeProfile);
                             storeID = storeProfile.ID;
 
                             // Add to UserStore
@@ -1711,11 +1713,11 @@ namespace scrapeAPI.Controllers
                                 StoreID = storeID,
                                 UserID = strCurrentUserId
                             };
-                            await db.UserStoreAddAsync(userStore);
+                            await _repository.UserStoreAddAsync(userStore);
                         }
 
                         // update eBayKeys
-                        var keys = await db.UserProfileKeysUpdate(dto.eBayKeys, dto.FieldNames.ToArray());
+                        var keys = await _repository.UserProfileKeysUpdate(dto.eBayKeys, dto.FieldNames.ToArray());
 
                         // update UserToken
                         userToken = new UserToken
@@ -1725,7 +1727,7 @@ namespace scrapeAPI.Controllers
                             KeysID = keys.ID,
                             Token = dto.Token
                         };
-                        await db.UserTokenUpdate(userToken, "Token");
+                        await _repository.UserTokenUpdate(userToken, "Token");
 
                         // add to UserSettings
                         /*
@@ -1737,9 +1739,9 @@ namespace scrapeAPI.Controllers
                         await db.UserSettingsSaveAsync(settings);
                         */
 
-                        var userProfile = db.GetUserProfile(strCurrentUserId);
+                        var userProfile = _repository.GetUserProfile(strCurrentUserId);
                         userProfile.SelectedStore = storeID;
-                        await db.UserProfileSaveAsync(userProfile, "SelectedStore");
+                        await _repository.UserProfileSaveAsync(userProfile, "SelectedStore");
 
                         transaction.Commit();
                     }
