@@ -33,17 +33,23 @@ namespace scrapeAPI.Controllers
     [Authorize]
     public class ScraperController : ApiController
     {
-        private IRepository _repository;
+        private readonly IRepository _repository;
 
         const string _logfile = "log.txt";
 
+        /// <summary>
+        /// Based on https://docs.microsoft.com/en-us/aspnet/web-api/overview/advanced/dependency-injection
+        /// </summary>
+        /// <param name="repository"></param>
         public ScraperController(IRepository repository)
         {
             _repository = repository;
             ebayAPIs.Init(_repository);
             eBayItem.Init(_repository);
+            eBayItemVariation.Init(_repository);
             FetchSeller.Init(_repository);
             StoreCheck.Init(_repository);
+            wallib.wmUtility.Init(_repository);
         }
         private ApplicationUserManager _userManager;
         public ApplicationUserManager UserManager
@@ -561,7 +567,7 @@ namespace scrapeAPI.Controllers
                         var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID, true);
                         if (sellerListing != null)
                         {
-                            dto.Listing.SellerListing = sellerListing;
+                            dto.Listing.SellerListing = sellerListing as SellerListing;
                             // if new listing and no title provided, then copy title from seller
                             if (string.IsNullOrEmpty(dto.Listing.ListingTitle))
                             {
@@ -629,7 +635,7 @@ namespace scrapeAPI.Controllers
                                 var sellerListing = await ebayAPIs.GetSingleItem(settings, dto.Listing.ItemID, true);
                                 if (sellerListing != null)
                                 {
-                                    dto.Listing.SellerListing = sellerListing;
+                                    dto.Listing.SellerListing = sellerListing as SellerListing;
                                     sellerListing.Updated = DateTime.Now;
                                     dto.Listing.PrimaryCategoryID = sellerListing.PrimaryCategoryID;
                                     dto.Listing.PrimaryCategoryName = sellerListing.PrimaryCategoryName;

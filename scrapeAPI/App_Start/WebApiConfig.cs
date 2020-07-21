@@ -29,6 +29,7 @@ namespace scrapeAPI
                 defaults: new { id = RouteParameter.Optional }
             );
 
+            //https://docs.microsoft.com/en-us/aspnet/web-api/overview/advanced/dependency-injection
             var container = new UnityContainer();
             container.RegisterType<IRepository, Repository>(new HierarchicalLifetimeManager());
             config.DependencyResolver = new UnityResolver(container);
