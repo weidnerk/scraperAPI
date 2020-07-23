@@ -592,7 +592,7 @@ namespace scrapeAPI.Controllers
                     else
                     {
                         // Seller listings aren't always removed since may be shared between stores
-                        dto.Listing.SellerListing = si;
+                        dto.Listing.SellerListing = si as SellerListing;
                         // if new listing and no title provided, then copy title from seller
                         if (string.IsNullOrEmpty(dto.Listing.ListingTitle))
                         {
