@@ -1815,13 +1815,13 @@ namespace scrapeAPI.Controllers
         }
         [HttpGet]
         [Route("getuserprofilekeys")]
-        public IHttpActionResult GetUserProfileKeys(int storeID)
+        public async Task<IHttpActionResult> GetUserProfileKeysAsync(int storeID)
         {
             string strCurrentUserId = null;
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                var keys = _repository.GetUserProfileKeysView(storeID, strCurrentUserId);
+                var keys = await _repository.GetUserProfileKeysViewAsync(storeID, strCurrentUserId);
                 return Ok(keys);
             }
             catch (Exception exc)
