@@ -1329,7 +1329,7 @@ namespace scrapeAPI.Controllers
                     */
 
                     RemoveImages("productimages");
-                    
+
                     // local
                     // RemoveImages(@"C:\Projects\eBay\scraperAPI\scrapeAPI\productimages");
                     return Ok(dashboard);
@@ -1486,7 +1486,7 @@ namespace scrapeAPI.Controllers
             {
                 strCurrentUserId = User.Identity.GetUserId();
                 string connStr = ConfigurationManager.ConnectionStrings["OPWContext"].ConnectionString;
-               
+
                 var userStores = _repository.GetUserStores(strCurrentUserId);
                 if (userStores == null)
                 {
@@ -1759,7 +1759,7 @@ namespace scrapeAPI.Controllers
                         return Content(HttpStatusCode.InternalServerError, msg);
                     }
                 }
-                      
+
                 return Ok(userToken);
             }
             catch (Exception exc)
@@ -1787,7 +1787,7 @@ namespace scrapeAPI.Controllers
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
         }
-   
+
         /// <summary>
         /// 
         /// </summary>
@@ -1891,7 +1891,7 @@ namespace scrapeAPI.Controllers
                 var uresult = u.ToList();
 
                 // might exist but if not listed or Ended, then can use
-                var w = u.Where(p=> p.StoreID == storeID && (p.Listed != null || p.Ended == null)).SingleOrDefault();
+                var w = u.Where(p => p.StoreID == storeID && (p.Listed != null || p.Ended == null)).SingleOrDefault();
 
                 // return null if OK to use
                 return Ok(w);
@@ -1916,7 +1916,7 @@ namespace scrapeAPI.Controllers
                 settings = _repository.GetUserSettingsView(connStr, strCurrentUserId);
 
                 var orders = ebayAPIs.GetOrdersByDate(settings, fromDate, toDate, 0.0915, "");
-                foreach(var o in orders)
+                foreach (var o in orders)
                 {
                     var salesOrder = _repository.Context.SalesOrders.Where(p => p.OrderID == o.OrderID).SingleOrDefault();
                     if (salesOrder == null)
