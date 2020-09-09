@@ -1289,7 +1289,7 @@ namespace scrapeAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("dashboard")]
-        public IHttpActionResult GetDashboard(int storeID)
+        public async Task<IHttpActionResult> GetDashboardAsync(int storeID)
         {
             IUserSettingsView settings = new UserSettingsView();
             try
@@ -1307,19 +1307,19 @@ namespace scrapeAPI.Controllers
                 if (settings != null)
                 {
                     IDashboard dashboard = new Dashboard();
-                    int OOS = _repository.Context.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).Count();
+                    int OOS = await _repository.Context.Listings.Where(p => p.Qty == 0 && p.StoreID == storeID && p.Listed != null).CountAsync();
                     dashboard.OOS = OOS;
 
-                    int notListed = _repository.Context.Listings.Where(p => p.Listed == null && p.StoreID == storeID).Count();
+                    int notListed = await _repository.Context.Listings.Where(p => p.Listed == null && p.StoreID == storeID).CountAsync();
                     dashboard.NotListed = notListed;
 
-                    int listed = _repository.Context.Listings.Where(p => p.Listed != null && p.StoreID == storeID).Count();
+                    int listed = await _repository.Context.Listings.Where(p => p.Listed != null && p.StoreID == storeID).CountAsync();
                     dashboard.Listed = listed;
 
-                    var repricerLastRan = _repository.Context.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().RepricerLastRan;
+                    var repricerLastRan = await _repository.Context.StoreProfiles.Where(p => p.ID == storeID).Select(f => f.RepricerLastRan).SingleOrDefaultAsync();
                     dashboard.RepricerLastRan = repricerLastRan;
 
-                    var repricerElapsedTime = _repository.Context.StoreProfiles.Where(p => p.ID == storeID).SingleOrDefault().ElapsedTime;
+                    var repricerElapsedTime = await _repository.Context.StoreProfiles.Where(p => p.ID == storeID).Select(f => f.ElapsedTime).SingleOrDefaultAsync();
                     dashboard.RepricerElapsedTime = repricerElapsedTime;
                     /*
                      * 04.10.2020 don't run this yet
@@ -1874,31 +1874,31 @@ namespace scrapeAPI.Controllers
             }
         }
         /// <summary>
-        /// 
+        /// Check if supplier item URL is already in use in store.
         /// </summary>
         /// <param name="storeID"></param>
         /// <param name="URL"></param>
         /// <returns>null if OK to use</returns>
         [HttpGet]
         [Route("getlistingbysupplierurl")]
-        public IHttpActionResult GetListingBySupplierURL(int storeID, string URL)
+        public async Task<IHttpActionResult> GetListingBySupplierURLAsync(int storeID, string URL)
         {
             string strCurrentUserId = null;
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
                 var u = _repository.GetListingBySupplierURL(storeID, URL);
-                var uresult = u.ToList();
+                var uresult = await u.ToListAsync();
 
                 // might exist but if not listed or Ended, then can use
-                var w = u.Where(p => p.StoreID == storeID && (p.Listed != null || p.Ended == null)).SingleOrDefault();
+                var w = await u.Where(p => p.StoreID == storeID && (p.Listed != null || p.Ended == null)).SingleOrDefaultAsync();
 
                 // return null if OK to use
                 return Ok(w);
             }
             catch (Exception exc)
             {
-                string msg = dsutil.DSUtil.ErrMsg("GetSupplierItemByURL", exc);
+                string msg = dsutil.DSUtil.ErrMsg("GetListingBySupplierURLAsync", exc);
                 dsutil.DSUtil.WriteFile(_logfile, msg, strCurrentUserId);
                 return Content(HttpStatusCode.InternalServerError, msg);
             }
