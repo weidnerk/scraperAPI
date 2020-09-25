@@ -1138,8 +1138,11 @@ namespace scrapeAPI.Controllers
                 var listings = _repository.GetListings(storeID, unlisted, listed);
                 //var listings = db.GetListings(storeID, unlisted, listed);
                 if (listings == null)
+                {
                     return NotFound();
-                return Ok(listings.ToList());
+                }
+                var output = listings.ToList();
+                return Ok(output);
             }
             catch (Exception exc)
             {
@@ -1887,14 +1890,10 @@ namespace scrapeAPI.Controllers
             try
             {
                 strCurrentUserId = User.Identity.GetUserId();
-                var u = _repository.GetListingBySupplierURL(storeID, URL);
-                var uresult = await u.ToListAsync();
-
-                // might exist but if not listed or Ended, then can use
-                var w = await u.Where(p => p.StoreID == storeID && (p.Listed != null || p.Ended == null)).SingleOrDefaultAsync();
+                var listing = await _repository.GetListingBySupplierURL(storeID, URL);
 
                 // return null if OK to use
-                return Ok(w);
+                return Ok(listing);
             }
             catch (Exception exc)
             {
